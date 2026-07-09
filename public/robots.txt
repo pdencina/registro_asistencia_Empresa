@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /superadmin
+Disallow: /app
+
+Sitemap: https://flexio.cl/sitemap.xml
