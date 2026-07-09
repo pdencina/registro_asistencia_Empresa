@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 50">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;800&amp;display=swap');
+    </style>
+  </defs>
+  <text x="0" y="40" font-family="'Nunito', sans-serif" font-size="42" fill="#2d2d2d" letter-spacing="-1">
+    <tspan font-weight="400">arm</tspan><tspan font-weight="800">global</tspan>
+  </text>
+</svg>

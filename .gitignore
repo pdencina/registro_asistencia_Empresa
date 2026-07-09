@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.env
+.env.local
+.vercel/
+
+# Archivos del enfoque anterior (ignorar)
+server/
+client/
