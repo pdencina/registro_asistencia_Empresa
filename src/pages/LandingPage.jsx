@@ -19,7 +19,7 @@ export default function LandingPage() {
         'Soporte por email',
         'Almacenamiento 5 GB',
       ],
-      cta: 'Comenzar gratis',
+      cta: 'Solicitar demo',
       highlighted: false,
     },
     {
@@ -37,7 +37,7 @@ export default function LandingPage() {
         'Soporte prioritario',
         'Almacenamiento 20 GB',
       ],
-      cta: 'Comenzar gratis',
+      cta: 'Solicitar demo',
       highlighted: true,
     },
     {
@@ -112,7 +112,7 @@ export default function LandingPage() {
               <a href="#legal" className="text-sm text-gray-600 hover:text-primary-600 transition-colors">Seguridad</a>
               <a href="/app" className="text-sm text-gray-600 hover:text-primary-600 transition-colors">Iniciar sesión</a>
               <a href="#pricing" className="px-5 py-2.5 bg-primary-600 text-white text-sm font-medium rounded-xl hover:bg-primary-700 transition-colors">
-                Prueba gratis
+                Solicitar demo
               </a>
             </div>
 
@@ -130,8 +130,8 @@ export default function LandingPage() {
             <a href="#pricing" className="block text-gray-600 py-2">Precios</a>
             <a href="#legal" className="block text-gray-600 py-2">Seguridad</a>
             <a href="/app" className="block text-gray-600 py-2">Iniciar sesión</a>
-            <a href="#pricing" className="block w-full text-center px-5 py-2.5 bg-primary-600 text-white rounded-xl font-medium">
-              Prueba gratis
+            <a href="https://wa.me/56949616038?text=Hola%2C%20me%20interesa%20Flexio%20para%20mi%20empresa" target="_blank" rel="noopener noreferrer" className="block w-full text-center px-5 py-2.5 bg-primary-600 text-white rounded-xl font-medium">
+              Solicitar demo
             </a>
           </div>
         )}
@@ -153,8 +153,8 @@ export default function LandingPage() {
             sin contacto ni tarjetas. Reportes en tiempo real para tu empresa.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="#pricing" className="px-8 py-4 bg-primary-600 text-white font-semibold rounded-2xl hover:bg-primary-700 transition-all shadow-lg shadow-primary-200 text-lg flex items-center justify-center gap-2">
-              Comenzar prueba gratuita
+            <a href="https://wa.me/56949616038?text=Hola%2C%20me%20interesa%20Flexio%20para%20mi%20empresa" target="_blank" rel="noopener noreferrer" className="px-8 py-4 bg-primary-600 text-white font-semibold rounded-2xl hover:bg-primary-700 transition-all shadow-lg shadow-primary-200 text-lg flex items-center justify-center gap-2">
+              Solicitar demo gratuita
               <ArrowRight className="w-5 h-5" />
             </a>
             <a href="#features" className="px-8 py-4 bg-gray-100 text-gray-700 font-semibold rounded-2xl hover:bg-gray-200 transition-all text-lg">
@@ -293,15 +293,18 @@ export default function LandingPage() {
                     </li>
                   ))}
                 </ul>
-                <button
-                  className={`w-full py-3 rounded-xl font-semibold text-sm transition-all ${
+                <a
+                  href={`https://wa.me/56949616038?text=Hola%2C%20me%20interesa%20el%20plan%20${encodeURIComponent(plan.name)}%20de%20Flexio`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`w-full py-3 rounded-xl font-semibold text-sm transition-all text-center block ${
                     plan.highlighted
                       ? 'bg-white text-primary-600 hover:bg-primary-50'
                       : 'bg-primary-600 text-white hover:bg-primary-700'
                   }`}
                 >
                   {plan.cta}
-                </button>
+                </a>
               </div>
             ))}
           </div>
@@ -348,7 +351,7 @@ export default function LandingPage() {
           <p className="text-lg text-gray-500 mb-8">
             Únete a las empresas que ya eliminaron el fraude y automatizaron sus reportes.
           </p>
-          <a href="#pricing" className="inline-flex items-center gap-2 px-8 py-4 bg-primary-600 text-white font-semibold rounded-2xl hover:bg-primary-700 transition-all shadow-lg shadow-primary-200 text-lg">
+          <a href="https://wa.me/56949616038?text=Hola%2C%20quiero%20probar%20Flexio%20en%20mi%20empresa" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-8 py-4 bg-primary-600 text-white font-semibold rounded-2xl hover:bg-primary-700 transition-all shadow-lg shadow-primary-200 text-lg">
             Comenzar prueba de 30 días
             <ArrowRight className="w-5 h-5" />
           </a>
@@ -385,8 +388,11 @@ export default function LandingPage() {
             <div>
               <h4 className="text-white font-semibold mb-3">Contacto</h4>
               <ul className="space-y-2 text-sm">
-                <li>contacto@flexio.cl</li>
-                <li>+56 9 XXXX XXXX</li>
+                <li>
+                  <a href="https://wa.me/56949616038" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+                    +56 9 4961 6038 (WhatsApp)
+                  </a>
+                </li>
                 <li>Santiago, Chile</li>
               </ul>
             </div>
