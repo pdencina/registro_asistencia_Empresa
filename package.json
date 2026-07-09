@@ -8,7 +8,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "db:setup": "node scripts/setup-db.js",
-    "db:migrate-multitenant": "node scripts/migrate-multitenant.js"
+    "db:migrate-multitenant": "node scripts/migrate-multitenant.js",
+    "db:migrate-billing": "node scripts/migrate-billing.js"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.10.4",
