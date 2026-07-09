@@ -13,7 +13,7 @@ export default function LandingPage() {
       description: 'Ideal para PYMEs y equipos pequeños',
       features: [
         'Hasta 30 colaboradores',
-        '1 tótem/dispositivo',
+        '1 dispositivo',
         'Reconocimiento facial',
         'Reportes básicos',
         'Soporte por email',
@@ -29,7 +29,7 @@ export default function LandingPage() {
       description: 'Para empresas en crecimiento',
       features: [
         'Hasta 100 colaboradores',
-        '3 tótems/dispositivos',
+        '3 dispositivos',
         'Reconocimiento facial avanzado',
         'Reportes y exportación Excel',
         'Webhooks e integraciones',
@@ -90,7 +90,7 @@ export default function LandingPage() {
     {
       icon: <Smartphone className="w-6 h-6" />,
       title: 'Multi-dispositivo',
-      description: 'Funciona en iPads, tablets Android y cualquier dispositivo con cámara.',
+      description: 'Funciona en iPads, tablets Android, celulares y cualquier dispositivo con cámara.',
     },
   ];
 
@@ -216,7 +216,7 @@ export default function LandingPage() {
             {[
               { step: '1', title: 'Crea tu cuenta', desc: 'Regístrate y configura tu empresa en menos de 5 minutos.' },
               { step: '2', title: 'Registra colaboradores', desc: 'Sube la foto de cada colaborador para el reconocimiento facial.' },
-              { step: '3', title: 'Instala el tótem', desc: 'Coloca una tablet con cámara en la entrada. Listo para marcar.' },
+              { step: '3', title: 'Configura el dispositivo', desc: 'Autoriza una tablet o celular con cámara. Listo para marcar.' },
             ].map((item, i) => (
               <div key={i} className="text-center">
                 <div className="w-14 h-14 bg-primary-600 text-white rounded-2xl flex items-center justify-center mx-auto mb-4 text-xl font-bold">

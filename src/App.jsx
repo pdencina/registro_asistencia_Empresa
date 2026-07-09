@@ -7,6 +7,8 @@ import LandingPage from './pages/LandingPage';
 import TermsPage from './pages/legal/TermsPage';
 import PrivacyPage from './pages/legal/PrivacyPage';
 import DpaPage from './pages/legal/DpaPage';
+import SuperAdminLoginPage from './pages/superadmin/SuperAdminLoginPage';
+import SuperAdminDashboard from './pages/superadmin/SuperAdminDashboard';
 
 function App() {
   return (
@@ -20,6 +22,9 @@ function App() {
 
         {/* Admin: protegido con PIN */}
         <Route path="/admin/*" element={<ProtectedAdmin />} />
+
+        {/* Super Admin: gestión de empresas */}
+        <Route path="/superadmin" element={<ProtectedSuperAdmin />} />
 
         {/* Páginas legales */}
         <Route path="/legal/terms" element={<TermsPage />} />
@@ -40,6 +45,25 @@ function ProtectedAdmin() {
   }
 
   return <AdminLayout />;
+}
+
+function ProtectedSuperAdmin() {
+  const [authenticated, setAuthenticated] = useState(
+    !!sessionStorage.getItem('superadmin_token')
+  );
+
+  if (!authenticated) {
+    return <SuperAdminLoginPage onLogin={() => setAuthenticated(true)} />;
+  }
+
+  return (
+    <SuperAdminDashboard
+      onLogout={() => {
+        sessionStorage.removeItem('superadmin_token');
+        setAuthenticated(false);
+      }}
+    />
+  );
 }
 
 export default App;
