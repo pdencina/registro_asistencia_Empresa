@@ -38,9 +38,9 @@ module.exports = async function handler(req, res) {
       const selectedPlan = plan || 'basico';
       const limits = planLimits[selectedPlan] || planLimits.basico;
 
-      // Trial: 30 días
+      // Trial: 15 días
       const trialEnds = new Date();
-      trialEnds.setDate(trialEnds.getDate() + 30);
+      trialEnds.setDate(trialEnds.getDate() + 15);
 
       const rows = await sql(`
         INSERT INTO tenants (name, slug, rut_empresa, plan, max_employees, max_devices, admin_email, trial_ends_at)
@@ -62,7 +62,7 @@ module.exports = async function handler(req, res) {
       return res.status(201).json({
         tenant: rows[0],
         message: `Cuenta creada. Accede en: ${slug}.flexio.cl`,
-        trial_days: 30,
+        trial_days: 15,
       });
     } catch (error) {
       return res.status(500).json({ error: error.message });

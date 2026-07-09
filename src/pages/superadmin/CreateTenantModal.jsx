@@ -66,7 +66,7 @@ export default function CreateTenantModal({ onClose, onCreated }) {
             <p className="text-sm text-gray-400">URL: <span className="text-primary-400 font-medium">{success.tenant?.slug}.flexio.cl</span></p>
             <p className="text-sm text-gray-400">PIN Admin: <span className="text-white font-mono font-bold text-lg">{form.admin_pin}</span></p>
             <p className="text-sm text-gray-400">Plan: <span className="text-white">{success.tenant?.plan}</span></p>
-            <p className="text-sm text-gray-400">Trial: <span className="text-emerald-400">30 días</span></p>
+            <p className="text-sm text-gray-400">Trial: <span className="text-emerald-400">15 días</span></p>
           </div>
           <p className="text-xs text-gray-500 mb-4">
             Comparte la URL y el PIN con el administrador de la empresa.

@@ -101,7 +101,7 @@ export default function BillingPage({ tenantId }) {
                 {subscriptionStatus === 'cancelled' && 'Suscripción cancelada'}
               </p>
               <p className="text-sm text-gray-500">
-                {subscriptionStatus === 'trial' && 'Tu prueba gratuita de 30 días está activa. Suscríbete para continuar después.'}
+                {subscriptionStatus === 'trial' && 'Tu prueba gratuita de 15 días está activa. Suscríbete para continuar después.'}
                 {subscriptionStatus === 'active' && 'Tu tarjeta se cobra automáticamente cada mes.'}
                 {subscriptionStatus === 'pending' && 'Completa el pago para activar tu cuenta.'}
               </p>

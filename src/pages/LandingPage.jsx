@@ -178,7 +178,7 @@ export default function LandingPage() {
               Ver funcionalidades
             </a>
           </div>
-          <p className="mt-4 text-sm text-gray-400">30 días gratis · Sin tarjeta de crédito · Cancela cuando quieras</p>
+          <p className="mt-4 text-sm text-gray-400">15 días gratis · Sin tarjeta de crédito · Cancela cuando quieras</p>
         </div>
       </section>
 
@@ -254,7 +254,7 @@ export default function LandingPage() {
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
               Planes transparentes, sin letra chica
             </h2>
-            <p className="text-lg text-gray-500 mb-8">Todos los planes incluyen 30 días de prueba gratis</p>
+            <p className="text-lg text-gray-500 mb-8">Todos los planes incluyen 15 días de prueba gratis</p>
 
             {/* Billing toggle */}
             <div className="inline-flex items-center gap-3 bg-gray-100 rounded-xl p-1">
@@ -369,7 +369,7 @@ export default function LandingPage() {
             Únete a las empresas que ya eliminaron el fraude y automatizaron sus reportes.
           </p>
           <a href="https://wa.me/56949616038?text=Hola%2C%20quiero%20probar%20Flexio%20en%20mi%20empresa" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-8 py-4 bg-primary-600 text-white font-semibold rounded-2xl hover:bg-primary-700 transition-all shadow-lg shadow-primary-200 text-lg">
-            Comenzar prueba de 30 días
+            Comenzar prueba de 15 días
             <ArrowRight className="w-5 h-5" />
           </a>
         </div>
