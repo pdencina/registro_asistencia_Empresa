@@ -594,7 +594,7 @@ export default function EmployeesPage() {
               <p className="font-semibold text-gray-900">Autorización para el tratamiento de datos biométricos</p>
 
               <p>
-                Mediante el presente documento, autorizo expresamente a <strong>MARCAI</strong> para recopilar, 
+                Mediante el presente documento, autorizo expresamente a <strong>FLEXIO</strong> para recopilar, 
                 almacenar y procesar mi imagen facial (dato biométrico) con el único propósito de 
                 <strong> registro y control de asistencia laboral</strong> mediante reconocimiento facial.
               </p>
@@ -603,7 +603,7 @@ export default function EmployeesPage() {
               <ul className="list-disc pl-5 space-y-1">
                 <li><strong>Dato recopilado:</strong> Imagen facial para generación de descriptor biométrico.</li>
                 <li><strong>Finalidad:</strong> Identificación automática para registro de ingreso y salida laboral.</li>
-                <li><strong>Responsable:</strong> MARCAI.</li>
+                <li><strong>Responsable:</strong> FLEXIO.</li>
                 <li><strong>Almacenamiento:</strong> Servidores seguros en la nube con acceso restringido.</li>
                 <li><strong>Retención:</strong> Los datos se conservarán mientras exista la relación laboral. Al término, serán eliminados en un plazo máximo de 30 días.</li>
                 <li><strong>Acceso:</strong> Solo personal autorizado de administración tendrá acceso a estos datos.</li>

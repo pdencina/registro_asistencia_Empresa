@@ -12,10 +12,10 @@ export default function PrivacyPage() {
             <h2 className="text-lg font-semibold text-gray-900 mt-8 mb-3">1. Responsable del Tratamiento</h2>
             <p>
               El responsable del tratamiento de datos personales es la empresa-cliente que contrata 
-              el servicio Marcai para gestionar la asistencia de sus colaboradores.
+              el servicio Flexio para gestionar la asistencia de sus colaboradores.
             </p>
             <p>
-              Marcai SpA actúa como <strong>encargado del tratamiento</strong> (procesador de datos), 
+              Flexio SpA actúa como <strong>encargado del tratamiento</strong> (procesador de datos), 
               procesando los datos personales según las instrucciones del responsable y conforme a la 
               normativa vigente en Chile.
             </p>
@@ -53,7 +53,7 @@ export default function PrivacyPage() {
             <p>El tratamiento de datos se fundamenta en:</p>
             <ul className="list-disc pl-5 space-y-1">
               <li><strong>Consentimiento explícito</strong> del colaborador para datos biométricos (Art. 16 Ley 21.719)</li>
-              <li><strong>Cumplimiento contractual</strong> entre la empresa-cliente y Marcai</li>
+              <li><strong>Cumplimiento contractual</strong> entre la empresa-cliente y Flexio</li>
               <li><strong>Interés legítimo</strong> del empleador para control de asistencia laboral</li>
               <li><strong>Cumplimiento legal</strong> de obligaciones laborales (Código del Trabajo)</li>
             </ul>
@@ -112,7 +112,7 @@ export default function PrivacyPage() {
             </ul>
             <p>
               Para ejercer estos derechos, el colaborador debe contactar a su empleador 
-              (responsable del tratamiento), quien coordinará con Marcai la ejecución 
+              (responsable del tratamiento), quien coordinará con Flexio la ejecución 
               de la solicitud en un plazo máximo de 15 días hábiles.
             </p>
           </section>
@@ -164,8 +164,8 @@ export default function PrivacyPage() {
             <h2 className="text-lg font-semibold text-gray-900 mt-8 mb-3">12. Contacto</h2>
             <p>
               Para consultas sobre privacidad y protección de datos:<br />
-              <strong>Marcai SpA</strong><br />
-              Email: privacidad@marcai.cl<br />
+              <strong>Flexio SpA</strong><br />
+              Email: privacidad@flexio.cl<br />
               Santiago, Chile
             </p>
           </section>

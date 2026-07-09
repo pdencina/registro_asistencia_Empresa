@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 40" fill="none">
+  <!-- Icon: abstract clock/face scan -->
+  <circle cx="20" cy="20" r="17" stroke="#2563eb" stroke-width="2.5" fill="none"/>
+  <!-- Clock hands -->
+  <line x1="20" y1="20" x2="20" y2="10" stroke="#2563eb" stroke-width="2" stroke-linecap="round"/>
+  <line x1="20" y1="20" x2="27" y2="23" stroke="#60a5fa" stroke-width="2" stroke-linecap="round"/>
+  <!-- Scan corners -->
+  <path d="M8 12V8h4" stroke="#2563eb" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M32 12V8h-4" stroke="#2563eb" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M8 28v4h4" stroke="#2563eb" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M32 28v4h-4" stroke="#2563eb" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Text -->
+  <text x="44" y="27" font-family="Nunito, sans-serif" font-weight="800" font-size="22" fill="#1e293b">flex</text>
+  <text x="99" y="27" font-family="Nunito, sans-serif" font-weight="800" font-size="22" fill="#2563eb">io</text>
+</svg>

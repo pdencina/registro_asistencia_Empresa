@@ -11,20 +11,20 @@ export default function TermsPage() {
           <section>
             <h2 className="text-lg font-semibold text-gray-900 mt-8 mb-3">1. Aceptación de los Términos</h2>
             <p>
-              Al acceder y utilizar la plataforma Marcai ("el Servicio"), usted ("el Cliente") acepta 
+              Al acceder y utilizar la plataforma Flexio ("el Servicio"), usted ("el Cliente") acepta 
               quedar vinculado por estos Términos de Servicio. Si no está de acuerdo con alguna parte 
               de estos términos, no podrá acceder al Servicio.
             </p>
             <p>
-              El Servicio es proporcionado por Marcai SpA, RUT XX.XXX.XXX-X, con domicilio en 
-              Santiago, Chile ("Marcai", "nosotros").
+              El Servicio es proporcionado por Flexio SpA, RUT XX.XXX.XXX-X, con domicilio en 
+              Santiago, Chile ("Flexio", "nosotros").
             </p>
           </section>
 
           <section>
             <h2 className="text-lg font-semibold text-gray-900 mt-8 mb-3">2. Descripción del Servicio</h2>
             <p>
-              Marcai es una plataforma SaaS de control de asistencia laboral mediante reconocimiento 
+              Flexio es una plataforma SaaS de control de asistencia laboral mediante reconocimiento 
               facial. El Servicio incluye:
             </p>
             <ul className="list-disc pl-5 space-y-1">
@@ -62,7 +62,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-lg font-semibold text-gray-900 mt-8 mb-3">5. Nivel de Servicio (SLA)</h2>
             <p>
-              Marcai se compromete a mantener una disponibilidad del 99.5% mensual para los 
+              Flexio se compromete a mantener una disponibilidad del 99.5% mensual para los 
               planes Profesional y Enterprise, y del 99% para el plan Básico, medida excluyendo 
               mantenimientos programados comunicados con al menos 48 horas de anticipación.
             </p>
@@ -88,7 +88,7 @@ export default function TermsPage() {
             <h2 className="text-lg font-semibold text-gray-900 mt-8 mb-3">7. Propiedad Intelectual</h2>
             <p>
               El software, código fuente, diseño, interfaces, algoritmos y toda la documentación 
-              del Servicio son propiedad exclusiva de Marcai SpA. El Cliente recibe una licencia 
+              del Servicio son propiedad exclusiva de Flexio SpA. El Cliente recibe una licencia 
               limitada, no exclusiva, no transferible y revocable para usar el Servicio durante la 
               vigencia de su suscripción.
             </p>
@@ -101,9 +101,9 @@ export default function TermsPage() {
           <section>
             <h2 className="text-lg font-semibold text-gray-900 mt-8 mb-3">8. Limitación de Responsabilidad</h2>
             <p>
-              Marcai no será responsable por daños indirectos, incidentales, especiales o 
+              Flexio no será responsable por daños indirectos, incidentales, especiales o 
               consecuentes, incluyendo pérdida de beneficios, datos o uso. La responsabilidad 
-              total de Marcai no excederá el monto pagado por el Cliente en los últimos 
+              total de Flexio no excederá el monto pagado por el Cliente en los últimos 
               12 meses.
             </p>
           </section>
@@ -112,7 +112,7 @@ export default function TermsPage() {
             <h2 className="text-lg font-semibold text-gray-900 mt-8 mb-3">9. Terminación</h2>
             <p>
               Cualquiera de las partes puede terminar el contrato con 30 días de aviso previo. 
-              Marcai puede suspender o terminar el acceso inmediatamente en caso de:
+              Flexio puede suspender o terminar el acceso inmediatamente en caso de:
             </p>
             <ul className="list-disc pl-5 space-y-1">
               <li>Incumplimiento de estos Términos</li>
@@ -137,8 +137,8 @@ export default function TermsPage() {
             <h2 className="text-lg font-semibold text-gray-900 mt-8 mb-3">11. Contacto</h2>
             <p>
               Para consultas sobre estos Términos de Servicio, contactar a: <br />
-              <strong>Marcai SpA</strong><br />
-              Email: legal@marcai.cl<br />
+              <strong>Flexio SpA</strong><br />
+              Email: legal@flexio.cl<br />
               Santiago, Chile
             </p>
           </section>

@@ -52,7 +52,7 @@ module.exports = async function handler(req, res) {
       isEntry,
     });
 
-    const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'asistencia@marcai.cl';
+    const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'asistencia@flexio.cl';
 
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -61,7 +61,7 @@ module.exports = async function handler(req, res) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: `Marcai <${FROM_EMAIL}>`,
+        from: `Flexio <${FROM_EMAIL}>`,
         to: [employee.email],
         subject,
         html,
@@ -149,7 +149,7 @@ function buildEmailHtml({ employeeName, type, time, date, isEntry }) {
           <tr>
             <td style="padding:20px 30px;border-top:1px solid #e5e7eb;text-align:center;">
               <p style="font-size:12px;color:#9ca3af;margin:0;">
-                Marcai · Sistema de Registro de Asistencia
+                Flexio · Sistema de Registro de Asistencia
               </p>
               <p style="font-size:11px;color:#d1d5db;margin:5px 0 0 0;">
                 Este es un mensaje automático, no responder.

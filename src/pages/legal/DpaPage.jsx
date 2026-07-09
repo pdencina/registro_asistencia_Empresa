@@ -11,8 +11,8 @@ export default function DpaPage() {
           <section>
             <h2 className="text-lg font-semibold text-gray-900 mt-8 mb-3">1. Definiciones</h2>
             <ul className="list-disc pl-5 space-y-1">
-              <li><strong>Responsable del Tratamiento ("Cliente"):</strong> La empresa que contrata Marcai</li>
-              <li><strong>Encargado del Tratamiento ("Marcai"):</strong> Marcai SpA</li>
+              <li><strong>Responsable del Tratamiento ("Cliente"):</strong> La empresa que contrata Flexio</li>
+              <li><strong>Encargado del Tratamiento ("Flexio"):</strong> Flexio SpA</li>
               <li><strong>Titular:</strong> El colaborador cuyos datos son procesados</li>
               <li><strong>Datos Personales:</strong> Toda información relativa a personas naturales identificadas</li>
               <li><strong>Datos Biométricos:</strong> Fotografías faciales y vectores de reconocimiento</li>
@@ -22,14 +22,14 @@ export default function DpaPage() {
           <section>
             <h2 className="text-lg font-semibold text-gray-900 mt-8 mb-3">2. Objeto del Acuerdo</h2>
             <p>
-              Este DPA regula el tratamiento de datos personales que Marcai realiza en nombre
-              del Cliente para la prestación del servicio de control de asistencia. Marcai
+              Este DPA regula el tratamiento de datos personales que Flexio realiza en nombre
+              del Cliente para la prestación del servicio de control de asistencia. Flexio
               solo procesará datos personales según las instrucciones documentadas del Cliente.
             </p>
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-gray-900 mt-8 mb-3">3. Obligaciones del Encargado (Marcai)</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mt-8 mb-3">3. Obligaciones del Encargado (Flexio)</h2>
             <ul className="list-disc pl-5 space-y-1">
               <li>Procesar datos únicamente para los fines establecidos en el contrato de servicio</li>
               <li>No utilizar los datos para fines propios ni compartirlos con terceros no autorizados</li>
@@ -48,13 +48,13 @@ export default function DpaPage() {
               <li>Informar a los colaboradores sobre el tratamiento de sus datos</li>
               <li>Garantizar la licitud de los datos proporcionados</li>
               <li>Responder a las solicitudes ARCO de los titulares</li>
-              <li>Notificar a Marcai de cualquier cambio en las instrucciones de procesamiento</li>
+              <li>Notificar a Flexio de cualquier cambio en las instrucciones de procesamiento</li>
             </ul>
           </section>
 
           <section>
             <h2 className="text-lg font-semibold text-gray-900 mt-8 mb-3">5. Medidas de Seguridad</h2>
-            <p>Marcai implementa las siguientes medidas:</p>
+            <p>Flexio implementa las siguientes medidas:</p>
             <ul className="list-disc pl-5 space-y-1">
               <li>Encriptación de datos en tránsito (TLS 1.3) y en reposo (AES-256)</li>
               <li>Control de acceso basado en roles</li>
@@ -67,7 +67,7 @@ export default function DpaPage() {
 
           <section>
             <h2 className="text-lg font-semibold text-gray-900 mt-8 mb-3">6. Sub-encargados</h2>
-            <p>Marcai utiliza los siguientes sub-encargados:</p>
+            <p>Flexio utiliza los siguientes sub-encargados:</p>
             <table className="w-full border-collapse border border-gray-200 my-4">
               <thead>
                 <tr className="bg-gray-50">
@@ -100,7 +100,7 @@ export default function DpaPage() {
           <section>
             <h2 className="text-lg font-semibold text-gray-900 mt-8 mb-3">7. Notificación de Brechas</h2>
             <p>
-              En caso de brecha de seguridad que afecte datos personales, Marcai notificará
+              En caso de brecha de seguridad que afecte datos personales, Flexio notificará
               al Cliente dentro de 72 horas, indicando: naturaleza de la brecha, datos afectados,
               medidas adoptadas y recomendaciones.
             </p>
@@ -110,7 +110,7 @@ export default function DpaPage() {
             <h2 className="text-lg font-semibold text-gray-900 mt-8 mb-3">8. Vigencia</h2>
             <p>
               Este DPA entra en vigor con la contratación del Servicio y permanece vigente
-              mientras Marcai procese datos personales del Cliente. Las obligaciones de
+              mientras Flexio procese datos personales del Cliente. Las obligaciones de
               confidencialidad sobreviven a la terminación del acuerdo.
             </p>
           </section>
@@ -119,8 +119,8 @@ export default function DpaPage() {
             <h2 className="text-lg font-semibold text-gray-900 mt-8 mb-3">9. Contacto</h2>
             <p>
               Delegado de Protección de Datos:<br />
-              <strong>Marcai SpA</strong><br />
-              Email: dpo@marcai.cl<br />
+              <strong>Flexio SpA</strong><br />
+              Email: dpo@flexio.cl<br />
               Santiago, Chile
             </p>
           </section>

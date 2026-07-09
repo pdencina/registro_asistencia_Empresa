@@ -101,8 +101,8 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-2">
-              <img src="/logo-marcai.svg" alt="Marcai" className="h-8" />
-              <span className="font-bold text-gray-900 text-lg">Marcai</span>
+              <img src="/logo-flexio.svg" alt="Flexio" className="h-8" />
+              <span className="font-bold text-gray-900 text-lg">Flexio</span>
             </div>
 
             {/* Desktop nav */}
@@ -168,7 +168,7 @@ export default function LandingPage() {
       {/* Social proof */}
       <section className="py-12 bg-gray-50 border-y border-gray-100">
         <div className="max-w-5xl mx-auto px-4 text-center">
-          <p className="text-sm text-gray-500 mb-6">Empresas que confían en Marcai</p>
+          <p className="text-sm text-gray-500 mb-6">Empresas que confían en Flexio</p>
           <div className="flex flex-wrap justify-center items-center gap-8 opacity-60">
             <span className="text-xl font-bold text-gray-400">Constructora Acme</span>
             <span className="text-xl font-bold text-gray-400">Logística Sur</span>
@@ -361,8 +361,8 @@ export default function LandingPage() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <img src="/logo-marcai.svg" alt="Marcai" className="h-6 brightness-200" />
-                <span className="font-bold text-white">Marcai</span>
+                <img src="/logo-flexio.svg" alt="Flexio" className="h-6 brightness-200" />
+                <span className="font-bold text-white">Flexio</span>
               </div>
               <p className="text-sm">Sistema de control de asistencia con reconocimiento facial para empresas en Chile.</p>
             </div>
@@ -385,14 +385,14 @@ export default function LandingPage() {
             <div>
               <h4 className="text-white font-semibold mb-3">Contacto</h4>
               <ul className="space-y-2 text-sm">
-                <li>contacto@marcai.cl</li>
+                <li>contacto@flexio.cl</li>
                 <li>+56 9 XXXX XXXX</li>
                 <li>Santiago, Chile</li>
               </ul>
             </div>
           </div>
           <div className="border-t border-gray-800 pt-8 text-center text-sm">
-            <p>&copy; {new Date().getFullYear()} Marcai SpA. Todos los derechos reservados.</p>
+            <p>&copy; {new Date().getFullYear()} Flexio SpA. Todos los derechos reservados.</p>
           </div>
         </div>
       </footer>

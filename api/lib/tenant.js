@@ -2,7 +2,7 @@ const { getDb } = require('./db');
 
 /**
  * Extrae el tenant desde el subdominio o header x-tenant-id.
- * Ejemplo: empresa.marcai.cl -> slug = "empresa"
+ * Ejemplo: empresa.flexio.cl -> slug = "empresa"
  * En dev, se puede pasar x-tenant-id como header.
  */
 async function getTenant(req) {
@@ -22,7 +22,7 @@ async function getTenant(req) {
   const host = req.headers.host || '';
   const parts = host.split('.');
 
-  // empresa.marcai.cl -> parts = ['empresa', 'marcai', 'cl']
+  // empresa.flexio.cl -> parts = ['empresa', 'flexio', 'cl']
   if (parts.length >= 3) {
     const slug = parts[0];
     // Ignorar 'www' y 'app'

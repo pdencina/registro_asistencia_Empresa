@@ -61,7 +61,7 @@ module.exports = async function handler(req, res) {
 
       return res.status(201).json({
         tenant: rows[0],
-        message: `Cuenta creada. Accede en: ${slug}.marcai.cl`,
+        message: `Cuenta creada. Accede en: ${slug}.flexio.cl`,
         trial_days: 30,
       });
     } catch (error) {
