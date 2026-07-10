@@ -106,7 +106,7 @@ module.exports = async function handler(req, res) {
 
       return res.status(201).json({
         tenant: rows[0],
-        message: `Empresa creada. URL: ${slug}.flexio.cl`,
+        message: `Empresa creada. URL: flexio.cl/app/${slug}`,
       });
     } catch (error) {
       return res.status(500).json({ error: error.message });

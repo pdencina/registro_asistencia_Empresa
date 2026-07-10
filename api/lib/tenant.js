@@ -1,8 +1,9 @@
 const { getDb } = require('./db');
 
 /**
- * Extrae el tenant desde el subdominio o header x-tenant-id.
- * Ejemplo: empresa.flexio.cl -> slug = "empresa"
+ * Extrae el tenant desde la ruta, subdominio o header x-tenant-id.
+ * Prioridad: header > ruta /app/:slug > subdominio > query param
+ * Ejemplo: flexio.cl/app/acme -> slug = "acme"
  * En dev, se puede pasar x-tenant-id como header.
  */
 async function getTenant(req) {
@@ -18,7 +19,17 @@ async function getTenant(req) {
     return rows[0] || null;
   }
 
-  // 2. Subdominio
+  // 2. Header x-tenant-slug (desde frontend por ruta)
+  const headerSlug = req.headers['x-tenant-slug'];
+  if (headerSlug) {
+    const rows = await sql(
+      'SELECT * FROM tenants WHERE slug = $1 AND active = true',
+      [headerSlug]
+    );
+    return rows[0] || null;
+  }
+
+  // 3. Subdominio (si tienen wildcard DNS configurado)
   const host = req.headers.host || '';
   const parts = host.split('.');
 
@@ -35,7 +46,7 @@ async function getTenant(req) {
     }
   }
 
-  // 3. Query param (fallback para dev)
+  // 4. Query param (fallback para dev)
   const tenantSlug = req.query?.tenant;
   if (tenantSlug) {
     const rows = await sql(

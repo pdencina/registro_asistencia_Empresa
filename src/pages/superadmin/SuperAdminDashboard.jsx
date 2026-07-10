@@ -123,7 +123,7 @@ export default function SuperAdminDashboard({ onLogout }) {
                   <tr key={tenant.id} className="border-b border-gray-700/50 hover:bg-gray-750">
                     <td className="px-5 py-4">
                       <p className="font-medium text-white">{tenant.name}</p>
-                      <p className="text-xs text-gray-400">{tenant.slug}.flexio.cl</p>
+                      <p className="text-xs text-gray-400">flexio.cl/app/{tenant.slug}</p>
                       <p className="text-xs text-gray-500">{tenant.admin_email}</p>
                     </td>
                     <td className="px-5 py-4">

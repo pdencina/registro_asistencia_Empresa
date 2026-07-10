@@ -1,11 +1,26 @@
 const API_BASE = '/api';
 
+// Extrae el slug del tenant desde la URL actual
+// flexio.cl/app/acme -> "acme"
+// flexio.cl/admin/acme/... -> "acme"
+function getTenantSlug() {
+  const path = window.location.pathname;
+  const appMatch = path.match(/^\/app\/([^/]+)/);
+  if (appMatch) return appMatch[1];
+  const adminMatch = path.match(/^\/admin\/([^/]+)/);
+  if (adminMatch) return adminMatch[1];
+  return null;
+}
+
 async function request(url, options = {}) {
   let response;
+  const tenantSlug = getTenantSlug();
+
   try {
     response = await fetch(`${API_BASE}${url}`, {
       headers: {
         'Content-Type': 'application/json',
+        ...(tenantSlug ? { 'x-tenant-slug': tenantSlug } : {}),
         ...options.headers,
       },
       ...options,

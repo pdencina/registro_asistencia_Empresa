@@ -17,10 +17,14 @@ function App() {
         {/* Landing page comercial */}
         <Route path="/" element={<LandingPage />} />
 
-        {/* App: kiosko de registro facial */}
-        <Route path="/app" element={<KioskLayout />} />
+        {/* App por tenant: flexio.cl/app/slug */}
+        <Route path="/app/:tenant" element={<KioskLayout />} />
 
-        {/* Admin: protegido con PIN */}
+        {/* Admin por tenant: flexio.cl/admin/slug */}
+        <Route path="/admin/:tenant/*" element={<ProtectedAdmin />} />
+
+        {/* Fallback legacy (sin tenant) */}
+        <Route path="/app" element={<KioskLayout />} />
         <Route path="/admin/*" element={<ProtectedAdmin />} />
 
         {/* Super Admin: gestión de empresas */}
