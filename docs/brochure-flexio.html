@@ -6,7 +6,7 @@
   <title>Flexio - Brochure Comercial</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #1e293b; line-height: 1.6; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #1e293b; line-height: 1.7; }
     
     .page { max-width: 800px; margin: 0 auto; padding: 60px 50px; }
     
@@ -14,71 +14,67 @@
     .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 50px; padding-bottom: 20px; border-bottom: 3px solid #2563eb; }
     .logo { font-size: 32px; font-weight: 800; color: #1e293b; }
     .logo span { color: #2563eb; }
-    .tagline { font-size: 13px; color: #64748b; }
+    .tagline { font-size: 13px; color: #64748b; margin-top: 2px; }
+    .header-contact { text-align: right; font-size: 12px; color: #64748b; line-height: 1.8; }
     
     /* Hero */
     .hero { text-align: center; margin-bottom: 50px; }
     .hero h1 { font-size: 28px; font-weight: 800; margin-bottom: 12px; color: #0f172a; }
     .hero h1 span { color: #2563eb; }
-    .hero p { font-size: 16px; color: #475569; max-width: 550px; margin: 0 auto; }
+    .hero p { font-size: 15px; color: #475569; max-width: 580px; margin: 0 auto; }
     
-    /* Problem section */
+    /* Badge */
+    .badge { display: inline-block; background: #eff6ff; color: #2563eb; font-size: 12px; font-weight: 600; padding: 6px 14px; border-radius: 20px; margin-bottom: 20px; }
+
+    /* Sections */
     .section { margin-bottom: 45px; }
-    .section-title { font-size: 20px; font-weight: 700; margin-bottom: 15px; color: #0f172a; }
-    .section-subtitle { font-size: 14px; color: #64748b; margin-bottom: 20px; }
+    .section-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; color: #0f172a; border-left: 4px solid #2563eb; padding-left: 12px; }
+    .section-subtitle { font-size: 13px; color: #64748b; margin-bottom: 20px; padding-left: 16px; }
     
-    /* Problem cards */
-    .problems { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
-    .problem-card { background: #fef2f2; border: 1px solid #fecaca; border-radius: 12px; padding: 16px; }
-    .problem-card .icon { font-size: 20px; margin-bottom: 6px; }
+    /* Problem/Solution grid */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    
+    .problem-card { background: #fef2f2; border: 1px solid #fecaca; border-radius: 10px; padding: 16px 18px; }
     .problem-card p { font-size: 13px; color: #991b1b; font-weight: 500; }
     
-    /* Solution cards */
-    .solutions { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-    .solution-card { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 16px; }
-    .solution-card .icon { font-size: 20px; margin-bottom: 6px; }
+    .solution-card { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 16px 18px; }
     .solution-card p { font-size: 13px; color: #166534; font-weight: 500; }
-    .solution-card .detail { font-size: 12px; color: #4ade80; margin-top: 4px; font-weight: 400; }
+    .solution-card .detail { font-size: 11px; color: #16a34a; margin-top: 3px; font-weight: 400; }
     
     /* Features */
-    .features { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
-    .feature { text-align: center; padding: 20px 15px; border: 1px solid #e2e8f0; border-radius: 12px; }
-    .feature .icon { font-size: 28px; margin-bottom: 8px; }
-    .feature h4 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
-    .feature p { font-size: 12px; color: #64748b; }
+    .features { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+    .feature { padding: 18px 14px; border: 1px solid #e2e8f0; border-radius: 10px; }
+    .feature h4 { font-size: 13px; font-weight: 600; margin-bottom: 4px; color: #0f172a; }
+    .feature p { font-size: 11px; color: #64748b; }
+    
+    /* Steps */
+    .steps { display: flex; gap: 20px; }
+    .step { text-align: center; flex: 1; }
+    .step .number { width: 36px; height: 36px; background: #2563eb; color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; margin: 0 auto 10px; }
+    .step h4 { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
+    .step p { font-size: 11px; color: #64748b; }
     
     /* Pricing */
-    .pricing { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
-    .plan { border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; text-align: center; }
+    .pricing { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+    .plan { border: 1px solid #e2e8f0; border-radius: 10px; padding: 20px; }
     .plan.featured { background: #2563eb; color: white; border-color: #2563eb; }
-    .plan h4 { font-size: 16px; font-weight: 700; margin-bottom: 5px; }
-    .plan .price { font-size: 24px; font-weight: 800; margin-bottom: 4px; }
-    .plan .period { font-size: 12px; opacity: 0.7; }
-    .plan ul { list-style: none; text-align: left; margin-top: 12px; font-size: 12px; }
-    .plan ul li { padding: 3px 0; }
-    .plan ul li::before { content: "✓ "; color: #10b981; }
+    .plan h4 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+    .plan .price { font-size: 22px; font-weight: 800; }
+    .plan .period { font-size: 11px; opacity: 0.7; margin-bottom: 12px; }
+    .plan ul { list-style: none; font-size: 11px; line-height: 2; }
+    .plan ul li::before { content: "— "; color: #94a3b8; }
     .plan.featured ul li::before { color: #93c5fd; }
     
-    /* How it works */
-    .steps { display: flex; gap: 20px; justify-content: center; }
-    .step { text-align: center; flex: 1; }
-    .step .number { width: 40px; height: 40px; background: #2563eb; color: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 18px; margin: 0 auto 10px; }
-    .step h4 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
-    .step p { font-size: 12px; color: #64748b; }
-    
     /* CTA */
-    .cta { text-align: center; background: #f8fafc; border-radius: 16px; padding: 40px; margin-top: 40px; }
-    .cta h3 { font-size: 22px; font-weight: 700; margin-bottom: 10px; }
+    .cta { text-align: center; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 40px; margin-top: 40px; }
+    .cta h3 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
     .cta p { font-size: 14px; color: #64748b; margin-bottom: 20px; }
-    .cta-button { display: inline-block; background: #2563eb; color: white; padding: 14px 32px; border-radius: 12px; text-decoration: none; font-weight: 600; font-size: 15px; }
-    .cta .contact { margin-top: 15px; font-size: 13px; color: #64748b; }
+    .cta-button { display: inline-block; background: #2563eb; color: white; padding: 14px 36px; border-radius: 10px; text-decoration: none; font-weight: 600; font-size: 14px; }
+    .cta .contact { margin-top: 16px; font-size: 13px; color: #64748b; }
     .cta .contact a { color: #2563eb; text-decoration: none; font-weight: 600; }
     
     /* Footer */
-    .footer { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #e2e8f0; font-size: 12px; color: #94a3b8; }
-    
-    /* Legal badge */
-    .badge { display: inline-block; background: #eff6ff; color: #2563eb; font-size: 12px; font-weight: 600; padding: 6px 14px; border-radius: 20px; margin-bottom: 20px; }
+    .footer { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #e2e8f0; font-size: 11px; color: #94a3b8; }
 
     @media print {
       .page { padding: 30px; }
@@ -94,7 +90,7 @@
         <div class="logo">flex<span>io</span></div>
         <p class="tagline">Control de asistencia inteligente</p>
       </div>
-      <div style="text-align: right; font-size: 12px; color: #64748b;">
+      <div class="header-contact">
         flexio.cl<br>
         +56 9 4961 6038
       </div>
@@ -102,124 +98,113 @@
 
     <!-- Hero -->
     <div class="hero">
-      <span class="badge">✓ Cumple Ley 21.719 de Protección de Datos</span>
+      <span class="badge">Cumple con Ley 21.719 de Protección de Datos</span>
       <h1>Control de asistencia con<br><span>reconocimiento facial</span></h1>
       <p>Elimina el fraude en el marcaje. Tu equipo registra su asistencia con el rostro, sin contacto ni tarjetas. Reportes automáticos en tiempo real.</p>
     </div>
 
     <!-- Problem -->
     <div class="section">
-      <h3 class="section-title">😤 El problema que resolvemos</h3>
-      <div class="problems">
+      <h3 class="section-title">El problema</h3>
+      <p class="section-subtitle">Situaciones que afectan la productividad y generan costos ocultos</p>
+      <div class="grid-2">
         <div class="problem-card">
-          <div class="icon">👥</div>
           <p>Un trabajador marca por otro (buddy punching)</p>
         </div>
         <div class="problem-card">
-          <div class="icon">⏰</div>
-          <p>No sabes quién llega tarde ni cuántas veces</p>
+          <p>No hay visibilidad sobre atrasos reincidentes</p>
         </div>
         <div class="problem-card">
-          <div class="icon">📋</div>
-          <p>Reportes manuales que toman horas cada mes</p>
+          <p>Reportes manuales que consumen horas cada mes</p>
         </div>
         <div class="problem-card">
-          <div class="icon">🔧</div>
-          <p>Huelleros que fallan o reloj control obsoleto</p>
+          <p>Huelleros que fallan o hardware obsoleto</p>
         </div>
       </div>
     </div>
 
     <!-- Solution -->
     <div class="section">
-      <h3 class="section-title">✅ La solución Flexio</h3>
-      <div class="solutions">
+      <h3 class="section-title">La solución</h3>
+      <p class="section-subtitle">Tecnología facial aplicada al control de asistencia laboral</p>
+      <div class="grid-2">
         <div class="solution-card">
-          <div class="icon">📸</div>
-          <p>Reconocimiento facial con IA</p>
-          <p class="detail">Imposible marcar por otro</p>
+          <p>Reconocimiento facial con inteligencia artificial</p>
+          <p class="detail">Verificación en menos de 2 segundos. Imposible suplantar.</p>
         </div>
         <div class="solution-card">
-          <div class="icon">📊</div>
           <p>Dashboard en tiempo real</p>
-          <p class="detail">Atrasos, ausencias, salidas anticipadas</p>
+          <p class="detail">Atrasos, ausencias y salidas anticipadas al instante.</p>
         </div>
         <div class="solution-card">
-          <div class="icon">📍</div>
-          <p>Geolocalización</p>
-          <p class="detail">Solo funciona en la ubicación autorizada</p>
+          <p>Geolocalización del dispositivo</p>
+          <p class="detail">El registro solo funciona desde la ubicación autorizada.</p>
         </div>
         <div class="solution-card">
-          <div class="icon">📱</div>
-          <p>Cualquier dispositivo con cámara</p>
-          <p class="detail">Tablet, celular o PC</p>
+          <p>Sin hardware especial</p>
+          <p class="detail">Funciona con cualquier tablet, celular o computador con cámara.</p>
         </div>
       </div>
     </div>
 
     <!-- Features -->
     <div class="section">
-      <h3 class="section-title">Funcionalidades incluidas</h3>
+      <h3 class="section-title">Funcionalidades</h3>
       <div class="features">
         <div class="feature">
-          <div class="icon">🕐</div>
           <h4>Control de horarios</h4>
-          <p>Turnos, tolerancias, atrasos automáticos</p>
+          <p>Turnos, tolerancias y cálculo automático de atrasos</p>
         </div>
         <div class="feature">
-          <div class="icon">🚪</div>
           <h4>Salidas anticipadas</h4>
-          <p>Motivo, quién autorizó, registro completo</p>
+          <p>Registro con motivo, quién autorizó y hora exacta</p>
         </div>
         <div class="feature">
-          <div class="icon">📈</div>
           <h4>Reportes exportables</h4>
-          <p>Excel, filtros por fecha, área y persona</p>
+          <p>Filtros por fecha, área y persona. Exporta a Excel</p>
         </div>
         <div class="feature">
-          <div class="icon">🔔</div>
           <h4>Notificaciones</h4>
-          <p>Email automático al colaborador</p>
+          <p>Email automático al colaborador en cada registro</p>
         </div>
         <div class="feature">
-          <div class="icon">🔒</div>
-          <h4>Datos seguros</h4>
-          <p>Encriptación, cumplimiento legal</p>
+          <h4>Seguridad de datos</h4>
+          <p>Encriptación TLS 1.3 + AES-256. Cumplimiento legal</p>
         </div>
         <div class="feature">
-          <div class="icon">⚡</div>
-          <h4>Setup en 5 minutos</h4>
-          <p>Sin instalación, sin hardware especial</p>
+          <h4>Implementación inmediata</h4>
+          <p>Configuración en 5 minutos. Sin instalaciones</p>
         </div>
       </div>
     </div>
 
-    <!-- How it works -->
+    <!-- Steps -->
     <div class="section">
-      <h3 class="section-title">Implementación rápida</h3>
+      <h3 class="section-title">Implementación</h3>
+      <p class="section-subtitle">3 pasos para tener el sistema operativo</p>
       <div class="steps">
         <div class="step">
           <div class="number">1</div>
           <h4>Creamos tu cuenta</h4>
-          <p>Configuramos tu empresa en minutos</p>
+          <p>Configuramos la empresa y los horarios</p>
         </div>
         <div class="step">
           <div class="number">2</div>
           <h4>Registras colaboradores</h4>
-          <p>Foto de cada persona para el reconocimiento</p>
+          <p>Foto frontal de cada persona</p>
         </div>
         <div class="step">
           <div class="number">3</div>
-          <h4>Listo para marcar</h4>
-          <p>Coloca un dispositivo con cámara en la entrada</p>
+          <h4>Listo para operar</h4>
+          <p>Dispositivo con cámara en la entrada</p>
         </div>
       </div>
     </div>
 
     <!-- Pricing -->
     <div class="section">
-      <h3 class="section-title">Planes y precios</h3>
-      <p class="section-subtitle">Sin compromiso · Cancela cuando quieras · Precios + IVA</p>
+      <h3 class="section-title">Planes</h3>
+      <p class="section-subtitle">Sin permanencia mínima. Precios mensuales + IVA.</p>
       <div class="pricing">
         <div class="plan">
           <h4>Básico</h4>
@@ -262,18 +247,18 @@
 
     <!-- CTA -->
     <div class="cta">
-      <h3>¿Listo para eliminar el fraude en asistencia?</h3>
-      <p>Prueba Flexio gratis por 15 días. Sin tarjeta de crédito.</p>
-      <a href="https://wa.me/56949616038?text=Hola,%20me%20interesa%20Flexio%20para%20mi%20empresa" class="cta-button">Solicitar demo gratuita →</a>
+      <h3>Solicite una demostración sin costo</h3>
+      <p>Pruebe Flexio durante 15 días sin compromiso ni tarjeta de crédito.</p>
+      <a href="https://wa.me/56949616038?text=Hola,%20me%20interesa%20una%20demo%20de%20Flexio" class="cta-button">Agendar demostración</a>
       <p class="contact">
-        WhatsApp: <a href="https://wa.me/56949616038">+56 9 4961 6038</a> · 
+        WhatsApp: <a href="https://wa.me/56949616038">+56 9 4961 6038</a> &nbsp;·&nbsp; 
         Web: <a href="https://flexio.cl">flexio.cl</a>
       </p>
     </div>
 
     <!-- Footer -->
     <div class="footer">
-      <p>© 2026 Flexio SpA · Santiago, Chile · Cumple con Ley 19.628 y Ley 21.719 de Protección de Datos Personales</p>
+      <p>Flexio SpA · Santiago, Chile · Cumple con Ley 19.628 y Ley 21.719 de Protección de Datos Personales</p>
     </div>
   </div>
 </body>
