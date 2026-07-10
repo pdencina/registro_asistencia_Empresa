@@ -471,50 +471,50 @@ export default function CheckInPage() {
   // ═══════════════════════════════════════════════════════════
   if (step === STEP_SCANNING) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[80vh] p-6 animate-fade-in bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900">
-        <div className="w-full max-w-xl">
-          {/* Instruction */}
-          <div className="text-center mb-5">
-            <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-500/10 backdrop-blur-sm text-emerald-400 rounded-full font-medium border border-emerald-500/20">
-              <div className="w-2.5 h-2.5 bg-emerald-400 rounded-full animate-pulse" />
-              Buscando tu rostro...
-            </div>
+      <div className="flex flex-col items-center justify-center min-h-[80vh] p-4 bg-black">
+        <div className="w-full max-w-lg">
+          {/* Status indicator */}
+          <div className="text-center mb-4">
+            <p className="text-sm text-primary-400 font-medium tracking-wide uppercase">Escaneando</p>
           </div>
 
-          {/* Camera */}
-          <div className="relative rounded-3xl overflow-hidden bg-black shadow-2xl ring-1 ring-white/10">
+          {/* Camera container */}
+          <div className="relative rounded-2xl overflow-hidden aspect-square max-w-md mx-auto">
             <Webcam
               ref={webcamRef}
               audio={false}
               screenshotFormat="image/jpeg"
-              videoConstraints={videoConstraints}
-              className="w-full aspect-[4/3] object-cover"
+              videoConstraints={{...videoConstraints, width: 480, height: 480}}
+              className="w-full h-full object-cover"
               mirrored={true}
             />
 
-            {/* Corner guides with glow */}
-            <div className="absolute inset-0 pointer-events-none">
-              <div className="absolute top-6 left-6 w-16 h-16 border-t-4 border-l-4 border-primary-400/80 rounded-tl-xl" />
-              <div className="absolute top-6 right-6 w-16 h-16 border-t-4 border-r-4 border-primary-400/80 rounded-tr-xl" />
-              <div className="absolute bottom-6 left-6 w-16 h-16 border-b-4 border-l-4 border-primary-400/80 rounded-bl-xl" />
-              <div className="absolute bottom-6 right-6 w-16 h-16 border-b-4 border-r-4 border-primary-400/80 rounded-br-xl" />
+            {/* Overlay gradient */}
+            <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/30 via-transparent to-black/30" />
+
+            {/* Animated scan corners */}
+            <div className="absolute inset-8 pointer-events-none">
+              <div className="absolute top-0 left-0 w-12 h-12 border-t-2 border-l-2 border-primary-400 rounded-tl-lg shadow-[0_0_8px_rgba(37,99,235,0.5)]" />
+              <div className="absolute top-0 right-0 w-12 h-12 border-t-2 border-r-2 border-primary-400 rounded-tr-lg shadow-[0_0_8px_rgba(37,99,235,0.5)]" />
+              <div className="absolute bottom-0 left-0 w-12 h-12 border-b-2 border-l-2 border-primary-400 rounded-bl-lg shadow-[0_0_8px_rgba(37,99,235,0.5)]" />
+              <div className="absolute bottom-0 right-0 w-12 h-12 border-b-2 border-r-2 border-primary-400 rounded-br-lg shadow-[0_0_8px_rgba(37,99,235,0.5)]" />
             </div>
 
-            {/* Scan line animation */}
-            <div className="absolute inset-x-8 top-0 h-0.5 bg-gradient-to-r from-transparent via-primary-400 to-transparent animate-pulse opacity-60" style={{top: '50%'}} />
+            {/* Scan line */}
+            <div className="absolute inset-x-10 h-px bg-gradient-to-r from-transparent via-primary-400 to-transparent animate-pulse" style={{top: '50%', boxShadow: '0 0 12px 2px rgba(37,99,235,0.4)'}} />
 
-            <div className="absolute top-4 left-4 bg-red-500/90 backdrop-blur-sm text-white text-xs px-3 py-1.5 rounded-full flex items-center gap-1.5">
-              <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
-              EN VIVO
-            </div>
-
-            <div className="absolute bottom-5 left-1/2 -translate-x-1/2 bg-white/10 backdrop-blur-md text-white px-6 py-3 rounded-full text-base font-medium border border-white/20">
-              Acércate a la cámara
+            {/* Bottom label */}
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2">
+              <div className="flex items-center gap-2 bg-black/60 backdrop-blur-md px-4 py-2 rounded-full border border-white/10">
+                <div className="w-2 h-2 bg-primary-400 rounded-full animate-pulse" />
+                <span className="text-white/90 text-sm font-medium">Buscando rostro</span>
+              </div>
             </div>
           </div>
 
-          <button onClick={cancelRecognition} className="w-full mt-5 py-3 text-gray-400 hover:text-white text-sm transition-colors">
-            ← Volver al inicio
+          {/* Cancel */}
+          <button onClick={cancelRecognition} className="w-full mt-6 py-3 text-gray-500 hover:text-white text-sm transition-colors">
+            Cancelar
           </button>
         </div>
       </div>
