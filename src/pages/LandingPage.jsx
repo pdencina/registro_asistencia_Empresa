@@ -235,53 +235,58 @@ export default function LandingPage() {
                 <div className="divide-y divide-gray-50">
                   {/* Row 1 */}
                   <div className="px-4 py-3 flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-xs font-bold text-emerald-600">MR</div>
+                    <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-xs font-bold text-emerald-600 shrink-0">MR</div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">María Rojas</p>
-                      <p className="text-xs text-gray-400">Operaciones</p>
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-sm font-medium text-gray-900 truncate">María Rojas</p>
+                        <span className="text-xs bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full whitespace-nowrap">08:02</span>
+                      </div>
+                      <p className="text-xs text-emerald-500 mt-0.5">✓ A tiempo</p>
                     </div>
-                    <span className="text-xs bg-emerald-50 text-emerald-600 px-2 py-1 rounded-full">Entrada 08:02</span>
-                    <span className="text-xs text-emerald-500">✓ A tiempo</span>
                   </div>
                   {/* Row 2 - Late */}
                   <div className="px-4 py-3 flex items-center gap-3 bg-orange-50/50">
-                    <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center text-xs font-bold text-orange-600">CP</div>
+                    <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center text-xs font-bold text-orange-600 shrink-0">CP</div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">Carlos Pérez</p>
-                      <p className="text-xs text-gray-400">Logística</p>
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-sm font-medium text-gray-900 truncate">Carlos Pérez</p>
+                        <span className="text-xs bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full whitespace-nowrap">08:47</span>
+                      </div>
+                      <p className="text-xs text-orange-500 mt-0.5">⚠ +17 min atraso (5° este mes)</p>
                     </div>
-                    <span className="text-xs bg-orange-100 text-orange-600 px-2 py-1 rounded-full">Entrada 08:47</span>
-                    <span className="text-xs text-orange-500">⚠ +17 min atraso (5° este mes)</span>
                   </div>
                   {/* Row 3 - Early exit */}
                   <div className="px-4 py-3 flex items-center gap-3 bg-blue-50/30">
-                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-xs font-bold text-blue-600">LV</div>
+                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-xs font-bold text-blue-600 shrink-0">LV</div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">Laura Vega</p>
-                      <p className="text-xs text-gray-400">Administración</p>
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-sm font-medium text-gray-900 truncate">Laura Vega</p>
+                        <span className="text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full whitespace-nowrap">15:30</span>
+                      </div>
+                      <p className="text-xs text-blue-500 mt-0.5">↗ Salida anticipada · Motivo: médico · Autorizó: J. Muñoz</p>
                     </div>
-                    <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full">Salida 15:30</span>
-                    <span className="text-xs text-blue-500">↗ Salida anticipada · Motivo: médico · Autorizó: J. Muñoz</span>
                   </div>
                   {/* Row 4 */}
                   <div className="px-4 py-3 flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-xs font-bold text-emerald-600">AG</div>
+                    <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-xs font-bold text-emerald-600 shrink-0">AG</div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">Andrés González</p>
-                      <p className="text-xs text-gray-400">TI</p>
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-sm font-medium text-gray-900 truncate">Andrés González</p>
+                        <span className="text-xs bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full whitespace-nowrap">07:55</span>
+                      </div>
+                      <p className="text-xs text-emerald-500 mt-0.5">✓ A tiempo</p>
                     </div>
-                    <span className="text-xs bg-emerald-50 text-emerald-600 px-2 py-1 rounded-full">Entrada 07:55</span>
-                    <span className="text-xs text-emerald-500">✓ A tiempo</span>
                   </div>
                   {/* Row 5 - Absent */}
                   <div className="px-4 py-3 flex items-center gap-3 bg-red-50/30">
-                    <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-xs font-bold text-red-600">FS</div>
+                    <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-xs font-bold text-red-600 shrink-0">FS</div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">Felipe Soto</p>
-                      <p className="text-xs text-gray-400">Operaciones</p>
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-sm font-medium text-gray-900 truncate">Felipe Soto</p>
+                        <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full whitespace-nowrap">Sin registro</span>
+                      </div>
+                      <p className="text-xs text-red-500 mt-0.5">✗ Ausente — sin justificación</p>
                     </div>
-                    <span className="text-xs bg-red-100 text-red-600 px-2 py-1 rounded-full">Sin registro</span>
-                    <span className="text-xs text-red-500">✗ Ausente — sin justificación</span>
                   </div>
                 </div>
               </div>
