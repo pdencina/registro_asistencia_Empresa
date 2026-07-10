@@ -1,12 +1,16 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Lock, Eye, EyeOff } from 'lucide-react';
+import { Lock, Eye, EyeOff, Mail, ArrowLeft, CheckCircle } from 'lucide-react';
 
 export default function AdminLoginPage({ onLogin }) {
   const [pin, setPin] = useState('');
   const [error, setError] = useState('');
   const [showPin, setShowPin] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showRecover, setShowRecover] = useState(false);
+  const [recoverEmail, setRecoverEmail] = useState('');
+  const [recoverSent, setRecoverSent] = useState(false);
+  const [recoverLoading, setRecoverLoading] = useState(false);
   const { tenant } = useParams();
 
   async function handleSubmit(e) {
@@ -15,7 +19,6 @@ export default function AdminLoginPage({ onLogin }) {
     setLoading(true);
 
     try {
-      // Validar PIN contra el backend (que verifica el tenant)
       const res = await fetch('/api/auth/verify-pin', {
         method: 'POST',
         headers: {
@@ -41,6 +44,80 @@ export default function AdminLoginPage({ onLogin }) {
     }
   }
 
+  async function handleRecover(e) {
+    e.preventDefault();
+    setRecoverLoading(true);
+
+    try {
+      await fetch('/api/auth/recover-pin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(tenant ? { 'x-tenant-slug': tenant } : {}),
+        },
+        body: JSON.stringify({ email: recoverEmail }),
+      });
+      setRecoverSent(true);
+    } catch {
+      setRecoverSent(true); // Mostrar éxito de todas formas (seguridad)
+    } finally {
+      setRecoverLoading(false);
+    }
+  }
+
+  // Vista de recuperación de PIN
+  if (showRecover) {
+    if (recoverSent) {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 w-full max-w-sm text-center">
+            <div className="w-16 h-16 bg-emerald-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <CheckCircle className="w-8 h-8 text-emerald-600" />
+            </div>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">Revisa tu email</h2>
+            <p className="text-sm text-gray-500 mb-6">
+              Si el email es correcto, recibirás tu PIN de acceso en los próximos minutos.
+            </p>
+            <button onClick={() => { setShowRecover(false); setRecoverSent(false); setRecoverEmail(''); }} className="w-full py-3 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 transition-all">
+              Volver al login
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 w-full max-w-sm text-center">
+          <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <Mail className="w-8 h-8 text-blue-600" />
+          </div>
+          <h2 className="text-xl font-bold text-gray-900 mb-2">Recuperar PIN</h2>
+          <p className="text-sm text-gray-500 mb-6">
+            Ingresa el email del administrador y te enviaremos el PIN de acceso.
+          </p>
+          <form onSubmit={handleRecover} className="space-y-4">
+            <input
+              type="email"
+              value={recoverEmail}
+              onChange={e => setRecoverEmail(e.target.value)}
+              placeholder="admin@empresa.cl"
+              required
+              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none"
+            />
+            <button type="submit" disabled={recoverLoading} className="w-full py-3 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 transition-all disabled:opacity-50">
+              {recoverLoading ? 'Enviando...' : 'Enviar PIN por email'}
+            </button>
+          </form>
+          <button onClick={() => setShowRecover(false)} className="inline-flex items-center gap-1 mt-4 text-sm text-gray-400 hover:text-gray-600">
+            <ArrowLeft className="w-4 h-4" /> Volver al login
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Vista principal de login
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
       <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 w-full max-w-sm text-center">
@@ -78,9 +155,9 @@ export default function AdminLoginPage({ onLogin }) {
           </button>
         </form>
 
-        <a href="/" className="inline-block mt-4 text-sm text-gray-400 hover:text-gray-600">
-          ← Volver al inicio
-        </a>
+        <button onClick={() => setShowRecover(true)} className="inline-block mt-4 text-sm text-primary-600 hover:text-primary-700 font-medium">
+          ¿Olvidaste tu PIN?
+        </button>
       </div>
     </div>
   );
