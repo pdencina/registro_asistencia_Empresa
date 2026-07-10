@@ -1,5 +1,6 @@
 const { getDb } = require('../lib/db');
 const { corsHeaders, handleCors } = require('../lib/cors');
+const { requireTenant } = require('../lib/tenant');
 
 const TZ = 'America/Santiago';
 
@@ -10,6 +11,9 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  const tenant = await requireTenant(req, res);
+  if (!tenant) return;
+
   const sql = getDb();
   const { employee_id, start_date, end_date, type, department } = req.query;
 
@@ -18,21 +22,21 @@ module.exports = async function handler(req, res) {
       SELECT ar.*, e.first_name, e.last_name, e.rut, e.department, e.photo_url
       FROM attendance_records ar
       JOIN employees e ON ar.employee_id = e.id
-      WHERE 1=1
+      WHERE ar.tenant_id = $1
     `;
-    const params = [TZ];
-    let idx = 2;
+    const params = [tenant.id, TZ];
+    let idx = 3;
 
     if (employee_id) {
       query += ` AND ar.employee_id = $${idx++}`;
       params.push(employee_id);
     }
     if (start_date) {
-      query += ` AND date(ar.timestamp AT TIME ZONE $1) >= $${idx++}`;
+      query += ` AND date(ar.timestamp AT TIME ZONE $2) >= $${idx++}`;
       params.push(start_date);
     }
     if (end_date) {
-      query += ` AND date(ar.timestamp AT TIME ZONE $1) <= $${idx++}`;
+      query += ` AND date(ar.timestamp AT TIME ZONE $2) <= $${idx++}`;
       params.push(end_date);
     }
     if (type) {

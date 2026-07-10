@@ -1,5 +1,6 @@
 const { getDb } = require('../lib/db');
 const { corsHeaders, handleCors } = require('../lib/cors');
+const { requireTenant } = require('../lib/tenant');
 
 const TZ = 'America/Santiago';
 
@@ -10,12 +11,17 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  const tenant = await requireTenant(req, res);
+  if (!tenant) return;
+
   const sql = getDb();
-  // If no date provided, use today in Chile timezone
   const date = req.query.date || null;
 
   try {
-    const [totalEmployees] = await sql('SELECT COUNT(*) as count FROM employees WHERE active = true');
+    const [totalEmployees] = await sql(
+      'SELECT COUNT(*) as count FROM employees WHERE tenant_id = $1 AND active = true',
+      [tenant.id]
+    );
 
     let presentQuery, exitedQuery, lastRecordsQuery;
 
@@ -23,44 +29,44 @@ module.exports = async function handler(req, res) {
       [presentQuery] = await sql(`
         SELECT COUNT(DISTINCT employee_id) as count 
         FROM attendance_records 
-        WHERE date(timestamp AT TIME ZONE $1) = $2 AND type = 'entry'
-      `, [TZ, date]);
+        WHERE tenant_id = $1 AND date(timestamp AT TIME ZONE $2) = $3 AND type = 'entry'
+      `, [tenant.id, TZ, date]);
 
       [exitedQuery] = await sql(`
         SELECT COUNT(DISTINCT employee_id) as count 
         FROM attendance_records 
-        WHERE date(timestamp AT TIME ZONE $1) = $2 AND type = 'exit'
-      `, [TZ, date]);
+        WHERE tenant_id = $1 AND date(timestamp AT TIME ZONE $2) = $3 AND type = 'exit'
+      `, [tenant.id, TZ, date]);
 
       lastRecordsQuery = await sql(`
         SELECT ar.*, e.first_name, e.last_name, e.photo_url
         FROM attendance_records ar
         JOIN employees e ON ar.employee_id = e.id
-        WHERE date(ar.timestamp AT TIME ZONE $1) = $2
+        WHERE ar.tenant_id = $1 AND date(ar.timestamp AT TIME ZONE $2) = $3
         ORDER BY ar.timestamp DESC
         LIMIT 10
-      `, [TZ, date]);
+      `, [tenant.id, TZ, date]);
     } else {
       [presentQuery] = await sql(`
         SELECT COUNT(DISTINCT employee_id) as count 
         FROM attendance_records 
-        WHERE date(timestamp AT TIME ZONE $1) = date(NOW() AT TIME ZONE $1) AND type = 'entry'
-      `, [TZ]);
+        WHERE tenant_id = $1 AND date(timestamp AT TIME ZONE $2) = date(NOW() AT TIME ZONE $2) AND type = 'entry'
+      `, [tenant.id, TZ]);
 
       [exitedQuery] = await sql(`
         SELECT COUNT(DISTINCT employee_id) as count 
         FROM attendance_records 
-        WHERE date(timestamp AT TIME ZONE $1) = date(NOW() AT TIME ZONE $1) AND type = 'exit'
-      `, [TZ]);
+        WHERE tenant_id = $1 AND date(timestamp AT TIME ZONE $2) = date(NOW() AT TIME ZONE $2) AND type = 'exit'
+      `, [tenant.id, TZ]);
 
       lastRecordsQuery = await sql(`
         SELECT ar.*, e.first_name, e.last_name, e.photo_url
         FROM attendance_records ar
         JOIN employees e ON ar.employee_id = e.id
-        WHERE date(ar.timestamp AT TIME ZONE $1) = date(NOW() AT TIME ZONE $1)
+        WHERE ar.tenant_id = $1 AND date(ar.timestamp AT TIME ZONE $2) = date(NOW() AT TIME ZONE $2)
         ORDER BY ar.timestamp DESC
         LIMIT 10
-      `, [TZ]);
+      `, [tenant.id, TZ]);
     }
 
     const total = Number(totalEmployees?.count || 0);

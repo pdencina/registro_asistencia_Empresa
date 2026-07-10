@@ -1,9 +1,14 @@
 const { getDb } = require('../lib/db');
 const { corsHeaders, handleCors } = require('../lib/cors');
+const { requireTenant } = require('../lib/tenant');
 const { put } = require('@vercel/blob');
 
 module.exports = async function handler(req, res) {
   if (handleCors(req, res)) return;
+
+  // Identificar tenant — OBLIGATORIO
+  const tenant = await requireTenant(req, res);
+  if (!tenant) return;
 
   const sql = getDb();
 
@@ -11,9 +16,9 @@ module.exports = async function handler(req, res) {
     if (req.method === 'GET') {
       const { search, active } = req.query;
 
-      let query = 'SELECT * FROM employees WHERE 1=1';
-      const params = [];
-      let paramIndex = 1;
+      let query = 'SELECT * FROM employees WHERE tenant_id = $1';
+      const params = [tenant.id];
+      let paramIndex = 2;
 
       if (search) {
         query += ` AND (first_name ILIKE $${paramIndex} OR last_name ILIKE $${paramIndex + 1} OR rut ILIKE $${paramIndex + 2})`;
@@ -40,15 +45,22 @@ module.exports = async function handler(req, res) {
         return res.status(400).json({ error: 'RUT, nombre y apellido son obligatorios' });
       }
 
-      const existing = await sql('SELECT id FROM employees WHERE rut = $1', [rut]);
+      // Verificar límite del plan
+      const [countRow] = await sql('SELECT COUNT(*) as count FROM employees WHERE tenant_id = $1 AND active = true', [tenant.id]);
+      if (Number(countRow.count) >= tenant.max_employees) {
+        return res.status(403).json({ error: `Límite de ${tenant.max_employees} colaboradores alcanzado. Actualiza tu plan.` });
+      }
+
+      // RUT único dentro del tenant
+      const existing = await sql('SELECT id FROM employees WHERE rut = $1 AND tenant_id = $2', [rut, tenant.id]);
       if (existing.length > 0) {
-        return res.status(409).json({ error: 'Ya existe un empleado con ese RUT' });
+        return res.status(409).json({ error: 'Ya existe un empleado con ese RUT en tu empresa' });
       }
 
       let photo_url = null;
       if (photo) {
         const buffer = base64ToBuffer(photo);
-        const blob = await put(`employees/${crypto.randomUUID()}.jpg`, buffer, {
+        const blob = await put(`employees/${tenant.slug}/${crypto.randomUUID()}.jpg`, buffer, {
           access: 'public',
           contentType: 'image/jpeg'
         });
@@ -58,17 +70,13 @@ module.exports = async function handler(req, res) {
       const id = crypto.randomUUID();
       const now = new Date().toISOString();
 
-      // Ensure email/phone columns exist
-      await sql('ALTER TABLE employees ADD COLUMN IF NOT EXISTS email VARCHAR(200)');
-      await sql('ALTER TABLE employees ADD COLUMN IF NOT EXISTS phone VARCHAR(50)');
-
-      await sql(
-        `INSERT INTO employees (id, rut, first_name, last_name, department, position, email, phone, photo_url, active, created_at, updated_at)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, true, $10, $11)`,
-        [id, rut, first_name, last_name, department || null, position || null, email || null, phone || null, photo_url, now, now]
+      await sql(`
+        INSERT INTO employees (id, tenant_id, rut, first_name, last_name, department, position, email, phone, photo_url, active, created_at, updated_at)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, true, $11, $12)`,
+        [id, tenant.id, rut, first_name, last_name, department || null, position || null, email || null, phone || null, photo_url, now, now]
       );
 
-      const [employee] = await sql('SELECT * FROM employees WHERE id = $1', [id]);
+      const [employee] = await sql('SELECT * FROM employees WHERE id = $1 AND tenant_id = $2', [id, tenant.id]);
       return res.status(201).json(employee);
     }
 

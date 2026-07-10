@@ -1,16 +1,20 @@
 const { getDb } = require('../lib/db');
 const { corsHeaders, handleCors } = require('../lib/cors');
+const { requireTenant } = require('../lib/tenant');
 const { put } = require('@vercel/blob');
 
 module.exports = async function handler(req, res) {
   if (handleCors(req, res)) return;
+
+  const tenant = await requireTenant(req, res);
+  if (!tenant) return;
 
   const { id } = req.query;
   const sql = getDb();
 
   try {
     if (req.method === 'GET') {
-      const [employee] = await sql('SELECT * FROM employees WHERE id = $1', [id]);
+      const [employee] = await sql('SELECT * FROM employees WHERE id = $1 AND tenant_id = $2', [id, tenant.id]);
       if (!employee) {
         return res.status(404).json({ error: 'Empleado no encontrado' });
       }
@@ -18,23 +22,22 @@ module.exports = async function handler(req, res) {
     }
 
     if (req.method === 'PUT') {
-      const { rut, first_name, last_name, department, position, active, photo, consent_at } = req.body;
+      const { rut, first_name, last_name, department, position, active, photo, consent_at, email, phone } = req.body;
 
-      const [current] = await sql('SELECT * FROM employees WHERE id = $1', [id]);
+      const [current] = await sql('SELECT * FROM employees WHERE id = $1 AND tenant_id = $2', [id, tenant.id]);
       if (!current) {
         return res.status(404).json({ error: 'Empleado no encontrado' });
       }
 
-      // Handle consent timestamp
       if (consent_at) {
         await sql('ALTER TABLE employees ADD COLUMN IF NOT EXISTS consent_at TIMESTAMPTZ');
-        await sql('UPDATE employees SET consent_at = $1 WHERE id = $2', [consent_at, id]);
+        await sql('UPDATE employees SET consent_at = $1 WHERE id = $2 AND tenant_id = $3', [consent_at, id, tenant.id]);
       }
 
       let photo_url = current.photo_url;
       if (photo) {
         const buffer = base64ToBuffer(photo);
-        const blob = await put(`employees/${crypto.randomUUID()}.jpg`, buffer, {
+        const blob = await put(`employees/${tenant.slug}/${crypto.randomUUID()}.jpg`, buffer, {
           access: 'public',
           contentType: 'image/jpeg'
         });
@@ -44,7 +47,8 @@ module.exports = async function handler(req, res) {
       const now = new Date().toISOString();
       await sql(
         `UPDATE employees SET rut = $1, first_name = $2, last_name = $3, department = $4, 
-         position = $5, photo_url = $6, active = $7, updated_at = $8 WHERE id = $9`,
+         position = $5, photo_url = $6, active = $7, updated_at = $8, email = $9, phone = $10
+         WHERE id = $11 AND tenant_id = $12`,
         [
           rut || current.rut,
           first_name || current.first_name,
@@ -54,30 +58,34 @@ module.exports = async function handler(req, res) {
           photo_url,
           active !== undefined ? active : current.active,
           now,
-          id
+          email !== undefined ? email : (current.email || null),
+          phone !== undefined ? phone : (current.phone || null),
+          id,
+          tenant.id
         ]
       );
 
-      const [employee] = await sql('SELECT * FROM employees WHERE id = $1', [id]);
+      const [employee] = await sql('SELECT * FROM employees WHERE id = $1 AND tenant_id = $2', [id, tenant.id]);
       return res.status(200).json(employee);
     }
 
     if (req.method === 'DELETE') {
       const { permanent } = req.body || {};
 
+      // Verificar que el empleado pertenece al tenant
+      const [check] = await sql('SELECT id FROM employees WHERE id = $1 AND tenant_id = $2', [id, tenant.id]);
+      if (!check) {
+        return res.status(404).json({ error: 'Empleado no encontrado' });
+      }
+
       if (permanent) {
-        // Eliminar todas las referencias primero
-        await sql('DELETE FROM early_exits WHERE employee_id = $1', [id]);
-        await sql('DELETE FROM employee_schedules WHERE employee_id = $1', [id]);
-        await sql('DELETE FROM attendance_records WHERE employee_id = $1', [id]);
-        // Eliminar empleado permanentemente
-        await sql('DELETE FROM employees WHERE id = $1', [id]);
+        await sql('DELETE FROM attendance_records WHERE employee_id = $1 AND tenant_id = $2', [id, tenant.id]);
+        await sql('DELETE FROM employees WHERE id = $1 AND tenant_id = $2', [id, tenant.id]);
         return res.status(200).json({ message: 'Empleado eliminado permanentemente' });
       }
 
-      // Soft delete (desactivar)
       const now = new Date().toISOString();
-      await sql('UPDATE employees SET active = false, updated_at = $1 WHERE id = $2', [now, id]);
+      await sql('UPDATE employees SET active = false, updated_at = $1 WHERE id = $2 AND tenant_id = $3', [now, id, tenant.id]);
       return res.status(200).json({ message: 'Empleado desactivado' });
     }
 

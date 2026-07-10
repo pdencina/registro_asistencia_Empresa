@@ -1,30 +1,49 @@
 import { useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { Lock, Eye, EyeOff } from 'lucide-react';
 
 export default function AdminLoginPage({ onLogin }) {
   const [pin, setPin] = useState('');
   const [error, setError] = useState('');
   const [showPin, setShowPin] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const { tenant } = useParams();
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     setError('');
+    setLoading(true);
 
-    // PIN configurable via variable de entorno, default: 1234
-    const correctPin = import.meta.env.VITE_ADMIN_PIN || '1234';
+    try {
+      // Validar PIN contra el backend (que verifica el tenant)
+      const res = await fetch('/api/auth/verify-pin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(tenant ? { 'x-tenant-slug': tenant } : {}),
+        },
+        body: JSON.stringify({ pin }),
+      });
 
-    if (pin === correctPin) {
-      sessionStorage.setItem('admin_auth', 'true');
-      onLogin();
-    } else {
-      setError('PIN incorrecto');
-      setPin('');
+      if (res.ok) {
+        sessionStorage.setItem('admin_auth', 'true');
+        if (tenant) sessionStorage.setItem('admin_tenant', tenant);
+        onLogin();
+      } else {
+        const data = await res.json();
+        setError(data.error || 'PIN incorrecto');
+        setPin('');
+      }
+    } catch {
+      setError('Error de conexión');
+    } finally {
+      setLoading(false);
     }
   }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-      <div className="card w-full max-w-sm text-center">
+      <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 w-full max-w-sm text-center">
         <div className="w-16 h-16 bg-primary-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
           <Lock className="w-8 h-8 text-primary-600" />
         </div>
@@ -54,13 +73,13 @@ export default function AdminLoginPage({ onLogin }) {
               {showPin ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
             </button>
           </div>
-          <button type="submit" className="btn-primary w-full" disabled={pin.length < 4}>
-            Ingresar
+          <button type="submit" className="w-full py-3 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 transition-all disabled:opacity-50" disabled={pin.length < 4 || loading}>
+            {loading ? 'Verificando...' : 'Ingresar'}
           </button>
         </form>
 
         <a href="/" className="inline-block mt-4 text-sm text-gray-400 hover:text-gray-600">
-          ← Volver al registro
+          ← Volver al inicio
         </a>
       </div>
     </div>

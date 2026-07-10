@@ -2,14 +2,13 @@ const { getDb } = require('./db');
 
 /**
  * Extrae el tenant desde la ruta, subdominio o header x-tenant-id.
- * Prioridad: header > ruta /app/:slug > subdominio > query param
+ * Prioridad: header x-tenant-id > header x-tenant-slug > subdominio > query param
  * Ejemplo: flexio.cl/app/acme -> slug = "acme"
- * En dev, se puede pasar x-tenant-id como header.
  */
 async function getTenant(req) {
   const sql = getDb();
 
-  // 1. Header explícito (desarrollo / API)
+  // 1. Header explícito por ID (desarrollo / API)
   const headerTenantId = req.headers['x-tenant-id'];
   if (headerTenantId) {
     const rows = await sql(
@@ -33,16 +32,14 @@ async function getTenant(req) {
   const host = req.headers.host || '';
   const parts = host.split('.');
 
-  // empresa.flexio.cl -> parts = ['empresa', 'flexio', 'cl']
   if (parts.length >= 3) {
     const slug = parts[0];
-    // Ignorar 'www' y 'app'
     if (slug !== 'www' && slug !== 'app') {
       const rows = await sql(
         'SELECT * FROM tenants WHERE slug = $1 AND active = true',
         [slug]
       );
-      return rows[0] || null;
+      if (rows[0]) return rows[0];
     }
   }
 
@@ -60,13 +57,15 @@ async function getTenant(req) {
 }
 
 /**
- * Middleware que inyecta req.tenant.
- * Retorna 401 si no se puede identificar el tenant.
+ * Middleware que requiere tenant. Retorna el tenant o responde 401.
+ * Uso: const tenant = await requireTenant(req, res); if (!tenant) return;
  */
 async function requireTenant(req, res) {
   const tenant = await getTenant(req);
   if (!tenant) {
-    res.status(401).json({ error: 'Tenant no identificado. Verifica el subdominio o header x-tenant-id.' });
+    res.status(401).json({ 
+      error: 'Empresa no identificada. Verifica la URL o contacta al administrador.' 
+    });
     return null;
   }
   return tenant;

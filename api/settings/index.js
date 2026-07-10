@@ -1,45 +1,63 @@
 const { getDb } = require('../lib/db');
 const { corsHeaders, handleCors } = require('../lib/cors');
+const { requireTenant } = require('../lib/tenant');
 
 module.exports = async function handler(req, res) {
   if (handleCors(req, res)) return;
 
+  const tenant = await requireTenant(req, res);
+  if (!tenant) return;
+
   const sql = getDb();
 
-  // Ensure settings table exists
-  await sql(`
-    CREATE TABLE IF NOT EXISTS app_settings (
-      key VARCHAR(50) PRIMARY KEY,
-      value VARCHAR(255) NOT NULL,
-      updated_at TIMESTAMPTZ DEFAULT NOW()
-    )
-  `);
-
   try {
-    // GET: Read settings
+    // GET: Read settings for this tenant
     if (req.method === 'GET') {
-      const rows = await sql('SELECT key, value FROM app_settings');
-      const settings = {};
-      for (const row of rows) {
-        settings[row.key] = row.value === 'true' ? true : row.value === 'false' ? false : row.value;
-      }
-      // Defaults
-      if (settings.geolocation_enabled === undefined) settings.geolocation_enabled = true;
+      const rows = await sql('SELECT * FROM tenant_settings WHERE tenant_id = $1', [tenant.id]);
 
-      return res.status(200).json(settings);
+      if (rows.length === 0) {
+        // Return defaults
+        return res.status(200).json({
+          geolocation_enabled: true,
+          geolocation_radius_meters: 100,
+          biometric_consent_required: true,
+          timezone: 'America/Santiago',
+        });
+      }
+
+      const settings = rows[0];
+      return res.status(200).json({
+        geolocation_enabled: settings.geolocation_enabled,
+        geolocation_radius_meters: settings.geolocation_radius_meters,
+        biometric_consent_required: settings.biometric_consent_required,
+        notification_email: settings.notification_email,
+        webhook_url: settings.webhook_url,
+        timezone: settings.timezone,
+      });
     }
 
-    // PUT: Update settings
+    // PUT: Update settings for this tenant
     if (req.method === 'PUT') {
-      const { geolocation_enabled } = req.body;
+      const { geolocation_enabled, geolocation_radius_meters, biometric_consent_required, notification_email, webhook_url } = req.body;
 
-      if (geolocation_enabled !== undefined) {
-        await sql(`
-          INSERT INTO app_settings (key, value, updated_at) 
-          VALUES ('geolocation_enabled', $1, NOW())
-          ON CONFLICT (key) DO UPDATE SET value = $1, updated_at = NOW()
-        `, [String(geolocation_enabled)]);
-      }
+      await sql(`
+        INSERT INTO tenant_settings (tenant_id, geolocation_enabled, geolocation_radius_meters, biometric_consent_required, notification_email, webhook_url, updated_at)
+        VALUES ($1, $2, $3, $4, $5, $6, NOW())
+        ON CONFLICT (tenant_id) DO UPDATE SET
+          geolocation_enabled = COALESCE($2, tenant_settings.geolocation_enabled),
+          geolocation_radius_meters = COALESCE($3, tenant_settings.geolocation_radius_meters),
+          biometric_consent_required = COALESCE($4, tenant_settings.biometric_consent_required),
+          notification_email = COALESCE($5, tenant_settings.notification_email),
+          webhook_url = COALESCE($6, tenant_settings.webhook_url),
+          updated_at = NOW()
+      `, [
+        tenant.id,
+        geolocation_enabled !== undefined ? geolocation_enabled : true,
+        geolocation_radius_meters || 100,
+        biometric_consent_required !== undefined ? biometric_consent_required : true,
+        notification_email || null,
+        webhook_url || null
+      ]);
 
       return res.status(200).json({ message: 'Configuración guardada' });
     }
