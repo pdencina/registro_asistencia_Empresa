@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flexio - Brochure Comercial</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #1e293b; line-height: 1.6; }
+    
+    .page { max-width: 800px; margin: 0 auto; padding: 60px 50px; }
+    
+    /* Header */
+    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 50px; padding-bottom: 20px; border-bottom: 3px solid #2563eb; }
+    .logo { font-size: 32px; font-weight: 800; color: #1e293b; }
+    .logo span { color: #2563eb; }
+    .tagline { font-size: 13px; color: #64748b; }
+    
+    /* Hero */
+    .hero { text-align: center; margin-bottom: 50px; }
+    .hero h1 { font-size: 28px; font-weight: 800; margin-bottom: 12px; color: #0f172a; }
+    .hero h1 span { color: #2563eb; }
+    .hero p { font-size: 16px; color: #475569; max-width: 550px; margin: 0 auto; }
+    
+    /* Problem section */
+    .section { margin-bottom: 45px; }
+    .section-title { font-size: 20px; font-weight: 700; margin-bottom: 15px; color: #0f172a; }
+    .section-subtitle { font-size: 14px; color: #64748b; margin-bottom: 20px; }
+    
+    /* Problem cards */
+    .problems { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
+    .problem-card { background: #fef2f2; border: 1px solid #fecaca; border-radius: 12px; padding: 16px; }
+    .problem-card .icon { font-size: 20px; margin-bottom: 6px; }
+    .problem-card p { font-size: 13px; color: #991b1b; font-weight: 500; }
+    
+    /* Solution cards */
+    .solutions { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    .solution-card { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 16px; }
+    .solution-card .icon { font-size: 20px; margin-bottom: 6px; }
+    .solution-card p { font-size: 13px; color: #166534; font-weight: 500; }
+    .solution-card .detail { font-size: 12px; color: #4ade80; margin-top: 4px; font-weight: 400; }
+    
+    /* Features */
+    .features { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+    .feature { text-align: center; padding: 20px 15px; border: 1px solid #e2e8f0; border-radius: 12px; }
+    .feature .icon { font-size: 28px; margin-bottom: 8px; }
+    .feature h4 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+    .feature p { font-size: 12px; color: #64748b; }
+    
+    /* Pricing */
+    .pricing { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
+    .plan { border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; text-align: center; }
+    .plan.featured { background: #2563eb; color: white; border-color: #2563eb; }
+    .plan h4 { font-size: 16px; font-weight: 700; margin-bottom: 5px; }
+    .plan .price { font-size: 24px; font-weight: 800; margin-bottom: 4px; }
+    .plan .period { font-size: 12px; opacity: 0.7; }
+    .plan ul { list-style: none; text-align: left; margin-top: 12px; font-size: 12px; }
+    .plan ul li { padding: 3px 0; }
+    .plan ul li::before { content: "✓ "; color: #10b981; }
+    .plan.featured ul li::before { color: #93c5fd; }
+    
+    /* How it works */
+    .steps { display: flex; gap: 20px; justify-content: center; }
+    .step { text-align: center; flex: 1; }
+    .step .number { width: 40px; height: 40px; background: #2563eb; color: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 18px; margin: 0 auto 10px; }
+    .step h4 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+    .step p { font-size: 12px; color: #64748b; }
+    
+    /* CTA */
+    .cta { text-align: center; background: #f8fafc; border-radius: 16px; padding: 40px; margin-top: 40px; }
+    .cta h3 { font-size: 22px; font-weight: 700; margin-bottom: 10px; }
+    .cta p { font-size: 14px; color: #64748b; margin-bottom: 20px; }
+    .cta-button { display: inline-block; background: #2563eb; color: white; padding: 14px 32px; border-radius: 12px; text-decoration: none; font-weight: 600; font-size: 15px; }
+    .cta .contact { margin-top: 15px; font-size: 13px; color: #64748b; }
+    .cta .contact a { color: #2563eb; text-decoration: none; font-weight: 600; }
+    
+    /* Footer */
+    .footer { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #e2e8f0; font-size: 12px; color: #94a3b8; }
+    
+    /* Legal badge */
+    .badge { display: inline-block; background: #eff6ff; color: #2563eb; font-size: 12px; font-weight: 600; padding: 6px 14px; border-radius: 20px; margin-bottom: 20px; }
+
+    @media print {
+      .page { padding: 30px; }
+      .cta-button { border: 2px solid #2563eb; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <!-- Header -->
+    <div class="header">
+      <div>
+        <div class="logo">flex<span>io</span></div>
+        <p class="tagline">Control de asistencia inteligente</p>
+      </div>
+      <div style="text-align: right; font-size: 12px; color: #64748b;">
+        flexio.cl<br>
+        +56 9 4961 6038
+      </div>
+    </div>
+
+    <!-- Hero -->
+    <div class="hero">
+      <span class="badge">✓ Cumple Ley 21.719 de Protección de Datos</span>
+      <h1>Control de asistencia con<br><span>reconocimiento facial</span></h1>
+      <p>Elimina el fraude en el marcaje. Tu equipo registra su asistencia con el rostro, sin contacto ni tarjetas. Reportes automáticos en tiempo real.</p>
+    </div>
+
+    <!-- Problem -->
+    <div class="section">
+      <h3 class="section-title">😤 El problema que resolvemos</h3>
+      <div class="problems">
+        <div class="problem-card">
+          <div class="icon">👥</div>
+          <p>Un trabajador marca por otro (buddy punching)</p>
+        </div>
+        <div class="problem-card">
+          <div class="icon">⏰</div>
+          <p>No sabes quién llega tarde ni cuántas veces</p>
+        </div>
+        <div class="problem-card">
+          <div class="icon">📋</div>
+          <p>Reportes manuales que toman horas cada mes</p>
+        </div>
+        <div class="problem-card">
+          <div class="icon">🔧</div>
+          <p>Huelleros que fallan o reloj control obsoleto</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Solution -->
+    <div class="section">
+      <h3 class="section-title">✅ La solución Flexio</h3>
+      <div class="solutions">
+        <div class="solution-card">
+          <div class="icon">📸</div>
+          <p>Reconocimiento facial con IA</p>
+          <p class="detail">Imposible marcar por otro</p>
+        </div>
+        <div class="solution-card">
+          <div class="icon">📊</div>
+          <p>Dashboard en tiempo real</p>
+          <p class="detail">Atrasos, ausencias, salidas anticipadas</p>
+        </div>
+        <div class="solution-card">
+          <div class="icon">📍</div>
+          <p>Geolocalización</p>
+          <p class="detail">Solo funciona en la ubicación autorizada</p>
+        </div>
+        <div class="solution-card">
+          <div class="icon">📱</div>
+          <p>Cualquier dispositivo con cámara</p>
+          <p class="detail">Tablet, celular o PC</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Features -->
+    <div class="section">
+      <h3 class="section-title">Funcionalidades incluidas</h3>
+      <div class="features">
+        <div class="feature">
+          <div class="icon">🕐</div>
+          <h4>Control de horarios</h4>
+          <p>Turnos, tolerancias, atrasos automáticos</p>
+        </div>
+        <div class="feature">
+          <div class="icon">🚪</div>
+          <h4>Salidas anticipadas</h4>
+          <p>Motivo, quién autorizó, registro completo</p>
+        </div>
+        <div class="feature">
+          <div class="icon">📈</div>
+          <h4>Reportes exportables</h4>
+          <p>Excel, filtros por fecha, área y persona</p>
+        </div>
+        <div class="feature">
+          <div class="icon">🔔</div>
+          <h4>Notificaciones</h4>
+          <p>Email automático al colaborador</p>
+        </div>
+        <div class="feature">
+          <div class="icon">🔒</div>
+          <h4>Datos seguros</h4>
+          <p>Encriptación, cumplimiento legal</p>
+        </div>
+        <div class="feature">
+          <div class="icon">⚡</div>
+          <h4>Setup en 5 minutos</h4>
+          <p>Sin instalación, sin hardware especial</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- How it works -->
+    <div class="section">
+      <h3 class="section-title">Implementación rápida</h3>
+      <div class="steps">
+        <div class="step">
+          <div class="number">1</div>
+          <h4>Creamos tu cuenta</h4>
+          <p>Configuramos tu empresa en minutos</p>
+        </div>
+        <div class="step">
+          <div class="number">2</div>
+          <h4>Registras colaboradores</h4>
+          <p>Foto de cada persona para el reconocimiento</p>
+        </div>
+        <div class="step">
+          <div class="number">3</div>
+          <h4>Listo para marcar</h4>
+          <p>Coloca un dispositivo con cámara en la entrada</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pricing -->
+    <div class="section">
+      <h3 class="section-title">Planes y precios</h3>
+      <p class="section-subtitle">Sin compromiso · Cancela cuando quieras · Precios + IVA</p>
+      <div class="pricing">
+        <div class="plan">
+          <h4>Básico</h4>
+          <div class="price">$39.990</div>
+          <div class="period">/mes</div>
+          <ul>
+            <li>Hasta 30 colaboradores</li>
+            <li>1 dispositivo</li>
+            <li>Reconocimiento facial</li>
+            <li>Reportes básicos</li>
+            <li>Soporte por email</li>
+          </ul>
+        </div>
+        <div class="plan featured">
+          <h4>Profesional</h4>
+          <div class="price">$79.990</div>
+          <div class="period">/mes</div>
+          <ul>
+            <li>Hasta 100 colaboradores</li>
+            <li>3 dispositivos</li>
+            <li>Reportes avanzados + Excel</li>
+            <li>Geolocalización</li>
+            <li>Soporte prioritario</li>
+          </ul>
+        </div>
+        <div class="plan">
+          <h4>Enterprise</h4>
+          <div class="price">$149.990</div>
+          <div class="period">/mes</div>
+          <ul>
+            <li>Hasta 300 colaboradores</li>
+            <li>10 dispositivos</li>
+            <li>Multi-sucursal</li>
+            <li>API completa</li>
+            <li>SLA 99.9%</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta">
+      <h3>¿Listo para eliminar el fraude en asistencia?</h3>
+      <p>Prueba Flexio gratis por 15 días. Sin tarjeta de crédito.</p>
+      <a href="https://wa.me/56949616038?text=Hola,%20me%20interesa%20Flexio%20para%20mi%20empresa" class="cta-button">Solicitar demo gratuita →</a>
+      <p class="contact">
+        WhatsApp: <a href="https://wa.me/56949616038">+56 9 4961 6038</a> · 
+        Web: <a href="https://flexio.cl">flexio.cl</a>
+      </p>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <p>© 2026 Flexio SpA · Santiago, Chile · Cumple con Ley 19.628 y Ley 21.719 de Protección de Datos Personales</p>
+    </div>
+  </div>
+</body>
+</html>
