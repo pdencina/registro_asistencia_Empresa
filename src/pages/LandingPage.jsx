@@ -386,10 +386,10 @@ export default function LandingPage() {
             {plans.map((plan, i) => (
               <div
                 key={i}
-                className={`rounded-2xl p-8 ${
+                className={`rounded-2xl p-8 transition-all duration-300 cursor-default ${
                   plan.highlighted
-                    ? 'bg-primary-600 text-white ring-4 ring-primary-200 scale-105'
-                    : 'bg-white border border-gray-200'
+                    ? 'bg-primary-600 text-white ring-4 ring-primary-200 scale-105 hover:scale-[1.07] hover:shadow-2xl'
+                    : 'bg-white border border-gray-200 hover:scale-[1.03] hover:shadow-xl hover:border-primary-200'
                 }`}
               >
                 <h3 className={`text-lg font-semibold mb-1 ${plan.highlighted ? 'text-white' : 'text-gray-900'}`}>
