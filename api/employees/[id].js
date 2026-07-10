@@ -79,7 +79,10 @@ module.exports = async function handler(req, res) {
       }
 
       if (permanent) {
-        await sql('DELETE FROM attendance_records WHERE employee_id = $1 AND tenant_id = $2', [id, tenant.id]);
+        // Eliminar registros dependientes primero (sin filtro tenant en tablas que no lo tienen)
+        try { await sql('DELETE FROM early_exits WHERE employee_id = $1', [id]); } catch(e) {}
+        try { await sql('DELETE FROM employee_schedules WHERE employee_id = $1', [id]); } catch(e) {}
+        try { await sql('DELETE FROM attendance_records WHERE employee_id = $1', [id]); } catch(e) {}
         await sql('DELETE FROM employees WHERE id = $1 AND tenant_id = $2', [id, tenant.id]);
         return res.status(200).json({ message: 'Empleado eliminado permanentemente' });
       }
