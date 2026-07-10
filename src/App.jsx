@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import { useState } from 'react';
 import KioskLayout from './layouts/KioskLayout';
 import AdminLayout from './layouts/AdminLayout';
@@ -31,8 +31,12 @@ function App() {
         {/* Admin por tenant: flexio.cl/admin/slug */}
         <Route path="/admin/:tenant/*" element={<ProtectedAdmin />} />
 
-        {/* Admin sin slug: redirigir a login */}
+        {/* Admin sin slug: siempre redirigir a login */}
         <Route path="/admin" element={<Navigate to="/login" replace />} />
+        <Route path="/admin/" element={<Navigate to="/login" replace />} />
+        <Route path="/admin/employees" element={<Navigate to="/login" replace />} />
+        <Route path="/admin/attendance" element={<Navigate to="/login" replace />} />
+        <Route path="/admin/settings" element={<Navigate to="/login" replace />} />
 
         {/* Super Admin: gestión de empresas */}
         <Route path="/superadmin" element={<ProtectedSuperAdmin />} />
@@ -50,6 +54,12 @@ function ProtectedAdmin() {
   const [authenticated, setAuthenticated] = useState(
     sessionStorage.getItem('admin_auth') === 'true'
   );
+  const { tenant } = useParams();
+
+  // Si no hay slug de tenant en la URL, redirigir a login
+  if (!tenant) {
+    return <Navigate to="/login" replace />;
+  }
 
   if (!authenticated) {
     return <AdminLoginPage onLogin={() => setAuthenticated(true)} />;
