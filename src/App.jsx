@@ -4,6 +4,8 @@ import KioskLayout from './layouts/KioskLayout';
 import AdminLayout from './layouts/AdminLayout';
 import AdminLoginPage from './pages/AdminLoginPage';
 import LandingPage from './pages/LandingPage';
+import LoginRedirectPage from './pages/LoginRedirectPage';
+import NoTenantPage from './pages/NoTenantPage';
 import TermsPage from './pages/legal/TermsPage';
 import PrivacyPage from './pages/legal/PrivacyPage';
 import DpaPage from './pages/legal/DpaPage';
@@ -17,15 +19,20 @@ function App() {
         {/* Landing page comercial */}
         <Route path="/" element={<LandingPage />} />
 
+        {/* Login: buscar empresa por email */}
+        <Route path="/login" element={<LoginRedirectPage />} />
+
         {/* App por tenant: flexio.cl/app/slug */}
         <Route path="/app/:tenant" element={<KioskLayout />} />
+
+        {/* App sin slug: mostrar mensaje */}
+        <Route path="/app" element={<NoTenantPage />} />
 
         {/* Admin por tenant: flexio.cl/admin/slug */}
         <Route path="/admin/:tenant/*" element={<ProtectedAdmin />} />
 
-        {/* Fallback legacy (sin tenant) */}
-        <Route path="/app" element={<KioskLayout />} />
-        <Route path="/admin/*" element={<ProtectedAdmin />} />
+        {/* Admin sin slug: redirigir a login */}
+        <Route path="/admin" element={<Navigate to="/login" replace />} />
 
         {/* Super Admin: gestión de empresas */}
         <Route path="/superadmin" element={<ProtectedSuperAdmin />} />
