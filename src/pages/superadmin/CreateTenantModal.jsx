@@ -63,13 +63,16 @@ export default function CreateTenantModal({ onClose, onCreated }) {
           <h3 className="text-xl font-bold text-white mb-2">Empresa creada</h3>
           <div className="bg-gray-900 rounded-xl p-4 text-left space-y-2 mb-6">
             <p className="text-sm text-gray-400">Empresa: <span className="text-white font-medium">{success.tenant?.name}</span></p>
-            <p className="text-sm text-gray-400">URL: <span className="text-primary-400 font-medium">flexio.cl/app/{success.tenant?.slug}</span></p>
-            <p className="text-sm text-gray-400">PIN Admin: <span className="text-white font-mono font-bold text-lg">{form.admin_pin}</span></p>
+            <p className="text-sm text-gray-400">URL Panel: <span className="text-primary-400 font-medium">flexio.cl/admin/{success.tenant?.slug}</span></p>
+            <p className="text-sm text-gray-400">URL Kiosko: <span className="text-emerald-400 font-medium">flexio.cl/app/{success.tenant?.slug}</span></p>
+            <p className="text-sm text-gray-400">Email: <span className="text-white font-medium">{form.admin_email}</span></p>
+            <p className="text-sm text-gray-400">Contraseña: <span className="text-white font-mono font-bold text-lg">{success.temp_password}</span></p>
+            <p className="text-sm text-gray-400">PIN dispositivo: <span className="text-white font-mono font-bold">{form.admin_pin}</span></p>
             <p className="text-sm text-gray-400">Plan: <span className="text-white">{success.tenant?.plan}</span></p>
             <p className="text-sm text-gray-400">Trial: <span className="text-emerald-400">15 días</span></p>
           </div>
           <p className="text-xs text-gray-500 mb-4">
-            Comparte la URL y el PIN con el administrador de la empresa.
+            Se envió un email al cliente con sus credenciales de acceso.
           </p>
           <button onClick={onCreated} className="w-full py-3 bg-primary-600 text-white font-medium rounded-xl hover:bg-primary-700">
             Cerrar

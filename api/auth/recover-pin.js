@@ -3,7 +3,7 @@ const { corsHeaders, handleCors } = require('../lib/cors');
 
 /**
  * POST /api/auth/recover-pin
- * Envía el PIN por email al administrador del tenant.
+ * Envía una contraseña temporal por email al administrador del tenant.
  * Body: { email: "admin@empresa.cl" }
  * Header: x-tenant-slug: "constructora-acme"
  */
@@ -46,7 +46,13 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({ message: 'Si el email es correcto, recibirás tu PIN en breve.' });
     }
 
-    // Enviar email con el PIN
+    // Generar contraseña temporal
+    const tempPassword = Math.random().toString(36).slice(-8);
+    
+    // Guardar contraseña temporal
+    await sql('UPDATE tenants SET admin_password = $1, updated_at = NOW() WHERE id = $2', [tempPassword, tenant.id]);
+
+    // Enviar email con la contraseña temporal
     const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'notificaciones@flexio.cl';
 
     const html = `
@@ -60,24 +66,24 @@ module.exports = async function handler(req, res) {
         <table width="480" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 6px rgba(0,0,0,0.05);">
           <tr>
             <td style="background:#2563eb;padding:30px;text-align:center;">
-              <h1 style="color:#ffffff;font-size:22px;margin:0;">Recuperación de PIN</h1>
+              <h1 style="color:#ffffff;font-size:22px;margin:0;">Recuperación de acceso</h1>
             </td>
           </tr>
           <tr>
             <td style="padding:30px;">
               <p style="font-size:16px;color:#374151;margin:0 0 20px 0;">
-                Hola, recibimos una solicitud para recuperar el PIN de acceso de <strong>${tenant.name}</strong>.
+                Hola, recibimos una solicitud para recuperar el acceso de <strong>${tenant.name}</strong>.
               </p>
+              <p style="font-size:14px;color:#374151;margin:0 0 10px 0;">Tu contraseña temporal es:</p>
               <div style="background:#f0f9ff;border:2px solid #bfdbfe;border-radius:12px;padding:24px;text-align:center;margin:20px 0;">
-                <p style="font-size:14px;color:#64748b;margin:0 0 8px 0;">Tu PIN de administrador es:</p>
-                <p style="font-size:36px;font-weight:800;color:#1e40af;margin:0;letter-spacing:8px;">${tenant.admin_pin_hash}</p>
+                <p style="font-size:28px;font-weight:800;color:#1e40af;margin:0;letter-spacing:2px;font-family:monospace;">${tempPassword}</p>
               </div>
               <p style="font-size:14px;color:#6b7280;margin:20px 0 0 0;">
-                Usa este PIN para acceder a tu panel en:<br>
+                Accede a tu panel y cambia tu contraseña:<br>
                 <a href="https://flexio.cl/admin/${tenant.slug}" style="color:#2563eb;font-weight:600;">flexio.cl/admin/${tenant.slug}</a>
               </p>
               <p style="font-size:12px;color:#9ca3af;margin:20px 0 0 0;">
-                Si no solicitaste esta recuperación, puedes ignorar este mensaje. Tu PIN no ha sido modificado.
+                Si no solicitaste esta recuperación, contacta a soporte inmediatamente.
               </p>
             </td>
           </tr>
@@ -102,7 +108,7 @@ module.exports = async function handler(req, res) {
       body: JSON.stringify({
         from: `Flexio <${FROM_EMAIL}>`,
         to: [tenant.admin_email],
-        subject: `Tu PIN de acceso — ${tenant.name}`,
+        subject: `Recuperación de acceso — ${tenant.name}`,
         html,
       }),
     });

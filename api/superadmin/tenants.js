@@ -73,14 +73,17 @@ module.exports = async function handler(req, res) {
       // Verificar slug único
       const existing = await sql('SELECT id FROM tenants WHERE slug = $1', [slug]);
       if (existing.length > 0) {
-        return res.status(409).json({ error: 'Ese subdominio ya está en uso' });
+        return res.status(409).json({ error: 'Ese identificador ya está en uso' });
       }
+
+      // Generar contraseña temporal para el admin
+      const tempPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-4);
 
       // Límites por plan
       const planLimits = {
         basico: { max_employees: 30, max_devices: 1 },
         profesional: { max_employees: 100, max_devices: 3 },
-        enterprise: { max_employees: 9999, max_devices: 999 },
+        enterprise: { max_employees: 300, max_devices: 10 },
       };
       const selectedPlan = plan || 'basico';
       const limits = planLimits[selectedPlan] || planLimits.basico;
@@ -89,11 +92,14 @@ module.exports = async function handler(req, res) {
       const trialEnds = new Date();
       trialEnds.setDate(trialEnds.getDate() + 15);
 
+      // Asegurar columna admin_password
+      await sql('ALTER TABLE tenants ADD COLUMN IF NOT EXISTS admin_password VARCHAR(200)');
+
       const rows = await sql(`
-        INSERT INTO tenants (name, slug, rut_empresa, plan, max_employees, max_devices, admin_email, admin_pin_hash, trial_ends_at)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        INSERT INTO tenants (name, slug, rut_empresa, plan, max_employees, max_devices, admin_email, admin_pin_hash, admin_password, trial_ends_at)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
         RETURNING *
-      `, [name, slug, rut_empresa || null, selectedPlan, limits.max_employees, limits.max_devices, admin_email, admin_pin, trialEnds.toISOString()]);
+      `, [name, slug, rut_empresa || null, selectedPlan, limits.max_employees, limits.max_devices, admin_email, admin_pin, tempPassword, trialEnds.toISOString()]);
 
       // Crear settings por defecto
       await sql('INSERT INTO tenant_settings (tenant_id) VALUES ($1)', [rows[0].id]);
@@ -104,8 +110,42 @@ module.exports = async function handler(req, res) {
         VALUES ($1, $2, 'trial', NOW(), $3)
       `, [rows[0].id, selectedPlan, trialEnds.toISOString()]);
 
+      // Enviar email de bienvenida con credenciales
+      const RESEND_API_KEY = process.env.RESEND_API_KEY;
+      if (RESEND_API_KEY) {
+        const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'notificaciones@flexio.cl';
+        const welcomeHtml = buildWelcomeEmail({
+          tenantName: name,
+          slug,
+          adminEmail: admin_email,
+          tempPassword,
+          devicePin: admin_pin,
+          plan: selectedPlan,
+          trialDays: 15,
+        });
+
+        try {
+          await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${RESEND_API_KEY}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              from: `Flexio <${FROM_EMAIL}>`,
+              to: [admin_email],
+              subject: `Bienvenido a Flexio — Tus datos de acceso`,
+              html: welcomeHtml,
+            }),
+          });
+        } catch (emailErr) {
+          console.error('Error enviando email de bienvenida:', emailErr);
+        }
+      }
+
       return res.status(201).json({
         tenant: rows[0],
+        temp_password: tempPassword,
         message: `Empresa creada. URL: flexio.cl/app/${slug}`,
       });
     } catch (error) {
@@ -154,3 +194,83 @@ module.exports = async function handler(req, res) {
 
   return res.status(405).json({ error: 'Método no permitido' });
 };
+
+function buildWelcomeEmail({ tenantName, slug, adminEmail, tempPassword, devicePin, plan, trialDays }) {
+  return `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f5;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="padding:40px 20px;">
+    <tr>
+      <td align="center">
+        <table width="540" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 6px rgba(0,0,0,0.05);">
+          <tr>
+            <td style="background:#2563eb;padding:35px;text-align:center;">
+              <h1 style="color:#ffffff;font-size:24px;margin:0;">Bienvenido a Flexio</h1>
+              <p style="color:#bfdbfe;font-size:14px;margin:8px 0 0 0;">Tu sistema de control de asistencia está listo</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:35px;">
+              <p style="font-size:16px;color:#374151;margin:0 0 20px 0;">
+                Hola, la cuenta de <strong>${tenantName}</strong> ha sido creada exitosamente en Flexio.
+              </p>
+
+              <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:24px;margin:20px 0;">
+                <p style="font-size:13px;color:#64748b;margin:0 0 12px 0;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Datos de acceso al panel</p>
+                <table width="100%" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="padding:6px 0;font-size:14px;color:#64748b;width:120px;">URL Panel:</td>
+                    <td style="padding:6px 0;font-size:14px;color:#1e40af;font-weight:600;">
+                      <a href="https://flexio.cl/admin/${slug}" style="color:#1e40af;text-decoration:none;">flexio.cl/admin/${slug}</a>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:6px 0;font-size:14px;color:#64748b;">Email:</td>
+                    <td style="padding:6px 0;font-size:14px;color:#0f172a;font-weight:600;">${adminEmail}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:6px 0;font-size:14px;color:#64748b;">Contraseña:</td>
+                    <td style="padding:6px 0;font-size:16px;color:#0f172a;font-weight:700;font-family:monospace;letter-spacing:1px;">${tempPassword}</td>
+                  </tr>
+                </table>
+              </div>
+
+              <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:20px;margin:20px 0;">
+                <p style="font-size:13px;color:#92400e;margin:0 0 8px 0;font-weight:600;">PIN para activar dispositivos</p>
+                <p style="font-size:13px;color:#78350f;margin:0;">
+                  Para activar el dispositivo de marcaje (tablet/celular), usa el PIN: <strong style="font-size:18px;letter-spacing:3px;">${devicePin}</strong>
+                </p>
+              </div>
+
+              <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:20px;margin:20px 0;">
+                <p style="font-size:13px;color:#166534;margin:0 0 8px 0;font-weight:600;">URL del kiosko de registro</p>
+                <p style="font-size:13px;color:#14532d;margin:0;">
+                  Tus colaboradores marcan asistencia en:<br>
+                  <a href="https://flexio.cl/app/${slug}" style="color:#166534;font-weight:600;font-size:15px;">flexio.cl/app/${slug}</a>
+                </p>
+              </div>
+
+              <p style="font-size:13px;color:#6b7280;margin:25px 0 0 0;">
+                Tu plan <strong>${plan}</strong> incluye ${trialDays} días de prueba gratis. Te recomendamos cambiar tu contraseña en el primer ingreso.
+              </p>
+
+              <div style="text-align:center;margin:30px 0 0 0;">
+                <a href="https://flexio.cl/admin/${slug}" style="display:inline-block;background:#2563eb;color:#ffffff;padding:14px 32px;border-radius:10px;text-decoration:none;font-weight:600;font-size:15px;">Acceder a mi panel</a>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:20px 30px;border-top:1px solid #e5e7eb;text-align:center;">
+              <p style="font-size:12px;color:#9ca3af;margin:0;">Flexio · Control de Asistencia con Reconocimiento Facial</p>
+              <p style="font-size:11px;color:#d1d5db;margin:5px 0 0 0;">flexio.cl · +56 9 4961 6038</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+}
