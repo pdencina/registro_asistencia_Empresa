@@ -111,19 +111,20 @@ export default function CreateTenantModal({ onClose, onCreated }) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Subdominio *</label>
+            <label className="block text-sm font-medium text-gray-300 mb-1">Identificador URL *</label>
             <div className="flex items-center">
+              <span className="px-3 py-3 bg-gray-600 border border-gray-600 rounded-l-xl text-gray-400 text-sm">
+                flexio.cl/app/
+              </span>
               <input
                 value={form.slug}
                 onChange={(e) => setForm({ ...form, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '') })}
                 placeholder="acme"
                 required
-                className="flex-1 px-4 py-3 bg-gray-700 border border-gray-600 rounded-l-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-primary-500 outline-none"
+                className="flex-1 px-4 py-3 bg-gray-700 border border-gray-600 rounded-r-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-primary-500 outline-none"
               />
-              <span className="px-3 py-3 bg-gray-600 border border-gray-600 rounded-r-xl text-gray-400 text-sm">
-                .flexio.cl
-              </span>
             </div>
+            <p className="text-xs text-gray-500 mt-1">El cliente accederá a: flexio.cl/app/{form.slug || 'nombre'}</p>
           </div>
 
           <div>
