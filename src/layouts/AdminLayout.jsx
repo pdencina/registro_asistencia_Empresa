@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Routes, Route, NavLink, Navigate, useNavigate } from 'react-router-dom';
+import { Routes, Route, NavLink, Navigate, useNavigate, useParams } from 'react-router-dom';
 import { Users, ClipboardList, BarChart3, LogOut, Camera, Settings, Clock } from 'lucide-react';
 import EmployeesPage from '../pages/EmployeesPage';
 import AttendancePage from '../pages/AttendancePage';
@@ -11,6 +11,8 @@ import SchedulesPage from '../pages/SchedulesPage';
 export default function AdminLayout() {
   const [time, setTime] = useState(new Date());
   const navigate = useNavigate();
+  const { tenant } = useParams();
+  const basePath = tenant ? `/admin/${tenant}` : '/admin';
 
   useEffect(() => {
     const interval = setInterval(() => setTime(new Date()), 1000);
@@ -19,6 +21,8 @@ export default function AdminLayout() {
 
   function handleLogout() {
     sessionStorage.removeItem('admin_auth');
+    sessionStorage.removeItem('admin_tenant');
+    sessionStorage.removeItem('admin_email');
     navigate('/');
   }
 
@@ -57,19 +61,19 @@ export default function AdminLayout() {
           <Route path="/register" element={<CheckInPage />} />
           <Route path="/schedules" element={<SchedulesPage />} />
           <Route path="/settings" element={<SettingsPage />} />
-          <Route path="*" element={<Navigate to="/admin" replace />} />
+          <Route path="*" element={<Navigate to={basePath} replace />} />
         </Routes>
       </main>
 
       {/* Bottom Navigation */}
       <nav className="bg-white border-t border-gray-200 px-4 py-2">
         <div className="flex justify-around max-w-3xl mx-auto">
-          <NavItem to="/admin" icon={<BarChart3 className="w-6 h-6" />} label="Dashboard" end />
-          <NavItem to="/admin/employees" icon={<Users className="w-6 h-6" />} label="Colaboradores" />
-          <NavItem to="/admin/attendance" icon={<ClipboardList className="w-6 h-6" />} label="Asistencia" />
-          <NavItem to="/admin/register" icon={<Camera className="w-6 h-6" />} label="Registrar" />
-          <NavItem to="/admin/schedules" icon={<Clock className="w-6 h-6" />} label="Horarios" />
-          <NavItem to="/admin/settings" icon={<Settings className="w-6 h-6" />} label="Config" />
+          <NavItem to={basePath} icon={<BarChart3 className="w-6 h-6" />} label="Dashboard" end />
+          <NavItem to={`${basePath}/employees`} icon={<Users className="w-6 h-6" />} label="Colaboradores" />
+          <NavItem to={`${basePath}/attendance`} icon={<ClipboardList className="w-6 h-6" />} label="Asistencia" />
+          <NavItem to={`${basePath}/register`} icon={<Camera className="w-6 h-6" />} label="Registrar" />
+          <NavItem to={`${basePath}/schedules`} icon={<Clock className="w-6 h-6" />} label="Horarios" />
+          <NavItem to={`${basePath}/settings`} icon={<Settings className="w-6 h-6" />} label="Config" />
         </div>
       </nav>
     </div>
