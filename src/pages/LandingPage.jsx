@@ -182,6 +182,115 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Dashboard Preview */}
+      <section className="pb-20 px-4 sm:px-6 lg:px-8 -mt-4">
+        <div className="max-w-5xl mx-auto">
+          <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden">
+            {/* Mock browser bar */}
+            <div className="bg-gray-100 border-b border-gray-200 px-4 py-2.5 flex items-center gap-2">
+              <div className="flex gap-1.5">
+                <div className="w-3 h-3 rounded-full bg-red-400"></div>
+                <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
+                <div className="w-3 h-3 rounded-full bg-green-400"></div>
+              </div>
+              <div className="flex-1 mx-4">
+                <div className="bg-white rounded-md px-3 py-1 text-xs text-gray-400 text-center border border-gray-200">
+                  empresa.flexio.cl/admin
+                </div>
+              </div>
+            </div>
+
+            {/* Dashboard content */}
+            <div className="p-6 bg-gray-50">
+              {/* Stats row */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+                <div className="bg-white rounded-xl p-4 border border-gray-100">
+                  <p className="text-xs text-gray-500">Presentes hoy</p>
+                  <p className="text-2xl font-bold text-emerald-600">24</p>
+                  <p className="text-xs text-emerald-500">de 28 activos</p>
+                </div>
+                <div className="bg-white rounded-xl p-4 border border-gray-100">
+                  <p className="text-xs text-gray-500">Atrasos este mes</p>
+                  <p className="text-2xl font-bold text-orange-500">7</p>
+                  <p className="text-xs text-orange-400">3 reincidentes</p>
+                </div>
+                <div className="bg-white rounded-xl p-4 border border-gray-100">
+                  <p className="text-xs text-gray-500">Salidas anticipadas</p>
+                  <p className="text-2xl font-bold text-blue-600">3</p>
+                  <p className="text-xs text-blue-400">todas autorizadas</p>
+                </div>
+                <div className="bg-white rounded-xl p-4 border border-gray-100">
+                  <p className="text-xs text-gray-500">Ausentes</p>
+                  <p className="text-2xl font-bold text-red-500">4</p>
+                  <p className="text-xs text-red-400">2 con licencia</p>
+                </div>
+              </div>
+
+              {/* Table */}
+              <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+                <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+                  <p className="text-sm font-semibold text-gray-700">Registro de hoy — Lunes 7 de julio</p>
+                  <span className="text-xs bg-primary-50 text-primary-600 px-2 py-1 rounded-full">En vivo</span>
+                </div>
+                <div className="divide-y divide-gray-50">
+                  {/* Row 1 */}
+                  <div className="px-4 py-3 flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-xs font-bold text-emerald-600">MR</div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">María Rojas</p>
+                      <p className="text-xs text-gray-400">Operaciones</p>
+                    </div>
+                    <span className="text-xs bg-emerald-50 text-emerald-600 px-2 py-1 rounded-full">Entrada 08:02</span>
+                    <span className="text-xs text-emerald-500">✓ A tiempo</span>
+                  </div>
+                  {/* Row 2 - Late */}
+                  <div className="px-4 py-3 flex items-center gap-3 bg-orange-50/50">
+                    <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center text-xs font-bold text-orange-600">CP</div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">Carlos Pérez</p>
+                      <p className="text-xs text-gray-400">Logística</p>
+                    </div>
+                    <span className="text-xs bg-orange-100 text-orange-600 px-2 py-1 rounded-full">Entrada 08:47</span>
+                    <span className="text-xs text-orange-500">⚠ +17 min atraso (5° este mes)</span>
+                  </div>
+                  {/* Row 3 - Early exit */}
+                  <div className="px-4 py-3 flex items-center gap-3 bg-blue-50/30">
+                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-xs font-bold text-blue-600">LV</div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">Laura Vega</p>
+                      <p className="text-xs text-gray-400">Administración</p>
+                    </div>
+                    <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full">Salida 15:30</span>
+                    <span className="text-xs text-blue-500">↗ Salida anticipada · Motivo: médico · Autorizó: J. Muñoz</span>
+                  </div>
+                  {/* Row 4 */}
+                  <div className="px-4 py-3 flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-xs font-bold text-emerald-600">AG</div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">Andrés González</p>
+                      <p className="text-xs text-gray-400">TI</p>
+                    </div>
+                    <span className="text-xs bg-emerald-50 text-emerald-600 px-2 py-1 rounded-full">Entrada 07:55</span>
+                    <span className="text-xs text-emerald-500">✓ A tiempo</span>
+                  </div>
+                  {/* Row 5 - Absent */}
+                  <div className="px-4 py-3 flex items-center gap-3 bg-red-50/30">
+                    <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-xs font-bold text-red-600">FS</div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">Felipe Soto</p>
+                      <p className="text-xs text-gray-400">Operaciones</p>
+                    </div>
+                    <span className="text-xs bg-red-100 text-red-600 px-2 py-1 rounded-full">Sin registro</span>
+                    <span className="text-xs text-red-500">✗ Ausente — sin justificación</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p className="text-center text-sm text-gray-400 mt-4">Panel de administración en tiempo real</p>
+        </div>
+      </section>
+
       {/* Social proof */}
       <section className="py-12 bg-gray-50 border-y border-gray-100">
         <div className="max-w-5xl mx-auto px-4 text-center">
