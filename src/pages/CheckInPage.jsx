@@ -421,9 +421,9 @@ export default function CheckInPage() {
   // ═══════════════════════════════════════════════════════════
   if (step === STEP_HOME) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[80vh] p-6 animate-fade-in">
+      <div className="flex flex-col items-center justify-center min-h-[80vh] p-6 animate-fade-in bg-gradient-to-br from-slate-50 via-white to-primary-50">
         <div className="text-center max-w-md">
-          <div className="w-28 h-28 bg-primary-50 rounded-full flex items-center justify-center mx-auto mb-8">
+          <div className="w-28 h-28 bg-gradient-to-br from-primary-100 to-primary-200 rounded-full flex items-center justify-center mx-auto mb-8 shadow-lg shadow-primary-100">
             <Fingerprint className="w-16 h-16 text-primary-600" />
           </div>
 
@@ -435,8 +435,8 @@ export default function CheckInPage() {
           {modelsLoaded && faceMatcher ? (
             <button
               onClick={startScanning}
-              className="w-full py-5 bg-primary-600 hover:bg-primary-700 text-white rounded-2xl
-                         font-bold text-xl shadow-xl shadow-primary-200 transition-all active:scale-95
+              className="w-full py-5 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white rounded-2xl
+                         font-bold text-xl shadow-xl shadow-primary-200/50 transition-all active:scale-95 hover:scale-[1.02]
                          flex items-center justify-center gap-3"
             >
               <Scan className="w-7 h-7" />
@@ -444,7 +444,7 @@ export default function CheckInPage() {
             </button>
           ) : modelsLoaded && !faceMatcher && !loadingDescriptors ? (
             <div className="p-4 bg-amber-50 rounded-2xl border border-amber-200">
-              <p className="text-amber-700 font-medium">⚠️ No hay colaboradores con foto registrada</p>
+              <p className="text-amber-700 font-medium">No hay colaboradores con foto registrada</p>
               <p className="text-amber-600 text-sm mt-1">Contacta al administrador</p>
             </div>
           ) : (
@@ -471,18 +471,18 @@ export default function CheckInPage() {
   // ═══════════════════════════════════════════════════════════
   if (step === STEP_SCANNING) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[80vh] p-6 animate-fade-in">
+      <div className="flex flex-col items-center justify-center min-h-[80vh] p-6 animate-fade-in bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900">
         <div className="w-full max-w-xl">
           {/* Instruction */}
           <div className="text-center mb-5">
-            <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-50 text-emerald-700 rounded-full font-medium">
-              <div className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse" />
+            <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-500/10 backdrop-blur-sm text-emerald-400 rounded-full font-medium border border-emerald-500/20">
+              <div className="w-2.5 h-2.5 bg-emerald-400 rounded-full animate-pulse" />
               Buscando tu rostro...
             </div>
           </div>
 
           {/* Camera */}
-          <div className="relative rounded-3xl overflow-hidden bg-black shadow-2xl">
+          <div className="relative rounded-3xl overflow-hidden bg-black shadow-2xl ring-1 ring-white/10">
             <Webcam
               ref={webcamRef}
               audio={false}
@@ -492,25 +492,28 @@ export default function CheckInPage() {
               mirrored={true}
             />
 
-            {/* Corner guides */}
+            {/* Corner guides with glow */}
             <div className="absolute inset-0 pointer-events-none">
-              <div className="absolute top-6 left-6 w-16 h-16 border-t-4 border-l-4 border-white/70 rounded-tl-xl" />
-              <div className="absolute top-6 right-6 w-16 h-16 border-t-4 border-r-4 border-white/70 rounded-tr-xl" />
-              <div className="absolute bottom-6 left-6 w-16 h-16 border-b-4 border-l-4 border-white/70 rounded-bl-xl" />
-              <div className="absolute bottom-6 right-6 w-16 h-16 border-b-4 border-r-4 border-white/70 rounded-br-xl" />
+              <div className="absolute top-6 left-6 w-16 h-16 border-t-4 border-l-4 border-primary-400/80 rounded-tl-xl" />
+              <div className="absolute top-6 right-6 w-16 h-16 border-t-4 border-r-4 border-primary-400/80 rounded-tr-xl" />
+              <div className="absolute bottom-6 left-6 w-16 h-16 border-b-4 border-l-4 border-primary-400/80 rounded-bl-xl" />
+              <div className="absolute bottom-6 right-6 w-16 h-16 border-b-4 border-r-4 border-primary-400/80 rounded-br-xl" />
             </div>
 
-            <div className="absolute top-4 left-4 bg-red-600 text-white text-xs px-3 py-1.5 rounded-full flex items-center gap-1.5">
+            {/* Scan line animation */}
+            <div className="absolute inset-x-8 top-0 h-0.5 bg-gradient-to-r from-transparent via-primary-400 to-transparent animate-pulse opacity-60" style={{top: '50%'}} />
+
+            <div className="absolute top-4 left-4 bg-red-500/90 backdrop-blur-sm text-white text-xs px-3 py-1.5 rounded-full flex items-center gap-1.5">
               <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
               EN VIVO
             </div>
 
-            <div className="absolute bottom-5 left-1/2 -translate-x-1/2 bg-black/70 backdrop-blur-sm text-white px-6 py-3 rounded-full text-base font-medium">
-              📷 Acércate a la cámara
+            <div className="absolute bottom-5 left-1/2 -translate-x-1/2 bg-white/10 backdrop-blur-md text-white px-6 py-3 rounded-full text-base font-medium border border-white/20">
+              Acércate a la cámara
             </div>
           </div>
 
-          <button onClick={cancelRecognition} className="w-full mt-5 py-3 text-gray-400 hover:text-gray-600 text-sm">
+          <button onClick={cancelRecognition} className="w-full mt-5 py-3 text-gray-400 hover:text-white text-sm transition-colors">
             ← Volver al inicio
           </button>
         </div>
