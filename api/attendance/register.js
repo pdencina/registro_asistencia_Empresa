@@ -85,44 +85,87 @@ async function sendAttendanceEmail(apiKey, employee, type, timestamp) {
 
   const isEntry = type === 'entry';
   const subject = isEntry
-    ? `✅ Ingreso registrado — ${timeStr}`
-    : `👋 Salida registrada — ${timeStr}`;
+    ? `Ingreso registrado — ${timeStr} hrs`
+    : `Salida registrada — ${timeStr} hrs`;
 
-  const color = isEntry ? '#10b981' : '#f97316';
-  const icon = isEntry ? '✅' : '👋';
   const typeLabel = isEntry ? 'Ingreso' : 'Salida';
-  const message = isEntry
-    ? 'Tu ingreso ha sido registrado correctamente.'
-    : 'Tu salida ha sido registrada correctamente.';
+  const accentColor = isEntry ? '#2563eb' : '#0f172a';
+  const badgeBg = isEntry ? '#eff6ff' : '#f8fafc';
+  const badgeColor = isEntry ? '#2563eb' : '#334155';
 
   const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'notificaciones@flexio.cl';
 
   const html = `
 <!DOCTYPE html>
-<html><head><meta charset="utf-8"></head>
-<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f5;">
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f1f5f9;">
   <table width="100%" cellpadding="0" cellspacing="0" style="padding:40px 20px;">
     <tr><td align="center">
-      <table width="480" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 6px rgba(0,0,0,0.05);">
-        <tr><td style="background:${color};padding:30px;text-align:center;">
-          <p style="font-size:36px;margin:0;">${icon}</p>
-          <h1 style="color:#ffffff;font-size:20px;margin:8px 0 0 0;">${typeLabel} Registrado</h1>
-        </td></tr>
-        <tr><td style="padding:30px;">
-          <p style="font-size:16px;color:#374151;margin:0 0 15px 0;">
-            Hola <strong>${employee.first_name}</strong>, ${message}
-          </p>
-          <table width="100%" style="background:#f9fafb;border-radius:10px;padding:15px;">
-            <tr><td style="padding:12px;">
-              <p style="margin:6px 0;font-size:14px;color:#6b7280;">Hora: <strong style="color:#111827;">${timeStr} hrs</strong></p>
-              <p style="margin:6px 0;font-size:14px;color:#6b7280;">Fecha: <strong style="color:#111827;">${dateStr}</strong></p>
-              <p style="margin:6px 0;font-size:14px;color:#6b7280;">Tipo: <strong style="color:#111827;">${typeLabel}</strong></p>
-            </td></tr>
+      <table width="500" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;">
+        
+        <!-- Header con marca -->
+        <tr><td style="padding:24px 32px;border-bottom:1px solid #f1f5f9;">
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+              <td><strong style="font-size:18px;color:#0f172a;">flex</strong><strong style="font-size:18px;color:#2563eb;">io</strong></td>
+              <td align="right"><span style="font-size:12px;color:#94a3b8;">Control de Asistencia</span></td>
+            </tr>
           </table>
         </td></tr>
-        <tr><td style="padding:15px 30px;border-top:1px solid #e5e7eb;text-align:center;">
-          <p style="font-size:11px;color:#9ca3af;margin:0;">Flexio · Control de Asistencia</p>
+
+        <!-- Contenido -->
+        <tr><td style="padding:32px;">
+          <!-- Badge tipo -->
+          <div style="margin-bottom:24px;">
+            <span style="display:inline-block;background:${badgeBg};color:${badgeColor};font-size:13px;font-weight:600;padding:6px 14px;border-radius:6px;border:1px solid ${isEntry ? '#bfdbfe' : '#e2e8f0'};">
+              ${typeLabel}
+            </span>
+          </div>
+
+          <p style="font-size:15px;color:#374151;margin:0 0 6px 0;">
+            Hola <strong>${employee.first_name}</strong>,
+          </p>
+          <p style="font-size:15px;color:#374151;margin:0 0 24px 0;">
+            Tu ${typeLabel.toLowerCase()} ha sido registrado correctamente.
+          </p>
+
+          <!-- Datos del registro -->
+          <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;">
+            <tr>
+              <td style="padding:20px 24px;">
+                <table width="100%" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="padding:8px 0;border-bottom:1px solid #e2e8f0;">
+                      <span style="font-size:12px;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">Hora</span><br>
+                      <strong style="font-size:20px;color:#0f172a;">${timeStr} hrs</strong>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:12px 0 8px 0;">
+                      <span style="font-size:12px;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">Fecha</span><br>
+                      <strong style="font-size:14px;color:#0f172a;">${dateStr}</strong>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+
+          <p style="font-size:12px;color:#94a3b8;margin:24px 0 0 0;">
+            Este es un registro automático. Si no reconoces esta actividad, contacta a tu administrador.
+          </p>
         </td></tr>
+
+        <!-- Footer -->
+        <tr><td style="padding:16px 32px;background:#f8fafc;border-top:1px solid #e2e8f0;">
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+              <td><span style="font-size:11px;color:#94a3b8;">Flexio · flexio.cl</span></td>
+              <td align="right"><span style="font-size:11px;color:#cbd5e1;">No responder a este correo</span></td>
+            </tr>
+          </table>
+        </td></tr>
+
       </table>
     </td></tr>
   </table>
