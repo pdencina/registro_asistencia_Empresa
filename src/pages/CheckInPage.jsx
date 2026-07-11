@@ -257,16 +257,7 @@ export default function CheckInPage() {
         photo_snapshot,
       });
 
-      // Send email notification (non-blocking)
-      fetch('/api/notifications/send-email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          employee_id: recognizedEmployee.id,
-          type,
-          timestamp: new Date().toISOString(),
-        }),
-      }).catch(() => {});
+      // Email notification is now sent automatically by the register endpoint
 
       // Save early exit info if applicable
       if (earlyExitData) {
