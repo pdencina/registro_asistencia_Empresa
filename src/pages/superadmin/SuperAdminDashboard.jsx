@@ -7,6 +7,7 @@ export default function SuperAdminDashboard({ onLogout }) {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [showCreate, setShowCreate] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(null);
   const [stats, setStats] = useState({ total_tenants: 0, total_employees: 0, active_tenants: 0 });
 
   useEffect(() => { loadTenants(); }, []);
@@ -149,13 +150,20 @@ export default function SuperAdminDashboard({ onLogout }) {
                       {new Date(tenant.created_at).toLocaleDateString('es-CL')}
                     </td>
                     <td className="px-5 py-4">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1">
                         <button
                           onClick={() => toggleTenant(tenant.id, tenant.active)}
                           className={`p-1.5 rounded-lg transition-all ${tenant.active ? 'text-emerald-400 hover:bg-emerald-500/10' : 'text-gray-500 hover:bg-gray-600/30'}`}
                           title={tenant.active ? 'Pausar' : 'Activar'}
                         >
                           {tenant.active ? <ToggleRight className="w-5 h-5" /> : <ToggleLeft className="w-5 h-5" />}
+                        </button>
+                        <button
+                          onClick={() => setConfirmDelete(tenant)}
+                          className="p-1.5 rounded-lg text-gray-500 hover:text-red-400 hover:bg-red-500/10 transition-all"
+                          title="Eliminar empresa"
+                        >
+                          <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
                     </td>
@@ -173,6 +181,47 @@ export default function SuperAdminDashboard({ onLogout }) {
           onClose={() => setShowCreate(false)}
           onCreated={() => { setShowCreate(false); loadTenants(); }}
         />
+      )}
+
+      {/* Modal confirmar eliminación */}
+      {confirmDelete && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-800 rounded-2xl p-6 w-full max-w-sm border border-gray-700 text-center">
+            <div className="w-14 h-14 bg-red-500/20 rounded-xl flex items-center justify-center mx-auto mb-4">
+              <Trash2 className="w-7 h-7 text-red-400" />
+            </div>
+            <h3 className="text-lg font-bold text-white mb-2">Eliminar empresa</h3>
+            <p className="text-sm text-gray-400 mb-1">
+              ¿Estás seguro de eliminar <strong className="text-white">{confirmDelete.name}</strong>?
+            </p>
+            <p className="text-xs text-red-400 mb-6">
+              Se eliminarán todos los colaboradores, registros y datos asociados. Esta acción no se puede deshacer.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setConfirmDelete(null)}
+                className="flex-1 py-3 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-xl font-medium transition-all"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={async () => {
+                  const token = sessionStorage.getItem('superadmin_token');
+                  await fetch('/api/superadmin/tenants', {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: confirmDelete.id }),
+                  });
+                  setConfirmDelete(null);
+                  loadTenants();
+                }}
+                className="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium transition-all"
+              >
+                Eliminar
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
