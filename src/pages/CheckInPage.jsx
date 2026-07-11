@@ -579,7 +579,7 @@ export default function CheckInPage() {
     const alreadyExit = employeeStatus?.status === 'exited';
 
     return (
-      <div className="flex flex-col items-center justify-center min-h-[80vh] p-6 animate-fade-in">
+      <div className="flex flex-col items-center justify-center min-h-[80vh] p-6 bg-gray-50">
         {/* Webcam oculta para snapshot */}
         <Webcam
           ref={webcamRef}
@@ -590,47 +590,42 @@ export default function CheckInPage() {
           mirrored={true}
         />
 
-        <div className="w-full max-w-md">
-          {/* Saludo */}
+        <div className="w-full max-w-sm">
+          {/* Avatar y saludo */}
           <div className="text-center mb-8">
-            <div className="w-20 h-20 rounded-full bg-gray-200 overflow-hidden mx-auto mb-4 ring-4 ring-emerald-200">
+            <div className="w-24 h-24 rounded-full bg-gray-200 overflow-hidden mx-auto mb-5 ring-[3px] ring-primary-200 shadow-lg">
               {recognizedEmployee.photo_url ? (
                 <img src={recognizedEmployee.photo_url} alt="" className="w-full h-full object-cover" />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-gray-400 font-bold text-2xl">
+                <div className="w-full h-full flex items-center justify-center text-gray-400 font-bold text-2xl bg-gray-100">
                   {recognizedEmployee.first_name[0]}{recognizedEmployee.last_name[0]}
                 </div>
               )}
             </div>
-            <p className="text-2xl font-bold text-gray-900 mb-1">
-              Hola, {recognizedEmployee.first_name} 👋
+            <h2 className="text-2xl font-bold text-gray-900 mb-1">
+              {recognizedEmployee.first_name} {recognizedEmployee.last_name}
+            </h2>
+            <p className="text-sm text-gray-400">
+              {recognizedEmployee.department || ''}{recognizedEmployee.department && recognizedEmployee.position ? ' · ' : ''}{recognizedEmployee.position || ''}
             </p>
-            <p className="text-gray-500">¿Qué deseas registrar?</p>
 
             {/* Status info */}
             {employeeStatus?.status === 'present' && employeeStatus.last_record && (
-              <p className="text-sm text-emerald-600 mt-3 bg-emerald-50 inline-block px-3 py-1.5 rounded-full">
-                ✓ Ingresaste hoy a las {new Date(employeeStatus.last_record.timestamp).toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' })} hrs
+              <p className="text-xs text-primary-600 mt-4 bg-primary-50 inline-block px-3 py-1.5 rounded-full border border-primary-100">
+                Ingreso registrado a las {new Date(employeeStatus.last_record.timestamp).toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' })} hrs
               </p>
             )}
             {employeeStatus?.status === 'exited' && (
-              <p className="text-sm text-orange-600 mt-3 bg-orange-50 inline-block px-3 py-1.5 rounded-full">
-                ✓ Ya completaste tu jornada hoy — volviendo al inicio...
+              <p className="text-xs text-gray-500 mt-4 bg-gray-100 inline-block px-3 py-1.5 rounded-full">
+                Jornada completada — volviendo al inicio...
               </p>
             )}
             {/* Tardiness alert */}
             {employeeTardiness && employeeTardiness.tardy_count > 0 && (
-              <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-xl text-left">
+              <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-xl text-left">
                 <div className="flex items-center gap-2 text-amber-700 font-medium text-sm">
                   <AlertTriangle className="w-4 h-4" />
-                  Esta semana llevas {employeeTardiness.tardy_count} {employeeTardiness.tardy_count === 1 ? 'día' : 'días'} con atraso
-                </div>
-                <div className="mt-1 text-xs text-amber-600">
-                  {employeeTardiness.tardy_days.map(d => (
-                    <span key={d.date} className="inline-block mr-2">
-                      {d.entry_time} hrs ({d.late_minutes} min tarde)
-                    </span>
-                  ))}
+                  {employeeTardiness.tardy_count} {employeeTardiness.tardy_count === 1 ? 'atraso' : 'atrasos'} esta semana
                 </div>
               </div>
             )}
@@ -638,42 +633,39 @@ export default function CheckInPage() {
 
           {/* Error message */}
           {errorMsg && (
-            <div className="mb-5 p-4 bg-red-50 border border-red-200 rounded-2xl text-center">
-              <p className="text-red-700 font-medium">{errorMsg}</p>
+            <div className="mb-5 p-4 bg-red-50 border border-red-200 rounded-xl text-center">
+              <p className="text-red-700 text-sm font-medium">{errorMsg}</p>
             </div>
           )}
 
           {/* Botones */}
-          <div className="grid grid-cols-2 gap-5 mb-8">
+          <div className="space-y-3 mb-6">
             <button
               onClick={() => handleRegister('entry')}
               disabled={loading || alreadyEntry}
-              className={`flex flex-col items-center justify-center gap-4 py-12 rounded-3xl
-                         font-bold text-xl transition-all active:scale-95 disabled:opacity-40 disabled:active:scale-100
+              className={`w-full flex items-center justify-center gap-3 py-4 rounded-xl
+                         font-semibold text-base transition-all active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed
                          ${alreadyEntry 
-                           ? 'bg-gray-200 text-gray-400 border-4 border-gray-200 shadow-none cursor-not-allowed' 
-                           : 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-xl shadow-emerald-200 border-4 border-emerald-400'
+                           ? 'bg-gray-100 text-gray-400 border border-gray-200' 
+                           : 'bg-primary-600 hover:bg-primary-700 text-white shadow-lg shadow-primary-200/50'
                          }`}
             >
-              <LogIn className="w-14 h-14" />
-              <span>INGRESO</span>
-              {alreadyEntry && <span className="text-xs font-normal">Ya registrado</span>}
+              <LogIn className="w-5 h-5" />
+              {alreadyEntry ? 'Ingreso ya registrado' : 'Registrar ingreso'}
             </button>
 
             <button
               onClick={() => handleRegister('exit')}
               disabled={loading || alreadyExit || !alreadyEntry}
-              className={`flex flex-col items-center justify-center gap-4 py-12 rounded-3xl
-                         font-bold text-xl transition-all active:scale-95 disabled:opacity-40 disabled:active:scale-100
+              className={`w-full flex items-center justify-center gap-3 py-4 rounded-xl
+                         font-semibold text-base transition-all active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed
                          ${alreadyExit || !alreadyEntry
-                           ? 'bg-gray-200 text-gray-400 border-4 border-gray-200 shadow-none cursor-not-allowed' 
-                           : 'bg-orange-500 hover:bg-orange-600 text-white shadow-xl shadow-orange-200 border-4 border-orange-400'
+                           ? 'bg-gray-100 text-gray-400 border border-gray-200' 
+                           : 'bg-gray-900 hover:bg-gray-800 text-white shadow-lg shadow-gray-300/50'
                          }`}
             >
-              <LogOut className="w-14 h-14" />
-              <span>SALIDA</span>
-              {alreadyExit && <span className="text-xs font-normal">Ya registrado</span>}
-              {!alreadyEntry && !alreadyExit && <span className="text-xs font-normal">Primero ingresa</span>}
+              <LogOut className="w-5 h-5" />
+              {alreadyExit ? 'Salida ya registrada' : !alreadyEntry ? 'Primero registra ingreso' : 'Registrar salida'}
             </button>
           </div>
 
