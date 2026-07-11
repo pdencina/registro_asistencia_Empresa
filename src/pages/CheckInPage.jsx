@@ -462,49 +462,50 @@ export default function CheckInPage() {
   // ═══════════════════════════════════════════════════════════
   if (step === STEP_SCANNING) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[80vh] p-4 bg-black">
-        <div className="w-full max-w-lg">
-          {/* Status indicator */}
-          <div className="text-center mb-4">
-            <p className="text-sm text-primary-400 font-medium tracking-wide uppercase">Escaneando</p>
+      <div className="flex flex-col items-center justify-center min-h-[80vh] p-6 bg-gray-50">
+        <div className="w-full max-w-sm">
+          {/* Camera with oval mask */}
+          <div className="relative mx-auto" style={{width: '320px', height: '400px'}}>
+            {/* Video feed */}
+            <div className="absolute inset-0 rounded-[2rem] overflow-hidden bg-gray-200">
+              <Webcam
+                ref={webcamRef}
+                audio={false}
+                screenshotFormat="image/jpeg"
+                videoConstraints={{...videoConstraints, width: 480, height: 600}}
+                className="w-full h-full object-cover"
+                mirrored={true}
+              />
+            </div>
+
+            {/* Oval guide overlay */}
+            <div className="absolute inset-0 pointer-events-none">
+              <svg className="w-full h-full" viewBox="0 0 320 400" fill="none">
+                {/* Dark mask with oval cutout */}
+                <defs>
+                  <mask id="oval-mask">
+                    <rect width="320" height="400" fill="white"/>
+                    <ellipse cx="160" cy="185" rx="110" ry="140" fill="black"/>
+                  </mask>
+                </defs>
+                <rect width="320" height="400" fill="rgba(249,250,251,0.85)" mask="url(#oval-mask)" rx="32"/>
+                {/* Oval border */}
+                <ellipse cx="160" cy="185" rx="110" ry="140" stroke="#2563eb" strokeWidth="2.5" fill="none" opacity="0.6"/>
+              </svg>
+            </div>
           </div>
 
-          {/* Camera container */}
-          <div className="relative rounded-2xl overflow-hidden aspect-square max-w-md mx-auto">
-            <Webcam
-              ref={webcamRef}
-              audio={false}
-              screenshotFormat="image/jpeg"
-              videoConstraints={{...videoConstraints, width: 480, height: 480}}
-              className="w-full h-full object-cover"
-              mirrored={true}
-            />
-
-            {/* Overlay gradient */}
-            <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/30 via-transparent to-black/30" />
-
-            {/* Animated scan corners */}
-            <div className="absolute inset-8 pointer-events-none">
-              <div className="absolute top-0 left-0 w-12 h-12 border-t-2 border-l-2 border-primary-400 rounded-tl-lg shadow-[0_0_8px_rgba(37,99,235,0.5)]" />
-              <div className="absolute top-0 right-0 w-12 h-12 border-t-2 border-r-2 border-primary-400 rounded-tr-lg shadow-[0_0_8px_rgba(37,99,235,0.5)]" />
-              <div className="absolute bottom-0 left-0 w-12 h-12 border-b-2 border-l-2 border-primary-400 rounded-bl-lg shadow-[0_0_8px_rgba(37,99,235,0.5)]" />
-              <div className="absolute bottom-0 right-0 w-12 h-12 border-b-2 border-r-2 border-primary-400 rounded-br-lg shadow-[0_0_8px_rgba(37,99,235,0.5)]" />
+          {/* Instructions below camera */}
+          <div className="text-center mt-6">
+            <div className="inline-flex items-center gap-2 mb-2">
+              <div className="w-2 h-2 bg-primary-500 rounded-full animate-pulse" />
+              <p className="text-sm font-medium text-gray-700">Posiciona tu rostro dentro del óvalo</p>
             </div>
-
-            {/* Scan line */}
-            <div className="absolute inset-x-10 h-px bg-gradient-to-r from-transparent via-primary-400 to-transparent animate-pulse" style={{top: '50%', boxShadow: '0 0 12px 2px rgba(37,99,235,0.4)'}} />
-
-            {/* Bottom label */}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2">
-              <div className="flex items-center gap-2 bg-black/60 backdrop-blur-md px-4 py-2 rounded-full border border-white/10">
-                <div className="w-2 h-2 bg-primary-400 rounded-full animate-pulse" />
-                <span className="text-white/90 text-sm font-medium">Buscando rostro</span>
-              </div>
-            </div>
+            <p className="text-xs text-gray-400">Mantenlo centrado y mira directamente a la cámara</p>
           </div>
 
           {/* Cancel */}
-          <button onClick={cancelRecognition} className="w-full mt-6 py-3 text-gray-500 hover:text-white text-sm transition-colors">
+          <button onClick={cancelRecognition} className="w-full mt-8 py-3 text-gray-400 hover:text-gray-600 text-sm transition-colors">
             Cancelar
           </button>
         </div>
