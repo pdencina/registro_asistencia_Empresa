@@ -215,7 +215,7 @@ export default function LandingPage() {
               Ver funcionalidades
             </a>
           </div>
-          <p className="mt-4 text-sm text-gray-400">15 días gratis · Sin tarjeta de crédito · Cancela cuando quieras</p>
+          <p className="mt-4 text-sm text-gray-400">15 días de prueba sin costo · Sin permanencia mínima</p>
         </div>
       </section>
 
@@ -405,7 +405,7 @@ export default function LandingPage() {
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
               Planes transparentes, sin letra chica
             </h2>
-            <p className="text-lg text-gray-500 mb-8">Todos los planes incluyen 15 días de prueba gratis</p>
+            <p className="text-lg text-gray-500 mb-8">Todos los planes incluyen 15 días de evaluación sin costo</p>
 
             {/* Billing toggle */}
             <div className="inline-flex items-center gap-3 bg-gray-100 rounded-xl p-1">
@@ -477,7 +477,7 @@ export default function LandingPage() {
             ))}
           </div>
           <p className="text-center text-sm text-gray-400 mt-8">
-            Precios en CLP (pesos chilenos) + IVA. Cancela en cualquier momento.
+            Precios en CLP (pesos chilenos) + IVA. Sin permanencia mínima.
           </p>
         </div>
       </section>
