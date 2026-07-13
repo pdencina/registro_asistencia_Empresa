@@ -106,29 +106,44 @@ export default function LandingPage() {
       description: 'Registro de asistencia mediante IA facial. Sin contacto, sin tarjetas, sin fraudes.',
     },
     {
-      icon: <Clock className="w-6 h-6" />,
-      title: 'Control de Horarios',
-      description: 'Gestiona turnos, atrasos y salidas anticipadas. Alertas automáticas.',
+      icon: <Smartphone className="w-6 h-6" />,
+      title: 'Marcaje Móvil con GPS',
+      description: 'Tu equipo en terreno marca desde su celular con selfie y geolocalización en tiempo real.',
     },
     {
-      icon: <MapPin className="w-6 h-6" />,
-      title: 'Geolocalización',
-      description: 'Verifica que el registro se realice desde la ubicación autorizada.',
+      icon: <Clock className="w-6 h-6" />,
+      title: 'Cálculo de Horas Extra',
+      description: 'El sistema calcula automáticamente las horas extra de cada colaborador. Exporta a Excel.',
     },
     {
       icon: <BarChart3 className="w-6 h-6" />,
       title: 'Reportes en Tiempo Real',
-      description: 'Dashboard con métricas de asistencia, atrasos y ausencias al instante.',
+      description: 'Dashboard con métricas de asistencia, atrasos, ausencias y salidas anticipadas al instante.',
+    },
+    {
+      icon: <MapPin className="w-6 h-6" />,
+      title: 'Geolocalización',
+      description: 'Verifica que el registro se realice desde la ubicación autorizada. Coordenadas GPS en cada marcaje.',
     },
     {
       icon: <Shield className="w-6 h-6" />,
       title: 'Cumplimiento Legal',
-      description: 'Cumple con la Ley 21.719 de datos personales y biométricos en Chile.',
+      description: 'Cumple con la Ley 21.719. Consentimiento biométrico integrado. Datos encriptados.',
+    },
+    {
+      icon: <Users className="w-6 h-6" />,
+      title: 'Gestión de Turnos',
+      description: 'Configura horarios, tolerancias y turnos rotativos. Control automático de atrasos.',
+    },
+    {
+      icon: <Clock className="w-6 h-6" />,
+      title: 'Notificaciones Automáticas',
+      description: 'Cada colaborador recibe un comprobante por email con hora, fecha y ubicación del registro.',
     },
     {
       icon: <Smartphone className="w-6 h-6" />,
       title: 'Multi-dispositivo',
-      description: 'Funciona en iPads, tablets Android, celulares y cualquier dispositivo con cámara.',
+      description: 'Funciona en tablets, celulares y cualquier dispositivo con cámara. Se instala como app.',
     },
   ];
 
