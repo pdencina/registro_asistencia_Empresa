@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { UserPlus, Edit2, Trash2, Camera, X, Search, Power, PowerOff, Shield } from 'lucide-react';
+import { UserPlus, Edit2, Trash2, Camera, X, Search, Power, PowerOff, Shield, KeyRound } from 'lucide-react';
 import Webcam from 'react-webcam';
 import { employeesApi } from '../api';
 
@@ -304,9 +304,10 @@ export default function EmployeesPage() {
     setNewEmployeePhoto(employee);
   }
 
+  const [pinAssigned, setPinAssigned] = useState(null); // { pin, name, url }
+
   async function handleConsentDeclined() {
     if (!showConsent) return;
-    // Generate a random 4-digit PIN
     const pin = String(Math.floor(1000 + Math.random() * 9000));
     const tenantSlug = sessionStorage.getItem('admin_tenant') || '';
     try {
@@ -328,9 +329,14 @@ export default function EmployeesPage() {
         }).catch(() => {});
       }
 
-      alert(`PIN asignado: ${pin}\n\nEl colaborador ${showConsent.first_name} ${showConsent.last_name} podrá marcar asistencia en:\nflexio.cl/pin/${tenantSlug}\n\n${showConsent.email ? 'Se envió un email con esta información.' : 'Entrega este PIN al colaborador.'}`);
+      setPinAssigned({
+        pin,
+        name: `${showConsent.first_name} ${showConsent.last_name}`,
+        url: `flexio.cl/pin/${tenantSlug}`,
+        hasEmail: !!showConsent.email,
+      });
     } catch (e) {
-      alert('Error al asignar PIN. Intenta nuevamente.');
+      setError('Error al asignar PIN. Intenta nuevamente.');
     }
     setShowConsent(null);
     setConsentAccepted(false);
@@ -690,6 +696,42 @@ export default function EmployeesPage() {
                 Se habilitará un PIN personal para registrar asistencia sin reconocimiento facial.
               </p>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal PIN Asignado */}
+      {pinAssigned && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-8 w-full max-w-sm text-center shadow-2xl">
+            <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-5">
+              <KeyRound className="w-8 h-8 text-primary-600" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">PIN asignado correctamente</h3>
+            <p className="text-sm text-gray-500 mb-5">Para: <strong>{pinAssigned.name}</strong></p>
+
+            <div className="bg-gray-50 border border-gray-200 rounded-xl p-5 mb-5">
+              <p className="text-xs text-gray-400 uppercase tracking-wider mb-2">PIN personal</p>
+              <p className="text-4xl font-bold text-primary-600 tracking-[0.3em] font-mono">{pinAssigned.pin}</p>
+            </div>
+
+            <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-5 text-left">
+              <p className="text-xs text-gray-400 mb-1">URL de marcaje</p>
+              <p className="text-sm font-medium text-primary-600">{pinAssigned.url}</p>
+            </div>
+
+            {pinAssigned.hasEmail && (
+              <p className="text-sm text-emerald-600 bg-emerald-50 px-3 py-2 rounded-lg mb-5">
+                Se envió esta información al email del colaborador.
+              </p>
+            )}
+
+            <button
+              onClick={() => setPinAssigned(null)}
+              className="w-full py-3 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 transition-all"
+            >
+              Entendido
+            </button>
           </div>
         </div>
       )}
