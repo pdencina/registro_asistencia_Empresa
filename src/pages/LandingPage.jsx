@@ -241,6 +241,7 @@ export default function LandingPage() {
               <a href="#features" className="text-sm text-gray-600 hover:text-primary-600 transition-colors">Funcionalidades</a>
               <a href="#pricing" className="text-sm text-gray-600 hover:text-primary-600 transition-colors">Precios</a>
               <a href="#legal" className="text-sm text-gray-600 hover:text-primary-600 transition-colors">Seguridad</a>
+              <a href="/mi" className="text-sm text-gray-600 hover:text-primary-600 transition-colors">Marcar asistencia</a>
               <a href="/login" className="text-sm text-gray-600 hover:text-primary-600 transition-colors">Iniciar sesión</a>
               <button onClick={() => setShowQuote(true)} className="px-5 py-2.5 bg-primary-600 text-white text-sm font-medium rounded-xl hover:bg-primary-700 transition-colors">
                 Cotizar
