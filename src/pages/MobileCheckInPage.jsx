@@ -57,7 +57,8 @@ export default function MobileCheckInPage() {
     setLoading(true);
 
     try {
-      const employees = await employeesApi.getAll({ search: rut.replace(/[.\-]/g, '') });
+      // Buscar con el RUT formateado (como está en la BD)
+      const employees = await employeesApi.getAll({ search: rut });
       const found = employees.find(emp =>
         emp.rut.replace(/[.\-\s]/g, '').toLowerCase() === rut.replace(/[.\-\s]/g, '').toLowerCase()
       );
