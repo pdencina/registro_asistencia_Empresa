@@ -60,9 +60,10 @@ export default function LandingPage() {
     let digits = value.replace(/\D/g, '');
     // Si empieza con 56, ya tiene código país
     if (digits.startsWith('56')) digits = digits.slice(2);
-    // Si empieza con 9 y tiene 9 dígitos
+    // Limitar a 9 dígitos
     if (digits.length > 9) digits = digits.slice(0, 9);
-    // Formatear
+    // Formatear +56 X XXXX XXXX
+    if (digits.length === 0) return '';
     if (digits.length <= 1) return `+56 ${digits}`;
     if (digits.length <= 5) return `+56 ${digits.slice(0, 1)} ${digits.slice(1)}`;
     return `+56 ${digits.slice(0, 1)} ${digits.slice(1, 5)} ${digits.slice(5, 9)}`;
@@ -683,7 +684,7 @@ export default function LandingPage() {
                       <input
                         type="text"
                         value={quoteForm.name}
-                        onChange={e => setQuoteForm({...quoteForm, name: e.target.value})}
+                        onChange={e => setQuoteForm({...quoteForm, name: e.target.value.replace(/[^a-zA-ZáéíóúñÁÉÍÓÚÑ\s]/g, '')})}
                         placeholder="Nombre completo *"
                         required
                         className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none"
@@ -703,7 +704,7 @@ export default function LandingPage() {
                   <input
                     type="email"
                     value={quoteForm.email}
-                    onChange={e => setQuoteForm({...quoteForm, email: e.target.value})}
+                    onChange={e => setQuoteForm({...quoteForm, email: e.target.value.toLowerCase().trim()})}
                     placeholder="Correo corporativo *"
                     required
                     className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none"
@@ -712,7 +713,10 @@ export default function LandingPage() {
                     <input
                       type="tel"
                       value={quoteForm.phone}
-                      onChange={e => setQuoteForm({...quoteForm, phone: formatPhoneCL(e.target.value)})}
+                      onChange={e => {
+                        const onlyDigits = e.target.value.replace(/[^\d+\s]/g, '');
+                        setQuoteForm({...quoteForm, phone: formatPhoneCL(onlyDigits)});
+                      }}
                       placeholder="+56 9 1234 5678 *"
                       required
                       inputMode="numeric"
