@@ -36,11 +36,21 @@ module.exports = async function handler(req, res) {
       WHERE REPLACE(REPLACE(e.rut, '.', ''), '-', '') = $1
         AND e.active = true
         AND t.active = true
-      LIMIT 1
     `, [cleanRut]);
 
     if (results.length === 0) {
       return res.status(404).json({ error: 'RUT no encontrado. Verifica con tu administrador.' });
+    }
+
+    // Si hay más de una empresa, devolver opciones
+    if (results.length > 1) {
+      const options = results.map(r => ({
+        slug: r.slug,
+        tenant_name: r.tenant_name,
+        method: (r.personal_pin && !r.photo_url) ? 'pin' : 'mobile',
+        employee_name: `${r.first_name} ${r.last_name}`,
+      }));
+      return res.status(200).json({ multiple: true, options });
     }
 
     const employee = results[0];

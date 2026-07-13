@@ -6,6 +6,7 @@ export default function UniversalCheckInPage() {
   const [rut, setRut] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [options, setOptions] = useState(null);
   const navigate = useNavigate();
 
   function formatRut(value) {
@@ -39,11 +40,11 @@ export default function UniversalCheckInPage() {
       const data = await res.json();
 
       if (res.ok) {
-        // Redirigir según si tiene foto (facial) o PIN
-        if (data.method === 'pin') {
-          navigate(`/pin/${data.slug}`);
+        // Si hay múltiples empresas, mostrar selector
+        if (data.multiple && data.options) {
+          setOptions(data.options);
         } else {
-          navigate(`/marcar/${data.slug}`);
+          redirectToCheckin(data);
         }
       } else {
         setError(data.error || 'RUT no encontrado en el sistema');
@@ -53,6 +54,46 @@ export default function UniversalCheckInPage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  function redirectToCheckin(data) {
+    if (data.method === 'pin') {
+      navigate(`/pin/${data.slug}`);
+    } else {
+      navigate(`/marcar/${data.slug}`);
+    }
+  }
+
+  // Si hay múltiples empresas, mostrar selector
+  if (options) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-center">
+          <img src="/logo-flexio.svg" alt="Flexio" className="h-6" />
+        </header>
+        <div className="flex-1 flex items-center justify-center p-6">
+          <div className="w-full max-w-sm text-center">
+            <h2 className="text-xl font-bold text-gray-900 mb-2">Selecciona tu empresa</h2>
+            <p className="text-sm text-gray-500 mb-6">Tu RUT está asociado a más de una empresa</p>
+            <div className="space-y-3">
+              {options.map((opt, i) => (
+                <button
+                  key={i}
+                  onClick={() => redirectToCheckin(opt)}
+                  className="w-full p-4 bg-white border border-gray-200 rounded-xl text-left hover:border-primary-300 hover:shadow-md transition-all"
+                >
+                  <p className="font-semibold text-gray-900">{opt.tenant_name}</p>
+                  <p className="text-xs text-gray-400 mt-1">flexio.cl/{opt.method === 'pin' ? 'pin' : 'marcar'}/{opt.slug}</p>
+                </button>
+              ))}
+            </div>
+            <button onClick={() => { setOptions(null); setRut(''); }} className="mt-4 text-sm text-gray-400 hover:text-gray-600">
+              ← Volver
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
