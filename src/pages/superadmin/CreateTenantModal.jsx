@@ -1,6 +1,41 @@
 import { useState } from 'react';
 import { X, Building2, CheckCircle } from 'lucide-react';
 
+function formatRutCL(value) {
+  let clean = value.replace(/[^0-9kK]/g, '').toUpperCase();
+  if (clean.length === 0) return '';
+  let dv = clean.slice(-1);
+  let body = clean.slice(0, -1);
+  if (body.length === 0) return clean;
+  let formatted = '';
+  let count = 0;
+  for (let i = body.length - 1; i >= 0; i--) {
+    formatted = body[i] + formatted;
+    count++;
+    if (count === 3 && i > 0) { formatted = '.' + formatted; count = 0; }
+  }
+  return formatted + '-' + dv;
+}
+
+function validateRut(rut) {
+  const clean = rut.replace(/[.\-]/g, '').toUpperCase();
+  if (clean.length < 2) return false;
+  const body = clean.slice(0, -1);
+  const dv = clean.slice(-1);
+  if (!/^\d+$/.test(body)) return false;
+  let sum = 0, multiplier = 2;
+  for (let i = body.length - 1; i >= 0; i--) {
+    sum += parseInt(body[i]) * multiplier;
+    multiplier = multiplier === 7 ? 2 : multiplier + 1;
+  }
+  const remainder = 11 - (sum % 11);
+  let expectedDv;
+  if (remainder === 11) expectedDv = '0';
+  else if (remainder === 10) expectedDv = 'K';
+  else expectedDv = String(remainder);
+  return dv === expectedDv;
+}
+
 export default function CreateTenantModal({ onClose, onCreated }) {
   const [form, setForm] = useState({
     name: '',
@@ -13,6 +48,7 @@ export default function CreateTenantModal({ onClose, onCreated }) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(null);
+  const [rutError, setRutError] = useState('');
 
   function handleSlug(name) {
     return name
@@ -134,10 +170,12 @@ export default function CreateTenantModal({ onClose, onCreated }) {
             <label className="block text-sm font-medium text-gray-300 mb-1">RUT empresa</label>
             <input
               value={form.rut_empresa}
-              onChange={(e) => setForm({ ...form, rut_empresa: e.target.value })}
+              onChange={(e) => { setForm({ ...form, rut_empresa: formatRutCL(e.target.value) }); setRutError(''); }}
+              onBlur={() => { if (form.rut_empresa && !validateRut(form.rut_empresa)) setRutError('RUT inválido'); }}
               placeholder="76.123.456-7"
-              className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-primary-500 outline-none"
+              className={`w-full px-4 py-3 bg-gray-700 border rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-primary-500 outline-none ${rutError ? 'border-red-500' : 'border-gray-600'}`}
             />
+            {rutError && <p className="text-xs text-red-400 mt-1">{rutError}</p>}
           </div>
 
           <div>

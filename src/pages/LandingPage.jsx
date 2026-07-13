@@ -8,9 +8,10 @@ export default function LandingPage() {
   const [contactLoading, setContactLoading] = useState(false);
   const [contactSent, setContactSent] = useState(false);
   const [showQuote, setShowQuote] = useState(false);
-  const [quoteForm, setQuoteForm] = useState({ name: '', email: '', company: '', phone: '', employees: '', plan: '' });
+  const [quoteForm, setQuoteForm] = useState({ name: '', email: '', company: '', phone: '', employees: '', plan: '', rut: '' });
   const [quoteLoading, setQuoteLoading] = useState(false);
   const [quoteSent, setQuoteSent] = useState(false);
+  const [quoteRutError, setQuoteRutError] = useState('');
 
   async function handleContactSubmit(e) {
     e.preventDefault();
@@ -31,6 +32,10 @@ export default function LandingPage() {
 
   async function handleQuoteSubmit(e) {
     e.preventDefault();
+    // Validar RUT si fue ingresado
+    if (quoteForm.rut && !validateRut(quoteForm.rut)) {
+      return;
+    }
     setQuoteLoading(true);
     try {
       await fetch('/api/contact', {
@@ -41,7 +46,7 @@ export default function LandingPage() {
           company: quoteForm.company,
           email: quoteForm.email,
           phone: quoteForm.phone,
-          message: `COTIZACIÓN\nPlan de interés: ${quoteForm.plan || 'No especificado'}\nN° colaboradores: ${quoteForm.employees}\n`,
+          message: `COTIZACIÓN\nPlan de interés: ${quoteForm.plan || 'No especificado'}\nN° colaboradores: ${quoteForm.employees}\nRUT empresa: ${quoteForm.rut || 'No indicado'}`,
         }),
       });
       setQuoteSent(true);
@@ -49,6 +54,53 @@ export default function LandingPage() {
     } finally {
       setQuoteLoading(false);
     }
+  }
+
+  function formatPhoneCL(value) {
+    let digits = value.replace(/\D/g, '');
+    // Si empieza con 56, ya tiene código país
+    if (digits.startsWith('56')) digits = digits.slice(2);
+    // Si empieza con 9 y tiene 9 dígitos
+    if (digits.length > 9) digits = digits.slice(0, 9);
+    // Formatear
+    if (digits.length <= 1) return `+56 ${digits}`;
+    if (digits.length <= 5) return `+56 ${digits.slice(0, 1)} ${digits.slice(1)}`;
+    return `+56 ${digits.slice(0, 1)} ${digits.slice(1, 5)} ${digits.slice(5, 9)}`;
+  }
+
+  function formatRutCL(value) {
+    let clean = value.replace(/[^0-9kK]/g, '').toUpperCase();
+    if (clean.length === 0) return '';
+    let dv = clean.slice(-1);
+    let body = clean.slice(0, -1);
+    if (body.length === 0) return clean;
+    let formatted = '';
+    let count = 0;
+    for (let i = body.length - 1; i >= 0; i--) {
+      formatted = body[i] + formatted;
+      count++;
+      if (count === 3 && i > 0) { formatted = '.' + formatted; count = 0; }
+    }
+    return formatted + '-' + dv;
+  }
+
+  function validateRut(rut) {
+    const clean = rut.replace(/[.\-]/g, '').toUpperCase();
+    if (clean.length < 2) return false;
+    const body = clean.slice(0, -1);
+    const dv = clean.slice(-1);
+    if (!/^\d+$/.test(body)) return false;
+    let sum = 0, multiplier = 2;
+    for (let i = body.length - 1; i >= 0; i--) {
+      sum += parseInt(body[i]) * multiplier;
+      multiplier = multiplier === 7 ? 2 : multiplier + 1;
+    }
+    const remainder = 11 - (sum % 11);
+    let expectedDv;
+    if (remainder === 11) expectedDv = '0';
+    else if (remainder === 10) expectedDv = 'K';
+    else expectedDv = String(remainder);
+    return dv === expectedDv;
   } // monthly | annual
 
   const plans = [
@@ -609,7 +661,7 @@ export default function LandingPage() {
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-2">Cotización recibida</h3>
                 <p className="text-sm text-gray-500 mb-6">Te contactaremos a la brevedad con una propuesta personalizada.</p>
-                <button onClick={() => { setShowQuote(false); setQuoteSent(false); setQuoteForm({ name: '', email: '', company: '', phone: '', employees: '', plan: '' }); }} className="w-full py-3 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700">
+                <button onClick={() => { setShowQuote(false); setQuoteSent(false); setQuoteForm({ name: '', email: '', company: '', phone: '', employees: '', plan: '', rut: '' }); setQuoteRutError(''); }} className="w-full py-3 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700">
                   Cerrar
                 </button>
               </div>
@@ -656,14 +708,28 @@ export default function LandingPage() {
                     required
                     className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none"
                   />
-                  <input
-                    type="tel"
-                    value={quoteForm.phone}
-                    onChange={e => setQuoteForm({...quoteForm, phone: e.target.value})}
-                    placeholder="Teléfono *"
-                    required
-                    className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none"
-                  />
+                  <div>
+                    <input
+                      type="tel"
+                      value={quoteForm.phone}
+                      onChange={e => setQuoteForm({...quoteForm, phone: formatPhoneCL(e.target.value)})}
+                      placeholder="+56 9 1234 5678 *"
+                      required
+                      inputMode="numeric"
+                      className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none"
+                    />
+                  </div>
+                  <div>
+                    <input
+                      type="text"
+                      value={quoteForm.rut}
+                      onChange={e => { setQuoteForm({...quoteForm, rut: formatRutCL(e.target.value)}); setQuoteRutError(''); }}
+                      onBlur={() => { if (quoteForm.rut && !validateRut(quoteForm.rut)) setQuoteRutError('RUT inválido'); }}
+                      placeholder="RUT empresa (opcional)"
+                      className={`w-full px-3 py-2.5 border rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none ${quoteRutError ? 'border-red-300' : 'border-gray-200'}`}
+                    />
+                    {quoteRutError && <p className="text-xs text-red-500 mt-1">{quoteRutError}</p>}
+                  </div>
                   <div>
                     <label className="block text-xs font-medium text-gray-500 mb-1">Número de colaboradores *</label>
                     <select
@@ -700,7 +766,7 @@ export default function LandingPage() {
                   <div className="pt-2">
                     <button
                       type="submit"
-                      disabled={quoteLoading}
+                      disabled={quoteLoading || quoteRutError}
                       className="w-full py-3 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 transition-all disabled:opacity-50"
                     >
                       {quoteLoading ? 'Enviando...' : 'Solicitar cotización'}
