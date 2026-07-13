@@ -475,6 +475,38 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Industries */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+              Solución para múltiples industrias
+            </h2>
+            <p className="text-lg text-gray-500 max-w-2xl mx-auto">
+              Flexio se adapta a cualquier organización que necesite controlar la asistencia de su equipo
+            </p>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {[
+              { name: 'Educación', desc: 'Colegios, jardines infantiles y universidades. Control de docentes, auxiliares y administrativos.', icon: '🎓' },
+              { name: 'Construcción', desc: 'Obras civiles con personal rotativo. Marcaje móvil con GPS para múltiples faenas.', icon: '🏗️' },
+              { name: 'Seguridad', desc: 'Guardias en distintos puntos. Verificación de presencia con geolocalización.', icon: '🛡️' },
+              { name: 'Salud', desc: 'Clínicas, centros médicos y laboratorios. Turnos rotativos y horas extra.', icon: '🏥' },
+              { name: 'Retail y Comercio', desc: 'Tiendas con múltiples sucursales y turnos. Control centralizado.', icon: '🏪' },
+              { name: 'Logística', desc: 'Bodegas, transporte y distribución. Personal en terreno y planta.', icon: '🚛' },
+            ].map((industry, i) => (
+              <div key={i} className="flex items-start gap-4 p-5 rounded-xl border border-gray-100 hover:border-primary-200 hover:shadow-md transition-all">
+                <span className="text-2xl">{industry.icon}</span>
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-1">{industry.name}</h3>
+                  <p className="text-sm text-gray-500 leading-relaxed">{industry.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Pricing */}
       <section id="pricing" className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
