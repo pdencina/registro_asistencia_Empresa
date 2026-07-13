@@ -3,12 +3,18 @@ const API_BASE = '/api';
 // Extrae el slug del tenant desde la URL actual
 // flexio.cl/app/acme -> "acme"
 // flexio.cl/admin/acme/... -> "acme"
+// flexio.cl/marcar/acme -> "acme"
+// flexio.cl/pin/acme -> "acme"
 function getTenantSlug() {
   const path = window.location.pathname;
   const appMatch = path.match(/^\/app\/([^/]+)/);
   if (appMatch) return appMatch[1];
   const adminMatch = path.match(/^\/admin\/([^/]+)/);
   if (adminMatch) return adminMatch[1];
+  const marcarMatch = path.match(/^\/marcar\/([^/]+)/);
+  if (marcarMatch) return marcarMatch[1];
+  const pinMatch = path.match(/^\/pin\/([^/]+)/);
+  if (pinMatch) return pinMatch[1];
   return null;
 }
 
