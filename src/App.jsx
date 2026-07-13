@@ -6,6 +6,7 @@ import AdminLoginPage from './pages/AdminLoginPage';
 import LandingPage from './pages/LandingPage';
 import LoginRedirectPage from './pages/LoginRedirectPage';
 import NoTenantPage from './pages/NoTenantPage';
+import MobileCheckInPage from './pages/MobileCheckInPage';
 import TermsPage from './pages/legal/TermsPage';
 import PrivacyPage from './pages/legal/PrivacyPage';
 import DpaPage from './pages/legal/DpaPage';
@@ -24,6 +25,9 @@ function App() {
 
         {/* App por tenant: flexio.cl/app/slug */}
         <Route path="/app/:tenant" element={<KioskLayout />} />
+
+        {/* Marcaje móvil: flexio.cl/marcar/slug */}
+        <Route path="/marcar/:tenant" element={<MobileCheckInPage />} />
 
         {/* App sin slug: mostrar mensaje */}
         <Route path="/app" element={<NoTenantPage />} />

@@ -7,6 +7,7 @@ import DashboardPage from '../pages/DashboardPage';
 import CheckInPage from '../pages/CheckInPage';
 import SettingsPage from '../pages/SettingsPage';
 import SchedulesPage from '../pages/SchedulesPage';
+import OvertimePage from '../pages/OvertimePage';
 
 export default function AdminLayout() {
   const [time, setTime] = useState(new Date());
@@ -60,6 +61,7 @@ export default function AdminLayout() {
           <Route path="/register" element={<CheckInPage />} />
           <Route path="/register" element={<CheckInPage />} />
           <Route path="/schedules" element={<SchedulesPage />} />
+          <Route path="/overtime" element={<OvertimePage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="*" element={<Navigate to={basePath} replace />} />
         </Routes>
@@ -73,6 +75,7 @@ export default function AdminLayout() {
           <NavItem to={`${basePath}/attendance`} icon={<ClipboardList className="w-6 h-6" />} label="Asistencia" />
           <NavItem to={`${basePath}/register`} icon={<Camera className="w-6 h-6" />} label="Registrar" />
           <NavItem to={`${basePath}/schedules`} icon={<Clock className="w-6 h-6" />} label="Horarios" />
+          <NavItem to={`${basePath}/overtime`} icon={<Clock className="w-6 h-6" />} label="Hrs Extra" />
           <NavItem to={`${basePath}/settings`} icon={<Settings className="w-6 h-6" />} label="Config" />
         </div>
       </nav>

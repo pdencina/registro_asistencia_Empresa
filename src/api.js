@@ -76,6 +76,10 @@ export const attendanceApi = {
   },
   getEmployeeStatus: (id) => request(`/attendance/status/${id}`),
   delete: (id) => request(`/attendance/${id}`, { method: 'DELETE' }),
+  getOvertime: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return request(`/attendance/overtime${query ? `?${query}` : ''}`);
+  },
 };
 
 // Devices API
