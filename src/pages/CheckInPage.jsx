@@ -1,13 +1,15 @@
 import { useState, useEffect, useRef } from 'react';
 import Webcam from 'react-webcam';
 import * as faceapi from 'face-api.js';
-import { LogIn, LogOut, XCircle, Loader, Scan, Fingerprint, AlertTriangle, Eye } from 'lucide-react';
+import { LogIn, LogOut, XCircle, Loader, Scan, Fingerprint, AlertTriangle, Eye, KeyRound, CheckCircle } from 'lucide-react';
 import { employeesApi, attendanceApi, tardinessApi, earlyExitApi, authorizersApi, schedulesApi } from '../api';
 import { playSuccess, playError, playRecognized } from '../utils/sounds';
 import { LivenessDetector } from '../utils/livenessDetection';
 
 // Estados del flujo
+const STEP_SELECT = 'select';
 const STEP_HOME = 'home';
+const STEP_PIN_INPUT = 'pin_input';
 const STEP_SCANNING = 'scanning';
 const STEP_LIVENESS = 'liveness';
 const STEP_RECOGNIZED = 'recognized';
@@ -16,7 +18,7 @@ const STEP_CONFIRMED = 'confirmed';
 const STEP_ERROR = 'error';
 
 export default function CheckInPage() {
-  const [step, setStep] = useState(STEP_HOME);
+  const [step, setStep] = useState(STEP_SELECT);
   const [employees, setEmployees] = useState([]);
   const [recognizedEmployee, setRecognizedEmployee] = useState(null);
   const [employeeStatus, setEmployeeStatus] = useState(null);
@@ -332,7 +334,7 @@ export default function CheckInPage() {
   }
 
   function resetFlow() {
-    setStep(STEP_HOME);
+    setStep(STEP_SELECT);
     setRecognizedEmployee(null);
     setEmployeeStatus(null);
     setEmployeeTardiness(null);
@@ -408,7 +410,57 @@ export default function CheckInPage() {
   };
 
   // ═══════════════════════════════════════════════════════════
-  // STEP: HOME — Pantalla de bienvenida
+  // STEP: SELECT — Elegir método de marcaje
+  // ═══════════════════════════════════════════════════════════
+  if (step === STEP_SELECT) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[80vh] p-6 bg-gray-50">
+        <div className="text-center max-w-sm w-full">
+          <img src="/logo-flexio.svg" alt="Flexio" className="h-8 mx-auto mb-8" />
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Registrar asistencia</h2>
+          <p className="text-sm text-gray-500 mb-10">Selecciona tu método de marcaje</p>
+
+          <div className="space-y-4">
+            <button
+              onClick={() => setStep(STEP_HOME)}
+              className="w-full p-6 bg-white border-2 border-gray-200 rounded-2xl hover:border-primary-300 hover:shadow-lg transition-all text-left flex items-center gap-4 group"
+            >
+              <div className="w-14 h-14 bg-primary-100 rounded-xl flex items-center justify-center group-hover:bg-primary-200 transition-colors">
+                <Scan className="w-7 h-7 text-primary-600" />
+              </div>
+              <div>
+                <p className="font-semibold text-gray-900 text-lg">Reconocimiento facial</p>
+                <p className="text-sm text-gray-500">Acércate a la cámara para identificarte</p>
+              </div>
+            </button>
+
+            <button
+              onClick={() => setStep(STEP_PIN_INPUT)}
+              className="w-full p-6 bg-white border-2 border-gray-200 rounded-2xl hover:border-primary-300 hover:shadow-lg transition-all text-left flex items-center gap-4 group"
+            >
+              <div className="w-14 h-14 bg-gray-100 rounded-xl flex items-center justify-center group-hover:bg-gray-200 transition-colors">
+                <Fingerprint className="w-7 h-7 text-gray-600" />
+              </div>
+              <div>
+                <p className="font-semibold text-gray-900 text-lg">Marcar con PIN</p>
+                <p className="text-sm text-gray-500">Ingresa tu PIN personal</p>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // STEP: PIN_INPUT — Marcaje por PIN integrado en kiosko
+  // ═══════════════════════════════════════════════════════════
+  if (step === STEP_PIN_INPUT) {
+    return <KioskPinMode onDone={resetFlow} />;
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // STEP: HOME — Pantalla de bienvenida (reconocimiento facial)
   // ═══════════════════════════════════════════════════════════
   if (step === STEP_HOME) {
     return (
@@ -839,4 +891,135 @@ export default function CheckInPage() {
 
   // Fallback
   return null;
+}
+
+
+// Componente de marcaje por PIN integrado en el kiosko
+function KioskPinMode({ onDone }) {
+  const [pin, setPin] = useState('');
+  const [employee, setEmployee] = useState(null);
+  const [status, setStatus] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [confirmed, setConfirmed] = useState(null);
+
+  async function handlePinSubmit(e) {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+    try {
+      const tenantSlug = window.location.pathname.match(/\/app\/([^/]+)/)?.[1] || '';
+      const res = await fetch('/api/attendance/pin-checkin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-tenant-slug': tenantSlug },
+        body: JSON.stringify({ pin, action: 'identify' }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setEmployee(data.employee);
+        setStatus(data.status);
+      } else {
+        setError(data.error || 'PIN no reconocido');
+        setPin('');
+      }
+    } catch { setError('Error de conexión'); }
+    finally { setLoading(false); }
+  }
+
+  async function handleRegister(type) {
+    setLoading(true);
+    setError('');
+    try {
+      const tenantSlug = window.location.pathname.match(/\/app\/([^/]+)/)?.[1] || '';
+      const res = await fetch('/api/attendance/pin-checkin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-tenant-slug': tenantSlug },
+        body: JSON.stringify({ pin, action: type }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setConfirmed({ type, time: new Date().toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' }) });
+        setTimeout(() => onDone(), 4000);
+      } else { setError(data.error || 'Error al registrar'); }
+    } catch { setError('Error de conexión'); }
+    finally { setLoading(false); }
+  }
+
+  // Confirmado
+  if (confirmed) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[80vh] p-6 bg-gray-50">
+        <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-5">
+          <CheckCircle className="w-10 h-10 text-emerald-600" />
+        </div>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+          {confirmed.type === 'entry' ? 'Ingreso' : 'Salida'} registrado
+        </h2>
+        <p className="text-lg text-gray-700">{confirmed.time} hrs</p>
+        <p className="text-sm text-gray-400 mt-2">Método: PIN personal</p>
+      </div>
+    );
+  }
+
+  // Elegir acción
+  if (employee) {
+    const canEntry = !status || status.status === 'absent';
+    const canExit = status?.status === 'present';
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[80vh] p-6 bg-gray-50">
+        <div className="w-full max-w-sm text-center">
+          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold text-gray-400">
+            {employee.first_name[0]}{employee.last_name[0]}
+          </div>
+          <h2 className="text-xl font-bold text-gray-900 mb-1">{employee.first_name} {employee.last_name}</h2>
+          <p className="text-sm text-gray-500 mb-6">{employee.department || ''}</p>
+
+          {error && <p className="text-red-600 text-sm bg-red-50 p-3 rounded-xl mb-4">{error}</p>}
+
+          <div className="space-y-3">
+            {canEntry && (
+              <button onClick={() => handleRegister('entry')} disabled={loading}
+                className="w-full flex items-center justify-center gap-3 py-4 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 disabled:opacity-50">
+                {loading ? <Loader className="w-5 h-5 animate-spin" /> : <LogIn className="w-5 h-5" />} Registrar ingreso
+              </button>
+            )}
+            {canExit && (
+              <button onClick={() => handleRegister('exit')} disabled={loading}
+                className="w-full flex items-center justify-center gap-3 py-4 bg-gray-900 text-white font-semibold rounded-xl hover:bg-gray-800 disabled:opacity-50">
+                {loading ? <Loader className="w-5 h-5 animate-spin" /> : <LogOut className="w-5 h-5" />} Registrar salida
+              </button>
+            )}
+            {status?.status === 'exited' && <p className="text-gray-500 text-sm py-4">Jornada completada hoy</p>}
+          </div>
+          <button onClick={onDone} className="mt-4 text-sm text-gray-400 hover:text-gray-600">← Volver</button>
+        </div>
+      </div>
+    );
+  }
+
+  // Ingresar PIN
+  return (
+    <div className="flex flex-col items-center justify-center min-h-[80vh] p-6 bg-gray-50">
+      <div className="w-full max-w-sm text-center">
+        <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-5">
+          <KeyRound className="w-8 h-8 text-primary-600" />
+        </div>
+        <h2 className="text-xl font-bold text-gray-900 mb-2">Ingresa tu PIN</h2>
+        <p className="text-sm text-gray-500 mb-6">PIN personal de 4 dígitos</p>
+
+        {error && <p className="text-red-600 text-sm bg-red-50 p-3 rounded-xl mb-4">{error}</p>}
+
+        <form onSubmit={handlePinSubmit}>
+          <input type="password" value={pin} onChange={e => setPin(e.target.value.replace(/\D/g, '').slice(0, 6))}
+            placeholder="••••" required autoFocus inputMode="numeric"
+            className="w-full px-4 py-5 border border-gray-200 rounded-xl text-center text-3xl tracking-[0.5em] focus:ring-2 focus:ring-primary-500 outline-none mb-4" />
+          <button type="submit" disabled={loading || pin.length < 4}
+            className="w-full py-4 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 disabled:opacity-50">
+            {loading ? 'Verificando...' : 'Continuar'}
+          </button>
+        </form>
+        <button onClick={onDone} className="mt-4 text-sm text-gray-400 hover:text-gray-600">← Volver al inicio</button>
+      </div>
+    </div>
+  );
 }
