@@ -188,7 +188,6 @@ export default function LandingPage() {
               <a href="#features" className="text-sm text-gray-600 hover:text-primary-600 transition-colors">Funcionalidades</a>
               <a href="#pricing" className="text-sm text-gray-600 hover:text-primary-600 transition-colors">Precios</a>
               <a href="#legal" className="text-sm text-gray-600 hover:text-primary-600 transition-colors">Seguridad</a>
-              <a href="#contacto" className="text-sm text-gray-600 hover:text-primary-600 transition-colors">Contacto</a>
               <a href="/login" className="text-sm text-gray-600 hover:text-primary-600 transition-colors">Iniciar sesión</a>
               <button onClick={() => setShowQuote(true)} className="px-5 py-2.5 bg-primary-600 text-white text-sm font-medium rounded-xl hover:bg-primary-700 transition-colors">
                 Cotizar
@@ -548,89 +547,6 @@ export default function LandingPage() {
             Comenzar prueba de 15 días
             <ArrowRight className="w-5 h-5" />
           </a>
-        </div>
-      </section>
-
-      {/* Contact Form */}
-      <section id="contacto" className="py-20 bg-gray-50 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-xl mx-auto">
-          <div className="text-center mb-10">
-            <h2 className="text-3xl font-bold text-gray-900 mb-3">Contáctanos</h2>
-            <p className="text-gray-500">Déjanos tus datos y te responderemos a la brevedad</p>
-          </div>
-          <form onSubmit={handleContactSubmit} className="space-y-4">
-            <div className="grid sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
-                <input
-                  type="text"
-                  value={contactForm.name}
-                  onChange={e => setContactForm({...contactForm, name: e.target.value})}
-                  required
-                  placeholder="Tu nombre"
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Empresa</label>
-                <input
-                  type="text"
-                  value={contactForm.company}
-                  onChange={e => setContactForm({...contactForm, company: e.target.value})}
-                  placeholder="Nombre de tu empresa"
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none"
-                />
-              </div>
-            </div>
-            <div className="grid sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                <input
-                  type="email"
-                  value={contactForm.email}
-                  onChange={e => setContactForm({...contactForm, email: e.target.value})}
-                  required
-                  placeholder="tu@empresa.cl"
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
-                <input
-                  type="tel"
-                  value={contactForm.phone}
-                  onChange={e => setContactForm({...contactForm, phone: e.target.value})}
-                  placeholder="+56 9 1234 5678"
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none"
-                />
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Mensaje</label>
-              <textarea
-                value={contactForm.message}
-                onChange={e => setContactForm({...contactForm, message: e.target.value})}
-                required
-                rows={4}
-                placeholder="Cuéntanos qué necesitas..."
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none resize-none"
-              />
-            </div>
-            {contactSent ? (
-              <div className="text-center py-4 bg-emerald-50 border border-emerald-200 rounded-xl">
-                <p className="text-emerald-700 font-medium">Mensaje enviado correctamente</p>
-                <p className="text-emerald-600 text-sm mt-1">Te responderemos a la brevedad</p>
-              </div>
-            ) : (
-              <button
-                type="submit"
-                disabled={contactLoading}
-                className="w-full py-3 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 transition-all disabled:opacity-50"
-              >
-                {contactLoading ? 'Enviando...' : 'Enviar mensaje'}
-              </button>
-            )}
-          </form>
         </div>
       </section>
 
