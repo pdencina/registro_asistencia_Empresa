@@ -22,7 +22,7 @@ module.exports = async function handler(req, res) {
     }
 
     if (req.method === 'PUT') {
-      const { rut, first_name, last_name, department, position, active, photo, consent_at, email, phone } = req.body;
+      const { rut, first_name, last_name, department, position, active, photo, consent_at, email, phone, personal_pin } = req.body;
 
       const [current] = await sql('SELECT * FROM employees WHERE id = $1 AND tenant_id = $2', [id, tenant.id]);
       if (!current) {
@@ -32,6 +32,11 @@ module.exports = async function handler(req, res) {
       if (consent_at) {
         await sql('ALTER TABLE employees ADD COLUMN IF NOT EXISTS consent_at TIMESTAMPTZ');
         await sql('UPDATE employees SET consent_at = $1 WHERE id = $2 AND tenant_id = $3', [consent_at, id, tenant.id]);
+      }
+
+      if (personal_pin !== undefined) {
+        await sql('ALTER TABLE employees ADD COLUMN IF NOT EXISTS personal_pin VARCHAR(10)');
+        await sql('UPDATE employees SET personal_pin = $1 WHERE id = $2 AND tenant_id = $3', [personal_pin, id, tenant.id]);
       }
 
       let photo_url = current.photo_url;

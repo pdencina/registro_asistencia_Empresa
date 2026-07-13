@@ -304,6 +304,39 @@ export default function EmployeesPage() {
     setNewEmployeePhoto(employee);
   }
 
+  async function handleConsentDeclined() {
+    if (!showConsent) return;
+    // Generate a random 4-digit PIN
+    const pin = String(Math.floor(1000 + Math.random() * 9000));
+    const tenantSlug = sessionStorage.getItem('admin_tenant') || '';
+    try {
+      await employeesApi.update(showConsent.id, { personal_pin: pin });
+
+      // Enviar PIN por email al colaborador si tiene email
+      if (showConsent.email) {
+        fetch('/api/notifications/send-pin', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-tenant-slug': tenantSlug,
+          },
+          body: JSON.stringify({
+            employee_id: showConsent.id,
+            pin,
+            slug: tenantSlug,
+          }),
+        }).catch(() => {});
+      }
+
+      alert(`PIN asignado: ${pin}\n\nEl colaborador ${showConsent.first_name} ${showConsent.last_name} podrá marcar asistencia en:\nflexio.cl/pin/${tenantSlug}\n\n${showConsent.email ? 'Se envió un email con esta información.' : 'Entrega este PIN al colaborador.'}`);
+    } catch (e) {
+      alert('Error al asignar PIN. Intenta nuevamente.');
+    }
+    setShowConsent(null);
+    setConsentAccepted(false);
+    loadEmployees();
+  }
+
   const filteredEmployees = employees.filter(e => {
     const term = search.toLowerCase();
     return e.first_name.toLowerCase().includes(term) ||
@@ -635,17 +668,27 @@ export default function EmployeesPage() {
               </span>
             </label>
 
-            <div className="flex gap-3">
-              <button onClick={() => { setShowConsent(null); setConsentAccepted(false); }}
-                className="flex-1 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium transition-all">
-                Cancelar
-              </button>
+            <div className="flex flex-col gap-3">
+              <div className="flex gap-3">
+                <button onClick={() => { setShowConsent(null); setConsentAccepted(false); }}
+                  className="flex-1 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium transition-all">
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleConsentAccepted}
+                  disabled={!consentAccepted}
+                  className="flex-1 py-3 bg-primary-600 hover:bg-primary-700 text-white rounded-xl font-medium transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+                  Aceptar y Continuar
+                </button>
+              </div>
               <button
-                onClick={handleConsentAccepted}
-                disabled={!consentAccepted}
-                className="flex-1 py-3 bg-primary-600 hover:bg-primary-700 text-white rounded-xl font-medium transition-all disabled:opacity-40 disabled:cursor-not-allowed">
-                Aceptar y Continuar
+                onClick={() => { handleConsentDeclined(); }}
+                className="w-full py-3 border border-gray-200 hover:bg-gray-50 text-gray-600 rounded-xl text-sm font-medium transition-all">
+                No autorizo — Asignar marcaje por PIN
               </button>
+              <p className="text-xs text-gray-400 text-center">
+                Se habilitará un PIN personal para registrar asistencia sin reconocimiento facial.
+              </p>
             </div>
           </div>
         </div>
