@@ -7,6 +7,7 @@ import LandingPage from './pages/LandingPage';
 import LoginRedirectPage from './pages/LoginRedirectPage';
 import NoTenantPage from './pages/NoTenantPage';
 import MobileCheckInPage from './pages/MobileCheckInPage';
+import PinCheckInPage from './pages/PinCheckInPage';
 import TermsPage from './pages/legal/TermsPage';
 import PrivacyPage from './pages/legal/PrivacyPage';
 import DpaPage from './pages/legal/DpaPage';
@@ -28,6 +29,9 @@ function App() {
 
         {/* Marcaje móvil: flexio.cl/marcar/slug */}
         <Route path="/marcar/:tenant" element={<MobileCheckInPage />} />
+
+        {/* Marcaje por PIN: flexio.cl/pin/slug */}
+        <Route path="/pin/:tenant" element={<PinCheckInPage />} />
 
         {/* App sin slug: mostrar mensaje */}
         <Route path="/app" element={<NoTenantPage />} />
