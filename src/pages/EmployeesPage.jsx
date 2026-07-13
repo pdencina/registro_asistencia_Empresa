@@ -689,7 +689,7 @@ export default function EmployeesPage() {
               </div>
               <button
                 onClick={() => { handleConsentDeclined(); }}
-                className="w-full py-3 border border-gray-200 hover:bg-gray-50 text-gray-600 rounded-xl text-sm font-medium transition-all">
+                className="w-full py-3 border border-gray-200 hover:bg-orange-50 hover:border-orange-300 hover:text-orange-700 text-gray-600 rounded-xl text-sm font-medium transition-all active:scale-[0.98]">
                 No autorizo — Asignar marcaje por PIN
               </button>
               <p className="text-xs text-gray-400 text-center">
