@@ -7,6 +7,10 @@ export default function LandingPage() {
   const [contactForm, setContactForm] = useState({ name: '', company: '', email: '', phone: '', message: '' });
   const [contactLoading, setContactLoading] = useState(false);
   const [contactSent, setContactSent] = useState(false);
+  const [showQuote, setShowQuote] = useState(false);
+  const [quoteForm, setQuoteForm] = useState({ name: '', email: '', company: '', phone: '', employees: '', plan: '' });
+  const [quoteLoading, setQuoteLoading] = useState(false);
+  const [quoteSent, setQuoteSent] = useState(false);
 
   async function handleContactSubmit(e) {
     e.preventDefault();
@@ -20,9 +24,30 @@ export default function LandingPage() {
       setContactSent(true);
       setContactForm({ name: '', company: '', email: '', phone: '', message: '' });
     } catch {
-      // Silently fail — could show error
     } finally {
       setContactLoading(false);
+    }
+  }
+
+  async function handleQuoteSubmit(e) {
+    e.preventDefault();
+    setQuoteLoading(true);
+    try {
+      await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: quoteForm.name,
+          company: quoteForm.company,
+          email: quoteForm.email,
+          phone: quoteForm.phone,
+          message: `COTIZACIÓN\nPlan de interés: ${quoteForm.plan || 'No especificado'}\nN° colaboradores: ${quoteForm.employees}\n`,
+        }),
+      });
+      setQuoteSent(true);
+    } catch {
+    } finally {
+      setQuoteLoading(false);
     }
   } // monthly | annual
 
@@ -165,9 +190,9 @@ export default function LandingPage() {
               <a href="#legal" className="text-sm text-gray-600 hover:text-primary-600 transition-colors">Seguridad</a>
               <a href="#contacto" className="text-sm text-gray-600 hover:text-primary-600 transition-colors">Contacto</a>
               <a href="/login" className="text-sm text-gray-600 hover:text-primary-600 transition-colors">Iniciar sesión</a>
-              <a href="#pricing" className="px-5 py-2.5 bg-primary-600 text-white text-sm font-medium rounded-xl hover:bg-primary-700 transition-colors">
-                Solicitar demo
-              </a>
+              <button onClick={() => setShowQuote(true)} className="px-5 py-2.5 bg-primary-600 text-white text-sm font-medium rounded-xl hover:bg-primary-700 transition-colors">
+                Cotizar
+              </button>
             </div>
 
             {/* Mobile menu button */}
@@ -656,6 +681,124 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+
+      {/* Modal Cotización */}
+      {showQuote && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
+          <div className="bg-white rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto shadow-2xl">
+            {quoteSent ? (
+              <div className="p-8 text-center">
+                <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <CheckCircle className="w-8 h-8 text-emerald-600" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Cotización recibida</h3>
+                <p className="text-sm text-gray-500 mb-6">Te contactaremos a la brevedad con una propuesta personalizada.</p>
+                <button onClick={() => { setShowQuote(false); setQuoteSent(false); setQuoteForm({ name: '', email: '', company: '', phone: '', employees: '', plan: '' }); }} className="w-full py-3 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700">
+                  Cerrar
+                </button>
+              </div>
+            ) : (
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-5">
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900">Solicitar cotización</h3>
+                    <p className="text-sm text-gray-500">Completa tus datos y te contactamos</p>
+                  </div>
+                  <button onClick={() => setShowQuote(false)} className="p-2 hover:bg-gray-100 rounded-lg text-gray-400">
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <form onSubmit={handleQuoteSubmit} className="space-y-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <input
+                        type="text"
+                        value={quoteForm.name}
+                        onChange={e => setQuoteForm({...quoteForm, name: e.target.value})}
+                        placeholder="Nombre completo *"
+                        required
+                        className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none"
+                      />
+                    </div>
+                    <div>
+                      <input
+                        type="text"
+                        value={quoteForm.company}
+                        onChange={e => setQuoteForm({...quoteForm, company: e.target.value})}
+                        placeholder="Empresa *"
+                        required
+                        className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none"
+                      />
+                    </div>
+                  </div>
+                  <input
+                    type="email"
+                    value={quoteForm.email}
+                    onChange={e => setQuoteForm({...quoteForm, email: e.target.value})}
+                    placeholder="Correo corporativo *"
+                    required
+                    className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none"
+                  />
+                  <input
+                    type="tel"
+                    value={quoteForm.phone}
+                    onChange={e => setQuoteForm({...quoteForm, phone: e.target.value})}
+                    placeholder="Teléfono *"
+                    required
+                    className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none"
+                  />
+                  <div>
+                    <label className="block text-xs font-medium text-gray-500 mb-1">Número de colaboradores *</label>
+                    <select
+                      value={quoteForm.employees}
+                      onChange={e => setQuoteForm({...quoteForm, employees: e.target.value})}
+                      required
+                      className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none text-gray-700"
+                    >
+                      <option value="">Selecciona un rango</option>
+                      <option value="1-15">1 a 15</option>
+                      <option value="16-30">16 a 30</option>
+                      <option value="31-50">31 a 50</option>
+                      <option value="51-100">51 a 100</option>
+                      <option value="101-200">101 a 200</option>
+                      <option value="201-500">201 a 500</option>
+                      <option value="500+">Más de 500</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-500 mb-1">Plan de interés</label>
+                    <select
+                      value={quoteForm.plan}
+                      onChange={e => setQuoteForm({...quoteForm, plan: e.target.value})}
+                      className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none text-gray-700"
+                    >
+                      <option value="">No estoy seguro</option>
+                      <option value="basico">Básico ($39.990/mes)</option>
+                      <option value="profesional">Profesional ($79.990/mes)</option>
+                      <option value="enterprise">Enterprise ($149.990/mes)</option>
+                      <option value="corporativo">Corporativo (a medida)</option>
+                    </select>
+                  </div>
+
+                  <div className="pt-2">
+                    <button
+                      type="submit"
+                      disabled={quoteLoading}
+                      className="w-full py-3 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 transition-all disabled:opacity-50"
+                    >
+                      {quoteLoading ? 'Enviando...' : 'Solicitar cotización'}
+                    </button>
+                  </div>
+                  <p className="text-xs text-gray-400 text-center">
+                    Al enviar, aceptas nuestra <a href="/legal/privacy" className="text-primary-600 hover:underline">política de privacidad</a>
+                  </p>
+                </form>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Botón flotante WhatsApp */}
       <a
