@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Routes, Route, NavLink, Navigate, useNavigate, useParams } from 'react-router-dom';
-import { Users, ClipboardList, BarChart3, LogOut, Camera, Settings, Clock } from 'lucide-react';
+import { Users, ClipboardList, BarChart3, LogOut, Camera, Settings, Clock, FileText } from 'lucide-react';
 import EmployeesPage from '../pages/EmployeesPage';
 import AttendancePage from '../pages/AttendancePage';
 import DashboardPage from '../pages/DashboardPage';
@@ -8,6 +8,7 @@ import CheckInPage from '../pages/CheckInPage';
 import SettingsPage from '../pages/SettingsPage';
 import SchedulesPage from '../pages/SchedulesPage';
 import OvertimePage from '../pages/OvertimePage';
+import MedicalLeavesPage from '../pages/MedicalLeavesPage';
 
 export default function AdminLayout() {
   const [time, setTime] = useState(new Date());
@@ -79,6 +80,7 @@ export default function AdminLayout() {
           <Route path="/register" element={<CheckInPage />} />
           <Route path="/schedules" element={<SchedulesPage />} />
           <Route path="/overtime" element={<OvertimePage />} />
+          <Route path="/medical-leaves" element={<MedicalLeavesPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="*" element={<Navigate to={basePath} replace />} />
         </Routes>
@@ -93,6 +95,7 @@ export default function AdminLayout() {
           <NavItem to={`${basePath}/register`} icon={<Camera className="w-5 h-5" />} label="Registrar" />
           <NavItem to={`${basePath}/schedules`} icon={<Clock className="w-5 h-5" />} label="Horarios" />
           <NavItem to={`${basePath}/overtime`} icon={<Clock className="w-5 h-5" />} label="Hrs Extra" />
+          <NavItem to={`${basePath}/medical-leaves`} icon={<FileText className="w-5 h-5" />} label="Licencias" />
           <NavItem to={`${basePath}/settings`} icon={<Settings className="w-5 h-5" />} label="Config" />
         </div>
       </nav>

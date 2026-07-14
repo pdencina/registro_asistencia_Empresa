@@ -128,3 +128,13 @@ export const earlyExitApi = {
   create: (data) => request('/attendance/early-exit', { method: 'POST', body: JSON.stringify(data) }),
   getByEmployee: (employeeId) => request(`/attendance/early-exit?employee_id=${employeeId}`),
 };
+
+// Medical Leaves API
+export const medicalLeavesApi = {
+  getAll: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return request(`/medical-leaves${query ? `?${query}` : ''}`);
+  },
+  create: (data) => request('/medical-leaves', { method: 'POST', body: JSON.stringify(data) }),
+  delete: (id) => request('/medical-leaves', { method: 'DELETE', body: JSON.stringify({ id }) }),
+};

@@ -189,6 +189,18 @@ module.exports = async function handler(req, res) {
       [tenant.id]
     );
 
+    // Get medical leaves in this period
+    let medicalLeaves = [];
+    try {
+      medicalLeaves = await sql(`
+        SELECT employee_id, start_date, end_date, days, diagnosis, file_url
+        FROM medical_leaves
+        WHERE tenant_id = $1
+          AND start_date <= $3
+          AND end_date >= $2
+      `, [tenant.id, startDate, endDate]);
+    } catch (e) {}
+
     // Get unique days each employee had at least one entry
     const presenceDays = {};
     for (const entry of allEntries) {
@@ -200,12 +212,15 @@ module.exports = async function handler(req, res) {
       const daysPresent = presenceDays[emp.id] ? presenceDays[emp.id].size : 0;
       const daysAbsent = Math.max(0, workingDays - daysPresent);
       const attendanceRate = workingDays > 0 ? Math.round((daysPresent / workingDays) * 100) : 0;
+      const empLeaves = medicalLeaves.filter(l => l.employee_id === emp.id);
       return {
         ...emp,
         days_present: daysPresent,
         days_absent: daysAbsent,
         attendance_rate: attendanceRate,
         absent_dates: getAbsentDates(startDate, endDate, presenceDays[emp.id] || new Set()),
+        has_medical_leave: empLeaves.length > 0,
+        medical_leaves: empLeaves.map(l => ({ start_date: l.start_date, end_date: l.end_date, days: l.days, diagnosis: l.diagnosis, file_url: l.file_url })),
       };
     }).sort((a, b) => a.attendance_rate - b.attendance_rate);
 
