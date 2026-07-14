@@ -151,7 +151,7 @@ export default function ContractPage() {
   }
 
   // Ya firmado — mostrar contrato completo con firmas
-  if (signed && contract) {
+  if ((signed || contract?.estado === 'firmado') && contract) {
     const signedPlan = PLANES[contract.plan] || PLANES.basico;
     const fechaFirma = new Date(contract.firmado_at).toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric' });
     return (
@@ -192,7 +192,7 @@ export default function ContractPage() {
               <section>
                 <h3 className="text-base font-bold text-gray-900">4. Modalidad y precio</h3>
                 <p>Modalidad: <strong>{contract.modalidad === 'anual' ? 'Anual (20% descuento)' : 'Mensual'}</strong></p>
-                <p>Precio acordado: <strong>{formatPrice(contract.precio)} + IVA {contract.modalidad === 'anual' ? '/año' : '/mes'}</strong></p>
+                <p>Precio acordado: <strong>{formatPrice(contract.precio)} + IVA ({formatPrice(Math.round(contract.precio * 1.19))} total) {contract.modalidad === 'anual' ? '/año' : '/mes'}</strong></p>
               </section>
 
               <section>
@@ -398,12 +398,26 @@ export default function ContractPage() {
 
             <section>
               <h3 className="text-lg font-bold text-gray-900">5. Precio y forma de pago</h3>
-              <p>
-                Precio acordado: <strong>{modalidad === 'mensual' ? formatPrice(precioMensual) + ' + IVA mensual' : formatPrice(precioAnual) + ' + IVA anual'}</strong>.
-                Forma de pago: transferencia bancaria o tarjeta.
-              </p>
-              <p>
-                Flexio se reserva el derecho de suspender el acceso al Servicio en caso de mora superior a 15 días desde la fecha de cobro, previo aviso al Cliente.
+              <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 my-4">
+                <table className="w-full text-sm">
+                  <tbody>
+                    <tr>
+                      <td className="py-1 text-gray-600">Precio neto:</td>
+                      <td className="py-1 text-right font-medium text-gray-900">{formatPrice(modalidad === 'mensual' ? precioMensual : precioAnual)}</td>
+                    </tr>
+                    <tr>
+                      <td className="py-1 text-gray-600">IVA (19%):</td>
+                      <td className="py-1 text-right font-medium text-gray-900">{formatPrice(Math.round((modalidad === 'mensual' ? precioMensual : precioAnual) * 0.19))}</td>
+                    </tr>
+                    <tr className="border-t border-gray-300">
+                      <td className="py-2 font-bold text-gray-900">Total a transferir:</td>
+                      <td className="py-2 text-right font-bold text-primary-600 text-lg">{formatPrice(Math.round((modalidad === 'mensual' ? precioMensual : precioAnual) * 1.19))} {modalidad === 'mensual' ? '/mes' : '/año'}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <p className="text-sm text-gray-500">
+                Forma de pago: transferencia bancaria o tarjeta. Flexio se reserva el derecho de suspender el acceso al Servicio en caso de mora superior a 15 días desde la fecha de cobro, previo aviso al Cliente.
               </p>
             </section>
 
