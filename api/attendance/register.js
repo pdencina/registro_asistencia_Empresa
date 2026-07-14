@@ -61,11 +61,11 @@ module.exports = async function handler(req, res) {
       WHERE ar.id = $1 AND ar.tenant_id = $2
     `, [id, tenant.id]);
 
-    // Enviar notificación por email al colaborador (async, no bloquea la respuesta)
+    // Enviar notificación por email al colaborador (await para que no se corte en serverless)
     if (employee.email) {
       const RESEND_API_KEY = process.env.RESEND_API_KEY;
       if (RESEND_API_KEY) {
-        sendAttendanceEmail(RESEND_API_KEY, employee, type, now).catch(err => {
+        await sendAttendanceEmail(RESEND_API_KEY, employee, type, now).catch(err => {
           console.error('Error enviando notificación:', err);
         });
       }
