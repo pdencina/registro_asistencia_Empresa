@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Users, UserCheck, UserX, Clock, TrendingUp, AlertTriangle, Award, Calendar, Download, BarChart3, Timer } from 'lucide-react';
+import { Users, UserCheck, UserX, Clock, TrendingUp, AlertTriangle, Award, Calendar, Download, BarChart3, Timer, Building2 } from 'lucide-react';
 import { attendanceApi, employeesApi } from '../api';
+import * as XLSX from 'xlsx';
 
 const TABS = [
   { id: 'today', label: 'Hoy' },
@@ -48,31 +49,105 @@ export default function DashboardPage() {
     }
   }
 
-  function exportCSV() {
+  function exportExcel() {
     if (!report) return;
-    const rows = [['Nombre', 'Departamento', 'Días Presentes', 'Días Ausentes', 'Atrasos', 'Min. Atraso Total', 'Tasa Asistencia']];
+    const wb = XLSX.utils.book_new();
 
+    // Sheet 1: Resumen General
+    const resumenData = [
+      ['REPORTE DE ASISTENCIA — FLEXIO'],
+      [],
+      ['Período', `${report.start_date} al ${report.end_date}`],
+      ['Días hábiles', report.working_days],
+      ['Total colaboradores', report.overview.total_employees],
+      ['Tasa de asistencia', `${report.overview.attendance_rate}%`],
+      ['Hora promedio de ingreso', report.overview.avg_entry_time],
+      ['Total llegadas tarde', report.overview.total_late],
+      ['Total días de ausencia', report.overview.total_absent_days],
+      ['Empleados siempre puntuales', report.overview.punctual_employees],
+      [],
+      ['Horario configurado', `${report.schedule.entry_time} (tolerancia: ${report.schedule.tolerance_minutes} min)`],
+    ];
+    const wsResumen = XLSX.utils.aoa_to_sheet(resumenData);
+    XLSX.utils.book_append_sheet(wb, wsResumen, 'Resumen');
+
+    // Sheet 2: Detalle por Colaborador
+    const detalleRows = [['Nombre', 'Apellido', 'Departamento', 'Días Presentes', 'Días Ausentes', 'Atrasos', 'Min. Atraso Total', 'Llegadas Temprano', 'Tasa Asistencia %']];
     for (const emp of report.absence_list) {
       const tardyData = report.tardiness_ranking.find(t => t.employee_id === emp.id);
-      rows.push([
-        `${emp.first_name} ${emp.last_name}`,
+      detalleRows.push([
+        emp.first_name,
+        emp.last_name,
         emp.department || '',
         emp.days_present,
         emp.days_absent,
         tardyData?.late_count || 0,
         tardyData?.total_late_minutes || 0,
-        `${emp.attendance_rate}%`,
+        tardyData?.early_count || 0,
+        emp.attendance_rate,
       ]);
     }
+    const wsDetalle = XLSX.utils.aoa_to_sheet(detalleRows);
+    XLSX.utils.book_append_sheet(wb, wsDetalle, 'Detalle Colaboradores');
 
-    const csv = rows.map(r => r.join(',')).join('\n');
-    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `reporte-asistencia-${report.period}-${report.start_date}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+    // Sheet 3: Asistencia por Día
+    const diariaRows = [['Fecha', 'Día', 'Presentes', 'Total', 'Tasa %']];
+    for (const d of report.daily_attendance) {
+      const dayName = new Date(d.date + 'T12:00:00').toLocaleDateString('es-CL', { weekday: 'long' });
+      diariaRows.push([d.date, dayName, d.present, d.total, d.rate]);
+    }
+    const wsDiaria = XLSX.utils.aoa_to_sheet(diariaRows);
+    XLSX.utils.book_append_sheet(wb, wsDiaria, 'Asistencia Diaria');
+
+    // Sheet 4: Ranking Atrasos
+    const atrasosRows = [['Pos.', 'Nombre', 'Departamento', 'Atrasos', 'Min. Total', 'Fechas Atraso']];
+    report.tardiness_ranking.filter(e => e.late_count > 0).forEach((emp, i) => {
+      atrasosRows.push([
+        i + 1,
+        `${emp.first_name} ${emp.last_name}`,
+        emp.department || '',
+        emp.late_count,
+        emp.total_late_minutes,
+        emp.dates_late.map(d => `${d.date} (${d.time}, +${d.minutes_late}min)`).join('; '),
+      ]);
+    });
+    const wsAtrasos = XLSX.utils.aoa_to_sheet(atrasosRows);
+    XLSX.utils.book_append_sheet(wb, wsAtrasos, 'Atrasos');
+
+    // Sheet 5: Inasistencias
+    const ausenciasRows = [['Nombre', 'Departamento', 'Días Ausente', 'Fechas Ausencia']];
+    for (const emp of report.absence_list.filter(e => e.days_absent > 0)) {
+      ausenciasRows.push([
+        `${emp.first_name} ${emp.last_name}`,
+        emp.department || '',
+        emp.days_absent,
+        emp.absent_dates.join(', '),
+      ]);
+    }
+    const wsAusencias = XLSX.utils.aoa_to_sheet(ausenciasRows);
+    XLSX.utils.book_append_sheet(wb, wsAusencias, 'Inasistencias');
+
+    // Sheet 6: Por Día de Semana
+    if (report.day_of_week) {
+      const dowRows = [['Día', 'Asistencia Promedio %', 'Tasa de Atraso %', 'Total Ingresos', 'Llegadas Tarde']];
+      for (const d of report.day_of_week) {
+        dowRows.push([d.name, d.avg_attendance, d.late_rate, d.entries, d.late]);
+      }
+      const wsDow = XLSX.utils.aoa_to_sheet(dowRows);
+      XLSX.utils.book_append_sheet(wb, wsDow, 'Por Día Semana');
+    }
+
+    // Sheet 7: Por Departamento
+    if (report.department_breakdown) {
+      const deptRows = [['Departamento', 'Colaboradores', 'Total Ingresos', 'Llegadas Tarde', 'Tasa Atraso %']];
+      for (const d of report.department_breakdown) {
+        deptRows.push([d.name, d.employees, d.total_entries, d.late, d.total_entries > 0 ? Math.round((d.late / d.total_entries) * 100) : 0]);
+      }
+      const wsDept = XLSX.utils.aoa_to_sheet(deptRows);
+      XLSX.utils.book_append_sheet(wb, wsDept, 'Por Departamento');
+    }
+
+    XLSX.writeFile(wb, `Flexio-Reporte-${report.period}-${report.start_date}.xlsx`);
   }
 
   if (loading && !report) {
@@ -106,11 +181,11 @@ export default function DashboardPage() {
           {/* Export */}
           {report && tab !== 'today' && (
             <button
-              onClick={exportCSV}
+              onClick={exportExcel}
               className="flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-xl text-sm font-medium transition-all"
             >
               <Download className="w-4 h-4" />
-              Exportar
+              Excel
             </button>
           )}
         </div>
@@ -242,6 +317,73 @@ export default function DashboardPage() {
           )}
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            {/* Day of Week Breakdown */}
+            {report.day_of_week && (
+              <div className="card">
+                <div className="flex items-center gap-2 mb-4">
+                  <Calendar className="w-5 h-5 text-primary-600" />
+                  <h3 className="font-bold text-gray-900">Asistencia por Día</h3>
+                </div>
+                <div className="space-y-2">
+                  {report.day_of_week.map(d => (
+                    <div key={d.name} className="flex items-center gap-3">
+                      <span className="text-sm text-gray-600 w-20 shrink-0">{d.name}</span>
+                      <div className="flex-1 h-6 bg-gray-100 rounded-full overflow-hidden relative">
+                        <div
+                          className={`h-full rounded-full transition-all ${
+                            d.avg_attendance >= 90 ? 'bg-emerald-500' : d.avg_attendance >= 70 ? 'bg-amber-400' : 'bg-red-400'
+                          }`}
+                          style={{ width: `${d.avg_attendance}%` }}
+                        />
+                        <span className="absolute inset-0 flex items-center justify-center text-xs font-medium text-gray-700">
+                          {d.avg_attendance}%
+                        </span>
+                      </div>
+                      {d.late > 0 && (
+                        <span className="text-xs text-amber-600 shrink-0">{d.late} tarde</span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Department Breakdown */}
+            {report.department_breakdown && report.department_breakdown.length > 0 && (
+              <div className="card">
+                <div className="flex items-center gap-2 mb-4">
+                  <Building2 className="w-5 h-5 text-primary-600" />
+                  <h3 className="font-bold text-gray-900">Por Departamento</h3>
+                </div>
+                <div className="space-y-2">
+                  {report.department_breakdown.map(dept => (
+                    <div key={dept.name} className="flex items-center gap-3 p-2.5 bg-gray-50 rounded-xl">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-gray-900 text-sm truncate">{dept.name}</p>
+                        <p className="text-xs text-gray-400">{dept.employees} colaboradores</p>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <p className="text-sm font-medium text-gray-900">{dept.total_entries} ingresos</p>
+                        {dept.late > 0 && <p className="text-xs text-amber-600">{dept.late} atrasos</p>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Executive metrics */}
+          {report.overview.avg_entry_time && (
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
+              <StatCard icon={<Clock className="w-5 h-5" />} label="Hora Prom. Ingreso" value={report.overview.avg_entry_time} color="blue" />
+              <StatCard icon={<UserX className="w-5 h-5" />} label="Días Ausencia Total" value={report.overview.total_absent_days} color="red" />
+              <StatCard icon={<UserCheck className="w-5 h-5" />} label="Ingresos a Tiempo" value={report.overview.total_on_time} color="green" />
+              <StatCard icon={<TrendingUp className="w-5 h-5" />} label="Ingresos Totales" value={report.overview.total_entries} color="blue" />
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             {/* Tardiness Ranking */}
             <div className="card">
               <div className="flex items-center gap-2 mb-4">
@@ -312,11 +454,11 @@ export default function DashboardPage() {
                 <h3 className="font-bold text-gray-900">Detalle por Colaborador</h3>
               </div>
               <button
-                onClick={exportCSV}
+                onClick={exportExcel}
                 className="flex items-center gap-1 text-sm text-primary-600 hover:text-primary-700 font-medium"
               >
                 <Download className="w-4 h-4" />
-                CSV
+                Excel
               </button>
             </div>
             <div className="overflow-x-auto">

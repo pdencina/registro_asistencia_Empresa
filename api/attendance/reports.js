@@ -180,6 +180,65 @@ module.exports = async function handler(req, res) {
     const totalLateEntries = tardinessRanking.reduce((sum, e) => sum + e.late_count, 0);
     const totalOnTimeEntries = tardinessRanking.reduce((sum, e) => sum + (e.total_entries - e.late_count), 0);
 
+    // 6. DAY OF WEEK BREAKDOWN
+    const dayOfWeekNames = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+    const dayOfWeekStats = { 1: { name: 'Lunes', entries: 0, late: 0, days: 0 }, 2: { name: 'Martes', entries: 0, late: 0, days: 0 }, 3: { name: 'Miércoles', entries: 0, late: 0, days: 0 }, 4: { name: 'Jueves', entries: 0, late: 0, days: 0 }, 5: { name: 'Viernes', entries: 0, late: 0, days: 0 } };
+
+    // Count working days per day of week
+    const tempDate = new Date(startDate + 'T12:00:00');
+    const endTemp = new Date(endDate + 'T12:00:00');
+    const today = new Date(); today.setHours(12, 0, 0, 0);
+    while (tempDate <= endTemp && tempDate <= today) {
+      const dow = tempDate.getDay();
+      if (dow >= 1 && dow <= 5 && dayOfWeekStats[dow]) dayOfWeekStats[dow].days++;
+      tempDate.setDate(tempDate.getDate() + 1);
+    }
+
+    for (const entry of allEntries) {
+      const dow = new Date(entry.entry_date + 'T12:00:00').getDay();
+      if (dow >= 1 && dow <= 5 && dayOfWeekStats[dow]) {
+        dayOfWeekStats[dow].entries++;
+        const [h, m] = entry.entry_time.split(':').map(Number);
+        if (h * 60 + m > maxEntryMinutes) dayOfWeekStats[dow].late++;
+      }
+    }
+
+    const dayOfWeekBreakdown = Object.values(dayOfWeekStats).map(d => ({
+      ...d,
+      avg_attendance: d.days > 0 && totalEmployees > 0 ? Math.round((d.entries / d.days / totalEmployees) * 100) : 0,
+      late_rate: d.entries > 0 ? Math.round((d.late / d.entries) * 100) : 0,
+    }));
+
+    // 7. AVERAGE ENTRY TIME
+    let totalEntryMinutes = 0;
+    let entryCount = 0;
+    for (const entry of allEntries) {
+      const [h, m] = entry.entry_time.split(':').map(Number);
+      if (h * 60 + m < 14 * 60) { // Skip unreasonable
+        totalEntryMinutes += h * 60 + m;
+        entryCount++;
+      }
+    }
+    const avgEntryMinutes = entryCount > 0 ? Math.round(totalEntryMinutes / entryCount) : 0;
+    const avgEntryTime = `${String(Math.floor(avgEntryMinutes / 60)).padStart(2, '0')}:${String(avgEntryMinutes % 60).padStart(2, '0')}`;
+
+    // 8. DEPARTMENT BREAKDOWN
+    const deptStats = {};
+    for (const emp of Object.values(employeeStats)) {
+      const dept = emp.department || 'Sin departamento';
+      if (!deptStats[dept]) deptStats[dept] = { name: dept, employees: 0, total_entries: 0, late: 0 };
+      deptStats[dept].employees++;
+      deptStats[dept].total_entries += emp.total_entries;
+      deptStats[dept].late += emp.late_count;
+    }
+    // Add employees with no entries
+    for (const emp of allEmployees) {
+      const dept = emp.department || 'Sin departamento';
+      if (!deptStats[dept]) deptStats[dept] = { name: dept, employees: 0, total_entries: 0, late: 0 };
+      if (!employeeStats[emp.id]) deptStats[dept].employees++;
+    }
+    const departmentBreakdown = Object.values(deptStats).sort((a, b) => b.employees - a.employees);
+
     return res.status(200).json({
       period: period || 'today',
       start_date: startDate,
@@ -194,6 +253,8 @@ module.exports = async function handler(req, res) {
         total_late: totalLateEntries,
         total_on_time: totalOnTimeEntries,
         punctual_employees: punctualEmployees.length,
+        avg_entry_time: avgEntryTime,
+        total_absent_days: absenceList.reduce((sum, e) => sum + e.days_absent, 0),
       },
 
       daily_attendance: dailyAttendance.map(d => ({
@@ -203,8 +264,10 @@ module.exports = async function handler(req, res) {
         rate: totalEmployees > 0 ? Math.round((Number(d.present) / totalEmployees) * 100) : 0,
       })),
 
-      tardiness_ranking: tardinessRanking.slice(0, 20),
-      punctuality_bonus: punctualEmployees.slice(0, 20),
+      day_of_week: dayOfWeekBreakdown,
+      department_breakdown: departmentBreakdown,
+      tardiness_ranking: tardinessRanking.slice(0, 30),
+      punctuality_bonus: punctualEmployees.slice(0, 30),
       absence_list: absenceList,
     });
   } catch (error) {
