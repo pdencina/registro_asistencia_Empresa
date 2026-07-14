@@ -7,6 +7,7 @@ const TABS = [
   { id: 'today', label: 'Hoy' },
   { id: 'week', label: 'Semana' },
   { id: 'month', label: 'Mes' },
+  { id: 'custom', label: 'Personalizado' },
 ];
 
 export default function DashboardPage() {
@@ -18,10 +19,12 @@ export default function DashboardPage() {
   const [filters, setFilters] = useState({ department: '', employee_id: '' });
   const [departments, setDepartments] = useState([]);
   const [drillDown, setDrillDown] = useState(null); // { title, data[] }
+  const [customRange, setCustomRange] = useState({ start: '', end: '' });
 
   useEffect(() => {
+    if (tab === 'custom' && (!customRange.start || !customRange.end)) return;
     loadData();
-  }, [tab, filters]);
+  }, [tab, filters, customRange]);
 
   // Load departments for filter
   useEffect(() => {
@@ -60,6 +63,10 @@ export default function DashboardPage() {
         setAbsentToday(allEmployees.filter(e => !presentIds.has(e.id)));
       }
       const params = { period: tab };
+      if (tab === 'custom' && customRange.start && customRange.end) {
+        params.start = customRange.start;
+        params.end = customRange.end;
+      }
       if (filters.department) params.department = filters.department;
       if (filters.employee_id) params.employee_id = filters.employee_id;
       const data = await attendanceApi.getReports(params);
@@ -411,6 +418,23 @@ export default function DashboardPage() {
               <option key={d} value={d}>{d}</option>
             ))}
           </select>
+          {tab === 'custom' && (
+            <>
+              <input
+                type="date"
+                value={customRange.start}
+                onChange={e => setCustomRange(r => ({ ...r, start: e.target.value }))}
+                className="text-sm px-3 py-2 border border-gray-200 rounded-lg bg-white focus:ring-2 focus:ring-primary-500 outline-none"
+              />
+              <span className="text-xs text-gray-400">al</span>
+              <input
+                type="date"
+                value={customRange.end}
+                onChange={e => setCustomRange(r => ({ ...r, end: e.target.value }))}
+                className="text-sm px-3 py-2 border border-gray-200 rounded-lg bg-white focus:ring-2 focus:ring-primary-500 outline-none"
+              />
+            </>
+          )}
           {(filters.department || filters.employee_id) && (
             <button
               onClick={() => setFilters({ department: '', employee_id: '' })}
@@ -519,19 +543,20 @@ export default function DashboardPage() {
                 <BarChart3 className="w-5 h-5 text-primary-600" />
                 <h3 className="font-bold text-gray-900">Tendencia de Asistencia</h3>
               </div>
-              <div className="flex items-end gap-1 h-32">
+              <div className="flex items-end gap-1" style={{ height: '160px' }}>
                 {report.daily_attendance.map((d, i) => {
-                  const height = d.rate;
+                  const height = Math.max(d.rate, 5);
                   const dayLabel = new Date(d.date + 'T12:00:00').toLocaleDateString('es-CL', { weekday: 'narrow', day: 'numeric' });
                   return (
-                    <div key={i} className="flex-1 flex flex-col items-center gap-1 cursor-pointer group" onClick={() => drillDayAttendance(d)}>
-                      <span className="text-[10px] text-gray-500 font-medium group-hover:text-primary-600">{d.rate}%</span>
-                      <div className="w-full relative rounded-t-md overflow-hidden group-hover:ring-2 group-hover:ring-primary-300 transition-all" style={{ height: `${Math.max(height, 4)}%` }}>
-                        <div className={`absolute inset-0 rounded-t-md ${
+                    <div key={i} className="flex-1 flex flex-col items-center justify-end cursor-pointer group h-full" onClick={() => drillDayAttendance(d)}>
+                      <span className="text-[10px] text-gray-500 font-medium group-hover:text-primary-600 mb-1">{d.rate}%</span>
+                      <div
+                        className={`w-full rounded-t-md group-hover:ring-2 group-hover:ring-primary-300 transition-all ${
                           d.rate >= 90 ? 'bg-emerald-500' : d.rate >= 70 ? 'bg-amber-400' : 'bg-red-400'
-                        }`} />
-                      </div>
-                      <span className="text-[9px] text-gray-400 truncate w-full text-center group-hover:text-primary-600">{dayLabel}</span>
+                        }`}
+                        style={{ height: `${height}%` }}
+                      />
+                      <span className="text-[9px] text-gray-400 truncate w-full text-center group-hover:text-primary-600 mt-1">{dayLabel}</span>
                     </div>
                   );
                 })}
