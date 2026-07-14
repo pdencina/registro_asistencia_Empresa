@@ -615,87 +615,40 @@ export default function EmployeesPage() {
         </div>
       )}
 
-      {/* Modal Consentimiento de datos biométricos */}
+      {/* Modal Consentimiento enviado */}
       {showConsent && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <div className="text-center mb-4">
-              <div className="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                <Shield className="w-7 h-7 text-blue-600" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900">Consentimiento de Datos Biométricos</h3>
-              <p className="text-sm text-gray-500 mt-1">
-                Para: <strong>{showConsent.first_name} {showConsent.last_name}</strong>
-              </p>
+          <div className="bg-white rounded-2xl p-8 w-full max-w-sm text-center">
+            <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-5">
+              <Shield className="w-8 h-8 text-emerald-600" />
             </div>
-
-            <div className="bg-gray-50 rounded-xl p-4 text-sm text-gray-700 space-y-3 mb-5 max-h-[300px] overflow-y-auto">
-              <p className="font-semibold text-gray-900">Autorización para el tratamiento de datos biométricos</p>
-
-              <p>
-                Mediante el presente documento, autorizo expresamente a <strong>FLEXIO</strong> para recopilar, 
-                almacenar y procesar mi imagen facial (dato biométrico) con el único propósito de 
-                <strong> registro y control de asistencia laboral</strong> mediante reconocimiento facial.
-              </p>
-
-              <p className="font-semibold text-gray-900 pt-2">Información sobre el tratamiento:</p>
-              <ul className="list-disc pl-5 space-y-1">
-                <li><strong>Dato recopilado:</strong> Imagen facial para generación de descriptor biométrico.</li>
-                <li><strong>Finalidad:</strong> Identificación automática para registro de ingreso y salida laboral.</li>
-                <li><strong>Responsable:</strong> FLEXIO.</li>
-                <li><strong>Almacenamiento:</strong> Servidores seguros en la nube con acceso restringido.</li>
-                <li><strong>Retención:</strong> Los datos se conservarán mientras exista la relación laboral. Al término, serán eliminados en un plazo máximo de 30 días.</li>
-                <li><strong>Acceso:</strong> Solo personal autorizado de administración tendrá acceso a estos datos.</li>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Colaborador creado</h3>
+            <p className="text-sm text-gray-600 mb-4">
+              Se ha enviado un correo de verificación a <strong>{showConsent.email || 'el colaborador'}</strong> para que confirme su identidad y autorice el uso de reconocimiento facial.
+            </p>
+            <div className="bg-gray-50 border border-gray-200 rounded-xl p-3 mb-4 text-left">
+              <p className="text-xs text-gray-500 mb-1 font-medium">El trabajador debe:</p>
+              <ul className="text-xs text-gray-600 space-y-1 pl-3">
+                <li>1. Abrir el correo que recibió</li>
+                <li>2. Verificar que la foto corresponde a su persona</li>
+                <li>3. Autorizar o rechazar el uso biométrico</li>
               </ul>
-
-              <p className="font-semibold text-gray-900 pt-2">Derechos del titular:</p>
-              <ul className="list-disc pl-5 space-y-1">
-                <li>Solicitar la eliminación de sus datos biométricos en cualquier momento.</li>
-                <li>Revocar este consentimiento, lo que implicará la eliminación de la imagen facial del sistema.</li>
-                <li>Acceder a la información almacenada sobre su persona.</li>
-                <li>Solicitar la rectificación de datos incorrectos.</li>
-              </ul>
-
-              <p className="text-xs text-gray-500 pt-2 border-t border-gray-200 mt-3">
-                Este consentimiento se otorga en cumplimiento de la Ley N° 19.628 sobre Protección de la Vida Privada 
-                y la Ley N° 21.719 sobre Protección de Datos Personales de Chile.
-              </p>
             </div>
-
-            <label className="flex items-start gap-3 mb-5 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={consentAccepted}
-                onChange={e => setConsentAccepted(e.target.checked)}
-                className="mt-1 w-5 h-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-              />
-              <span className="text-sm text-gray-700">
-                He leído y acepto el tratamiento de mis datos biométricos según lo descrito anteriormente.
-              </span>
-            </label>
-
-            <div className="flex flex-col gap-3">
-              <div className="flex gap-3">
-                <button onClick={() => { setShowConsent(null); setConsentAccepted(false); }}
-                  className="flex-1 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium transition-all">
-                  Cancelar
-                </button>
-                <button
-                  onClick={handleConsentAccepted}
-                  disabled={!consentAccepted}
-                  className="flex-1 py-3 bg-primary-600 hover:bg-primary-700 text-white rounded-xl font-medium transition-all disabled:opacity-40 disabled:cursor-not-allowed">
-                  Aceptar y Continuar
-                </button>
-              </div>
-              <button
-                onClick={() => { handleConsentDeclined(); }}
-                className="w-full py-3 border border-gray-200 hover:bg-orange-50 hover:border-orange-300 hover:text-orange-700 text-gray-600 rounded-xl text-sm font-medium transition-all active:scale-[0.98]">
-                No autorizo — Asignar marcaje por PIN
-              </button>
-              <p className="text-xs text-gray-400 text-center">
-                Se habilitará un PIN personal para registrar asistencia sin reconocimiento facial.
-              </p>
-            </div>
+            <p className="text-xs text-gray-400 mb-5">
+              El reconocimiento facial solo se habilitará cuando el trabajador autorice. Esta decisión es 100% responsabilidad del colaborador.
+            </p>
+            <button
+              onClick={() => { setShowConsent(null); setNewEmployeePhoto(showConsent); }}
+              className="w-full py-3 bg-primary-600 hover:bg-primary-700 text-white rounded-xl font-medium transition-all mb-2"
+            >
+              Continuar — Tomar foto
+            </button>
+            <button
+              onClick={() => setShowConsent(null)}
+              className="w-full py-2 text-sm text-gray-500 hover:text-gray-700"
+            >
+              Cerrar
+            </button>
           </div>
         </div>
       )}
