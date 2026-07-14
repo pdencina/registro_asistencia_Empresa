@@ -37,7 +37,7 @@ export default function ContractPage() {
         setTenantData(data.tenant);
         setContract(data.contract);
         setSelectedPlan(data.tenant?.plan || 'basico');
-        if (data.contract?.estado === 'firmado') {
+        if (data.contract?.estado === 'firmado' || data.contract?.estado === 'firmado_cliente') {
           setSigned(true);
         }
       } else {
@@ -151,7 +151,7 @@ export default function ContractPage() {
   }
 
   // Ya firmado — mostrar contrato completo con firmas
-  if ((signed || contract?.estado === 'firmado') && contract) {
+  if ((signed || contract?.estado === 'firmado' || contract?.estado === 'firmado_cliente') && contract) {
     const signedPlan = PLANES[contract.plan] || PLANES.basico;
     const fechaFirma = new Date(contract.firmado_at).toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric' });
     return (

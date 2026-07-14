@@ -32,6 +32,29 @@ module.exports = async function handler(req, res) {
   // GET - Listar tenants con stats
   if (req.method === 'GET') {
     try {
+      // Asegurar tabla contracts existe
+      await sql(`
+        CREATE TABLE IF NOT EXISTS contracts (
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          tenant_id UUID NOT NULL REFERENCES tenants(id),
+          plan VARCHAR(50) NOT NULL,
+          modalidad VARCHAR(20) NOT NULL DEFAULT 'mensual',
+          precio INTEGER,
+          firmante_nombre VARCHAR(200),
+          firmante_rut VARCHAR(20),
+          firmante_email VARCHAR(200),
+          firma_digital TEXT,
+          firmado_at TIMESTAMPTZ,
+          auditoria_firma JSONB,
+          prestador_firma TEXT,
+          prestador_firmado_at TIMESTAMPTZ,
+          prestador_auditoria JSONB,
+          estado VARCHAR(20) DEFAULT 'pendiente',
+          created_at TIMESTAMPTZ DEFAULT NOW(),
+          updated_at TIMESTAMPTZ DEFAULT NOW()
+        )
+      `);
+
       const tenants = await sql(`
         SELECT t.*,
                (SELECT COUNT(*) FROM employees e WHERE e.tenant_id = t.id) as employee_count,
