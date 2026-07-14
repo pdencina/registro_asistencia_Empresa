@@ -100,13 +100,13 @@ async function main() {
 
   console.log(`\n   Total: ${createdEmployees.length} empleados\n`);
 
-  // 2. Generate attendance for the last 10 working days
-  console.log('⏰ Registering attendance (last 10 working days)...\n');
+  // 2. Generate attendance for the last 60 working days (~3 months)
+  console.log('⏰ Registering attendance (last 60 working days / ~3 months)...\n');
 
   const today = new Date();
   const workingDays = [];
   const d = new Date(today);
-  while (workingDays.length < 10) {
+  while (workingDays.length < 60) {
     d.setDate(d.getDate() - 1);
     const dow = d.getDay();
     if (dow >= 1 && dow <= 5) {
@@ -127,14 +127,30 @@ async function main() {
       const emp = createdEmployees[i];
       const pattern = PATTERNS[i] || PATTERNS[0];
 
-      // Check if absent
-      if (Math.random() < pattern.absent_chance) {
+      // Check if absent — slightly vary by "month" within the period
+      const dayIndex = workingDays.indexOf(day);
+      const monthPhase = dayIndex < 20 ? 0 : dayIndex < 40 ? 1 : 2; // 0=first month, 1=second, 2=third
+      let absentChance = pattern.absent_chance;
+      // Some employees improve over time, some get worse
+      if (i === 7) absentChance = [0.15, 0.10, 0.05][monthPhase]; // Felipe improves
+      if (i === 3) absentChance = [0.05, 0.08, 0.12][monthPhase]; // Jorge gets worse
+
+      if (Math.random() < absentChance) {
         totalAbsent++;
-        continue; // Skip this employee for this day
+        continue;
       }
 
-      // Generate entry time
-      const entryMinutes = randomBetween(pattern.arrival[0], pattern.arrival[1]);
+      // Generate entry time — slight variation by month
+      let arrivalMin = pattern.arrival[0];
+      let arrivalMax = pattern.arrival[1];
+      // Roberto and Ignacio: consistently early all 3 months (bono puntualidad)
+      // Felipe: starts very late, improves month by month
+      if (i === 7) { // Felipe
+        arrivalMin = [520, 505, 490][monthPhase];
+        arrivalMax = [560, 530, 510][monthPhase];
+      }
+
+      const entryMinutes = randomBetween(arrivalMin, arrivalMax);
       const exitMinutes = randomBetween(pattern.departure[0], pattern.departure[1]);
 
       // Create entry timestamp (Chile time → UTC)
