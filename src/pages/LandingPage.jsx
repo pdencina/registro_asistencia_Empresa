@@ -186,42 +186,57 @@ export default function LandingPage() {
     {
       icon: <Smartphone className="w-6 h-6" />,
       title: 'Marcaje Móvil con GPS',
-      description: 'Tu equipo en terreno marca desde su celular con selfie y geolocalización en tiempo real.',
-    },
-    {
-      icon: <Clock className="w-6 h-6" />,
-      title: 'Cálculo de Horas Extra',
-      description: 'El sistema calcula automáticamente las horas extra de cada colaborador. Exporta a Excel.',
+      description: 'Tu equipo en terreno marca desde su celular con selfie y geolocalización verificada.',
     },
     {
       icon: <BarChart3 className="w-6 h-6" />,
-      title: 'Reportes en Tiempo Real',
-      description: 'Dashboard con métricas de asistencia, atrasos, ausencias y salidas anticipadas al instante.',
+      title: 'Dashboard Interactivo',
+      description: 'KPIs en tiempo real, gráficos de tendencia, ranking de atrasos y sugerencias automáticas del sistema.',
     },
     {
       icon: <MapPin className="w-6 h-6" />,
-      title: 'Geolocalización',
-      description: 'Verifica que el registro se realice desde la ubicación autorizada. Coordenadas GPS en cada marcaje.',
-    },
-    {
-      icon: <Shield className="w-6 h-6" />,
-      title: 'Cumplimiento Legal',
-      description: 'Cumple con la Ley 21.719. Consentimiento biométrico integrado. Datos encriptados.',
-    },
-    {
-      icon: <Users className="w-6 h-6" />,
-      title: 'Gestión de Turnos',
-      description: 'Configura horarios, tolerancias y turnos rotativos. Control automático de atrasos.',
+      title: 'Geolocalización Verificada',
+      description: 'Dirección real en cada marcaje. Restricción por radio de proximidad configurable.',
     },
     {
       icon: <Clock className="w-6 h-6" />,
-      title: 'Notificaciones Automáticas',
-      description: 'Cada colaborador recibe un comprobante por email con hora, fecha y ubicación del registro.',
+      title: 'Horas Extra Inteligentes',
+      description: 'Solo cuenta tiempo post-horario (llegar temprano no suma HE). Bono de puntualidad automático.',
+    },
+    {
+      icon: <Users className="w-6 h-6" />,
+      title: 'Turnos Rotativos',
+      description: 'Jornada partida, turnos 4x4, 7x7 y custom. Se adapta a cualquier industria.',
+    },
+    {
+      icon: <Shield className="w-6 h-6" />,
+      title: 'Consentimiento Biométrico',
+      description: 'Cumple Ley 21.719. Cada trabajador autoriza el uso de su dato facial desde su email.',
+    },
+    {
+      icon: <CheckCircle className="w-6 h-6" />,
+      title: 'Alertas Automáticas',
+      description: 'Email al administrador a las 9:15 AM si alguien no ha marcado. Sin intervención manual.',
+    },
+    {
+      icon: <Clock className="w-6 h-6" />,
+      title: 'Vacaciones y Permisos',
+      description: 'Solicitudes online, aprobación con un click, saldo de días por ley (15 días/año).',
     },
     {
       icon: <Smartphone className="w-6 h-6" />,
-      title: 'Multi-dispositivo',
-      description: 'Funciona en tablets, celulares y cualquier dispositivo con cámara. Se instala como app.',
+      title: 'Calendario Visual',
+      description: 'Vista mensual color-coded por colaborador. Verde presente, rojo ausente, amarillo tarde.',
+    },
+    {
+      icon: <BarChart3 className="w-6 h-6" />,
+      title: 'Libro de Asistencia DT',
+      description: 'Exporta en un click el formato que la Dirección del Trabajo exige en fiscalizaciones.',
+    },
+    {
+      icon: <Shield className="w-6 h-6" />,
+      title: 'Roles y Permisos',
+      description: 'Admin, Supervisor, RRHH. Cada perfil ve lo que corresponde. Control de acceso granular.',
     },
   ];
 
