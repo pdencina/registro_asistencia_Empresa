@@ -91,6 +91,10 @@ export const attendanceApi = {
     return request(`/attendance/reports${query ? `?${query}` : ''}`);
   },
   getLibroAsistencia: (start_date, end_date) => request(`/attendance/libro-asistencia?start_date=${start_date}&end_date=${end_date}`),
+  getCalendar: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return request(`/attendance/calendar${query ? `?${query}` : ''}`);
+  },
 };
 
 // Devices API
