@@ -129,6 +129,9 @@ module.exports = async function handler(req, res) {
         const planNombres = { basico: 'Básico', profesional: 'Profesional', enterprise: 'Enterprise' };
         const planNombre = planNombres[plan || tenant.plan] || plan || tenant.plan;
         const precioFormatted = precio ? new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(precio) : '';
+        const ivaAmount = precio ? Math.round(precio * 0.19) : 0;
+        const totalConIva = precio ? new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(precio + ivaAmount) : '';
+        const ivaFormatted = precio ? new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(ivaAmount) : '';
         const fechaFirma = new Date(timestamp).toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
         const emailHtml = `
@@ -156,7 +159,9 @@ module.exports = async function handler(req, res) {
               <tr><td style="padding:5px 0;font-size:13px;color:#64748b;width:130px;">Empresa:</td><td style="padding:5px 0;font-size:13px;color:#0f172a;font-weight:600;">${tenant.name}</td></tr>
               <tr><td style="padding:5px 0;font-size:13px;color:#64748b;">Plan:</td><td style="padding:5px 0;font-size:13px;color:#0f172a;font-weight:600;">${planNombre}</td></tr>
               <tr><td style="padding:5px 0;font-size:13px;color:#64748b;">Modalidad:</td><td style="padding:5px 0;font-size:13px;color:#0f172a;font-weight:600;">${(modalidad || 'mensual').charAt(0).toUpperCase() + (modalidad || 'mensual').slice(1)}</td></tr>
-              ${precioFormatted ? `<tr><td style="padding:5px 0;font-size:13px;color:#64748b;">Precio:</td><td style="padding:5px 0;font-size:13px;color:#0f172a;font-weight:600;">${precioFormatted} ${modalidad === 'anual' ? '/año' : '/mes'}</td></tr>` : ''}
+              ${precioFormatted ? `<tr><td style="padding:5px 0;font-size:13px;color:#64748b;">Precio neto:</td><td style="padding:5px 0;font-size:13px;color:#0f172a;font-weight:600;">${precioFormatted} ${modalidad === 'anual' ? '/año' : '/mes'}</td></tr>
+              <tr><td style="padding:5px 0;font-size:13px;color:#64748b;">IVA (19%):</td><td style="padding:5px 0;font-size:13px;color:#0f172a;font-weight:600;">${ivaFormatted}</td></tr>
+              <tr style="border-top:1px solid #e2e8f0;"><td style="padding:8px 0 5px;font-size:14px;color:#0f172a;font-weight:700;">Total a pagar:</td><td style="padding:8px 0 5px;font-size:14px;color:#059669;font-weight:700;">${totalConIva} ${modalidad === 'anual' ? '/año' : '/mes'}</td></tr>` : ''}
               <tr><td style="padding:5px 0;font-size:13px;color:#64748b;">Firmante:</td><td style="padding:5px 0;font-size:13px;color:#0f172a;font-weight:600;">${firmante_nombre} (${firmante_rut})</td></tr>
               <tr><td style="padding:5px 0;font-size:13px;color:#64748b;">Fecha firma:</td><td style="padding:5px 0;font-size:13px;color:#0f172a;font-weight:600;">${fechaFirma}</td></tr>
             </table>
