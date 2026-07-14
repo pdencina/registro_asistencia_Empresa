@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { MapPin, Shield, Loader, ToggleLeft, ToggleRight, Bell, Send } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { MapPin, Shield, Loader, ToggleLeft, ToggleRight, Bell, Send, Building2, Upload, Trash2 } from 'lucide-react';
 
 const API_BASE = '/api';
 
@@ -9,9 +9,13 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
   const [testingWebhook, setTestingWebhook] = useState(false);
+  const [logoUrl, setLogoUrl] = useState(null);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const logoInputRef = useRef(null);
 
   useEffect(() => {
     loadSettings();
+    loadLogo();
   }, []);
 
   async function loadSettings() {
@@ -25,6 +29,86 @@ export default function SettingsPage() {
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function loadLogo() {
+    try {
+      const res = await fetch(`${API_BASE}/settings/logo`);
+      if (res.ok) {
+        const data = await res.json();
+        setLogoUrl(data.logo_url);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function handleLogoUpload(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setMessage('Error: Solo se permiten archivos de imagen');
+      setTimeout(() => setMessage(''), 3000);
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      setMessage('Error: El archivo no debe superar 2 MB');
+      setTimeout(() => setMessage(''), 3000);
+      return;
+    }
+
+    setUploadingLogo(true);
+    setMessage('');
+
+    try {
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const base64 = reader.result;
+        const res = await fetch(`${API_BASE}/settings/logo`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ logo: base64 }),
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          setLogoUrl(data.logo_url);
+          setMessage('Logo actualizado correctamente');
+        } else {
+          const err = await res.json();
+          setMessage(err.error || 'Error al subir logo');
+        }
+        setUploadingLogo(false);
+        setTimeout(() => setMessage(''), 3000);
+      };
+      reader.readAsDataURL(file);
+    } catch (err) {
+      setMessage('Error de conexión');
+      setUploadingLogo(false);
+      setTimeout(() => setMessage(''), 3000);
+    }
+
+    // Reset input
+    if (logoInputRef.current) logoInputRef.current.value = '';
+  }
+
+  async function handleLogoDelete() {
+    if (!confirm('¿Eliminar el logo de la empresa?')) return;
+    setUploadingLogo(true);
+    try {
+      const res = await fetch(`${API_BASE}/settings/logo`, { method: 'DELETE' });
+      if (res.ok) {
+        setLogoUrl(null);
+        setMessage('Logo eliminado');
+      }
+    } catch (err) {
+      setMessage('Error de conexión');
+    } finally {
+      setUploadingLogo(false);
+      setTimeout(() => setMessage(''), 3000);
     }
   }
 
@@ -95,6 +179,60 @@ export default function SettingsPage() {
           {message}
         </div>
       )}
+
+      {/* Logo de empresa */}
+      <div className="card mb-6">
+        <div className="flex items-center gap-3 mb-6">
+          <Building2 className="w-5 h-5 text-primary-600" />
+          <h3 className="font-bold text-gray-900">Logo de la Empresa</h3>
+        </div>
+
+        <div className="flex items-center gap-6">
+          {/* Preview */}
+          <div className="w-24 h-24 rounded-xl border-2 border-dashed border-gray-200 flex items-center justify-center overflow-hidden bg-gray-50 shrink-0">
+            {logoUrl ? (
+              <img src={logoUrl} alt="Logo empresa" className="w-full h-full object-contain p-2" />
+            ) : (
+              <Building2 className="w-10 h-10 text-gray-300" />
+            )}
+          </div>
+
+          {/* Actions */}
+          <div className="flex-1">
+            <p className="text-sm text-gray-500 mb-3">
+              Este logo se mostrará a tus colaboradores cuando registren su asistencia.
+            </p>
+            <div className="flex items-center gap-2">
+              <input
+                ref={logoInputRef}
+                type="file"
+                accept="image/png,image/jpeg,image/svg+xml,image/webp"
+                onChange={handleLogoUpload}
+                className="hidden"
+              />
+              <button
+                onClick={() => logoInputRef.current?.click()}
+                disabled={uploadingLogo}
+                className="flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-xl text-sm font-medium transition-all disabled:opacity-50"
+              >
+                <Upload className="w-4 h-4" />
+                {uploadingLogo ? 'Subiendo...' : logoUrl ? 'Cambiar Logo' : 'Subir Logo'}
+              </button>
+              {logoUrl && (
+                <button
+                  onClick={handleLogoDelete}
+                  disabled={uploadingLogo}
+                  className="flex items-center gap-2 px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl text-sm font-medium transition-all disabled:opacity-50"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Eliminar
+                </button>
+              )}
+            </div>
+            <p className="text-xs text-gray-400 mt-2">PNG, JPG, SVG o WebP. Máximo 2 MB.</p>
+          </div>
+        </div>
+      </div>
 
       <div className="card">
         <div className="flex items-center gap-3 mb-6">

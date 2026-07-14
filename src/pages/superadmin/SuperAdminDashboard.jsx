@@ -123,9 +123,20 @@ export default function SuperAdminDashboard({ onLogout }) {
                 {filtered.map(tenant => (
                   <tr key={tenant.id} className="border-b border-gray-700/50 hover:bg-gray-750">
                     <td className="px-5 py-4">
-                      <p className="font-medium text-white">{tenant.name}</p>
-                      <p className="text-xs text-gray-400">flexio.cl/app/{tenant.slug}</p>
-                      <p className="text-xs text-gray-500">{tenant.admin_email}</p>
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-lg bg-gray-700 flex items-center justify-center shrink-0 overflow-hidden">
+                          {tenant.logo_url ? (
+                            <img src={tenant.logo_url} alt="" className="w-full h-full object-contain p-1" />
+                          ) : (
+                            <Building2 className="w-4 h-4 text-gray-500" />
+                          )}
+                        </div>
+                        <div>
+                          <p className="font-medium text-white">{tenant.name}</p>
+                          <p className="text-xs text-gray-400">flexio.cl/app/{tenant.slug}</p>
+                          <p className="text-xs text-gray-500">{tenant.admin_email}</p>
+                        </div>
+                      </div>
                     </td>
                     <td className="px-5 py-4">
                       <span className={`text-xs px-2 py-1 rounded-full font-medium ${

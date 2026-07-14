@@ -153,10 +153,10 @@ module.exports = async function handler(req, res) {
     }
   }
 
-  // PUT - Actualizar tenant (activar/pausar, cambiar plan)
+  // PUT - Actualizar tenant (activar/pausar, cambiar plan, logo)
   if (req.method === 'PUT') {
     try {
-      const { id, active, plan, max_employees, max_devices } = req.body;
+      const { id, active, plan, max_employees, max_devices, logo_url } = req.body;
 
       if (!id) return res.status(400).json({ error: 'id es obligatorio' });
 
@@ -179,6 +179,10 @@ module.exports = async function handler(req, res) {
       if (max_devices) {
         updates.push(`max_devices = $${paramIndex++}`);
         values.push(max_devices);
+      }
+      if (logo_url !== undefined) {
+        updates.push(`logo_url = $${paramIndex++}`);
+        values.push(logo_url || null);
       }
 
       updates.push(`updated_at = NOW()`);

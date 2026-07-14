@@ -16,6 +16,23 @@ export default function PinCheckInPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [confirmData, setConfirmData] = useState(null);
+  const [tenantLogo, setTenantLogo] = useState(null);
+
+  // Cargar logo del tenant
+  useEffect(() => {
+    async function loadLogo() {
+      try {
+        const res = await fetch('/api/settings/logo', {
+          headers: tenant ? { 'x-tenant-slug': tenant } : {},
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.logo_url) setTenantLogo(data.logo_url);
+        }
+      } catch (e) {}
+    }
+    loadLogo();
+  }, [tenant]);
 
   async function handlePinSubmit(e) {
     e.preventDefault();
@@ -96,7 +113,11 @@ export default function PinCheckInPage() {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col">
         <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-2">
-          <img src="/logo-flexio.svg" alt="Flexio" className="h-6" />
+          {tenantLogo ? (
+            <img src={tenantLogo} alt="Logo empresa" className="h-7 max-w-[120px] object-contain" />
+          ) : (
+            <img src="/logo-flexio.svg" alt="Flexio" className="h-6" />
+          )}
           <span className="text-xs text-gray-400">Marcaje por PIN</span>
         </header>
 
@@ -147,7 +168,11 @@ export default function PinCheckInPage() {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col">
         <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-2">
-          <img src="/logo-flexio.svg" alt="Flexio" className="h-6" />
+          {tenantLogo ? (
+            <img src={tenantLogo} alt="Logo empresa" className="h-7 max-w-[120px] object-contain" />
+          ) : (
+            <img src="/logo-flexio.svg" alt="Flexio" className="h-6" />
+          )}
         </header>
 
         <div className="flex-1 flex items-center justify-center p-6">
