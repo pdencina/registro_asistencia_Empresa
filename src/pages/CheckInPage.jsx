@@ -49,7 +49,13 @@ export default function CheckInPage() {
   useEffect(() => {
     async function loadLogo() {
       try {
-        const res = await fetch('/api/settings/logo');
+        // Extraer slug del tenant desde la URL
+        const path = window.location.pathname;
+        const match = path.match(/^\/(app|admin|marcar|pin)\/([^/]+)/);
+        const slug = match ? match[2] : null;
+        const res = await fetch('/api/settings/logo', {
+          headers: slug ? { 'x-tenant-slug': slug } : {},
+        });
         if (res.ok) {
           const data = await res.json();
           if (data.logo_url) setTenantLogo(data.logo_url);
