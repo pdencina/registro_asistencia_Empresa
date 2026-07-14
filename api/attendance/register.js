@@ -65,23 +65,25 @@ module.exports = async function handler(req, res) {
     if (employee.email) {
       const RESEND_API_KEY = process.env.RESEND_API_KEY;
       if (RESEND_API_KEY) {
-        // Intentar obtener dirección legible de las coordenadas
-        let locationText = notes || null;
+        // Obtener dirección real siempre (reverse geocoding)
+        let locationText = null;
+
         if (notes && notes.includes('GPS:')) {
+          // Marcaje móvil: tiene coordenadas en las notas
           const gpsMatch = notes.match(/GPS:\s*([-\d.]+),\s*([-\d.]+)/);
           if (gpsMatch) {
-            const address = await reverseGeocode(gpsMatch[1], gpsMatch[2]);
-            if (address) locationText = address;
+            locationText = await reverseGeocode(gpsMatch[1], gpsMatch[2]);
           }
-        } else if (!notes) {
-          // Kiosco: buscar la ubicación del dispositivo en la BD
+        }
+
+        if (!locationText) {
+          // Buscar ubicación del dispositivo registrado para este tenant
           const [device] = await sql(
-            'SELECT lat, lng, name FROM authorized_devices WHERE tenant_id = $1 AND active = true LIMIT 1',
+            'SELECT lat, lng FROM authorized_devices WHERE tenant_id = $1 AND active = true LIMIT 1',
             [tenant.id]
           );
           if (device && device.lat && device.lng) {
-            const address = await reverseGeocode(device.lat, device.lng);
-            locationText = address || `${device.name || 'Kiosco'} (${device.lat}, ${device.lng})`;
+            locationText = await reverseGeocode(device.lat, device.lng);
           }
         }
 
@@ -166,10 +168,7 @@ async function sendAttendanceEmail(apiKey, employee, type, timestamp, notes) {
             ${notes ? `<tr>
               <td style="padding:12px 16px;font-size:13px;color:#64748b;background:#f8fafc;">Ubicación</td>
               <td style="padding:12px 16px;font-size:13px;color:#0f172a;">📍 ${notes}</td>
-            </tr>` : `<tr>
-              <td style="padding:12px 16px;font-size:13px;color:#64748b;background:#f8fafc;">Ubicación</td>
-              <td style="padding:12px 16px;font-size:13px;color:#0f172a;">📍 Dispositivo autorizado (kiosco)</td>
-            </tr>`}
+            </tr>` : ''}
           </table>
         </td></tr>
 

@@ -478,7 +478,7 @@ export default function CheckInPage() {
   }
 
   // ═══════════════════════════════════════════════════════════
-  // STEP: PIN_INPUT — Marcaje por PIN integrado en kiosko
+  // STEP: PIN_INPUT — Marcaje por PIN integrado en punto de registro
   // ═══════════════════════════════════════════════════════════
   if (step === STEP_PIN_INPUT) {
     return <KioskPinMode onDone={resetFlow} />;
@@ -919,7 +919,7 @@ export default function CheckInPage() {
 }
 
 
-// Componente de marcaje por PIN integrado en el kiosko
+// Componente de marcaje por PIN integrado en el punto de registro
 function KioskPinMode({ onDone }) {
   const [pin, setPin] = useState('');
   const [employee, setEmployee] = useState(null);

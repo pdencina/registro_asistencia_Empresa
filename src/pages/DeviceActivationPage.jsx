@@ -6,7 +6,7 @@ import { getCurrentPosition, saveAuthorizedLocation } from '../utils/geolocation
 
 export default function DeviceActivationPage({ onActivated }) {
   const [pin, setPin] = useState('');
-  const [name, setName] = useState('Tótem Principal');
+  const [name, setName] = useState('Punto de Registro Principal');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPin, setShowPin] = useState(false);
@@ -80,7 +80,7 @@ export default function DeviceActivationPage({ onActivated }) {
               type="text"
               value={name}
               onChange={e => setName(e.target.value)}
-              placeholder="Ej: Tótem Recepción"
+              placeholder="Ej: Punto de Registro Recepción"
               className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none"
             />
           </div>
@@ -89,7 +89,7 @@ export default function DeviceActivationPage({ onActivated }) {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               <MapPin className="w-4 h-4 inline mr-1" />
-              Ubicación del tótem
+              Ubicación del dispositivo
             </label>
             <div className={`px-4 py-3 rounded-xl border text-sm ${
               location ? 'bg-emerald-50 border-emerald-200 text-emerald-700' :

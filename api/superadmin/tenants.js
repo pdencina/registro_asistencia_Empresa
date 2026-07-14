@@ -297,7 +297,7 @@ function buildWelcomeEmail({ tenantName, slug, adminEmail, tempPassword, deviceP
               </div>
 
               <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:20px;margin:20px 0;">
-                <p style="font-size:13px;color:#166534;margin:0 0 8px 0;font-weight:600;">URL del kiosko de registro</p>
+                <p style="font-size:13px;color:#166534;margin:0 0 8px 0;font-weight:600;">URL del punto de registro</p>
                 <p style="font-size:13px;color:#14532d;margin:0;">
                   Tus colaboradores marcan asistencia en:<br>
                   <a href="https://flexio.cl/app/${slug}" style="color:#166534;font-weight:600;font-size:15px;">flexio.cl/app/${slug}</a>

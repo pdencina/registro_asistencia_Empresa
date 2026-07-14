@@ -100,7 +100,7 @@ export default function CreateTenantModal({ onClose, onCreated }) {
           <div className="bg-gray-900 rounded-xl p-4 text-left space-y-2 mb-6">
             <p className="text-sm text-gray-400">Empresa: <span className="text-white font-medium">{success.tenant?.name}</span></p>
             <p className="text-sm text-gray-400">URL Panel: <span className="text-primary-400 font-medium">flexio.cl/admin/{success.tenant?.slug}</span></p>
-            <p className="text-sm text-gray-400">URL Kiosko: <span className="text-emerald-400 font-medium">flexio.cl/app/{success.tenant?.slug}</span></p>
+            <p className="text-sm text-gray-400">URL Registro: <span className="text-emerald-400 font-medium">flexio.cl/app/{success.tenant?.slug}</span></p>
             <p className="text-sm text-gray-400">Email: <span className="text-white font-medium">{form.admin_email}</span></p>
             <p className="text-sm text-gray-400">Contraseña: <span className="text-white font-mono font-bold text-lg">{success.temp_password}</span></p>
             <p className="text-sm text-gray-400">PIN dispositivo: <span className="text-white font-mono font-bold">{form.admin_pin}</span></p>

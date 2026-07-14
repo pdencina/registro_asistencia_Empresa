@@ -250,7 +250,7 @@ export default function SettingsPage() {
       <div className="card">
         <div className="flex items-center gap-3 mb-6">
           <Shield className="w-5 h-5 text-primary-600" />
-          <h3 className="font-bold text-gray-900">Seguridad del Tótem</h3>
+          <h3 className="font-bold text-gray-900">Seguridad del Punto de Registro</h3>
         </div>
 
         {/* Geolocation toggle */}
@@ -261,8 +261,8 @@ export default function SettingsPage() {
               <p className="font-medium text-gray-900">Verificación por Geolocalización</p>
               <p className="text-sm text-gray-500">
                 {settings.geolocation_enabled
-                  ? 'El tótem solo funciona desde la ubicación autorizada (200m)'
-                  : 'El tótem funciona desde cualquier ubicación'
+                  ? 'El punto de registro solo funciona desde la ubicación autorizada (200m)'
+                  : 'El punto de registro funciona desde cualquier ubicación'
                 }
               </p>
             </div>
