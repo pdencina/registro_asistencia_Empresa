@@ -8,7 +8,7 @@ export default function SchedulesPage() {
   const [authorizers, setAuthorizers] = useState([]);
   const [activeTab, setActiveTab] = useState('schedules'); // schedules | assign | authorizers
   const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState({ name: '', entry_time: '08:30', exit_time: '18:00', tolerance_minutes: 10, is_default: false, block2_entry_time: '', block2_exit_time: '' });
+  const [formData, setFormData] = useState({ name: '', entry_time: '08:30', exit_time: '18:00', tolerance_minutes: 10, is_default: false, block2_entry_time: '', block2_exit_time: '', shift_type: 'fixed', rotation_days_on: '', rotation_days_off: '', rotation_start_date: '' });
   const [showBlock2, setShowBlock2] = useState(false);
   const [newAuthorizer, setNewAuthorizer] = useState({ name: '', position: '' });
   const [assignData, setAssignData] = useState({ employee_id: '', schedule_id: '', custom_entry_time: '', custom_exit_time: '' });
@@ -37,10 +37,15 @@ export default function SchedulesPage() {
         payload.block2_entry_time = null;
         payload.block2_exit_time = null;
       }
+      if (payload.shift_type !== 'rotating') {
+        payload.rotation_days_on = null;
+        payload.rotation_days_off = null;
+        payload.rotation_start_date = null;
+      }
       await schedulesApi.create(payload);
       setShowForm(false);
       setShowBlock2(false);
-      setFormData({ name: '', entry_time: '08:30', exit_time: '18:00', tolerance_minutes: 10, is_default: false, block2_entry_time: '', block2_exit_time: '' });
+      setFormData({ name: '', entry_time: '08:30', exit_time: '18:00', tolerance_minutes: 10, is_default: false, block2_entry_time: '', block2_exit_time: '', shift_type: 'fixed', rotation_days_on: '', rotation_days_off: '', rotation_start_date: '' });
       loadData();
       showMsg('Horario creado');
     } catch (err) { showMsg(err.message); }
@@ -135,6 +140,9 @@ export default function SchedulesPage() {
                     {sch.block2_entry_time && sch.block2_exit_time && (
                       <span className="ml-2 text-primary-600 font-medium">+ Bloque 2: {sch.block2_entry_time?.slice(0,5)} — {sch.block2_exit_time?.slice(0,5)}</span>
                     )}
+                    {sch.shift_type === 'rotating' && (
+                      <span className="ml-2 text-purple-600 font-medium">· Rotativo {sch.rotation_days_on}x{sch.rotation_days_off}</span>
+                    )}
                   </p>
                 </div>
                 <button onClick={() => handleDeleteSchedule(sch.id)} className="p-2 text-gray-400 hover:text-red-600 rounded-lg">
@@ -204,6 +212,41 @@ export default function SchedulesPage() {
                             className="w-full px-3 py-2 border border-blue-200 rounded-lg outline-none text-sm" />
                         </div>
                         <p className="col-span-2 text-xs text-blue-600">Ej: Bloque 1 (08:00-13:00), Bloque 2 (15:00-18:00)</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Rotating shifts */}
+                  <div className="border-t border-gray-200 pt-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de turno</label>
+                    <select value={formData.shift_type} onChange={e => setFormData({...formData, shift_type: e.target.value})}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl outline-none mb-3">
+                      <option value="fixed">Fijo (Lunes a Viernes)</option>
+                      <option value="rotating">Rotativo (por ciclo)</option>
+                    </select>
+
+                    {formData.shift_type === 'rotating' && (
+                      <div className="bg-purple-50 p-3 rounded-xl space-y-3">
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-xs font-medium text-purple-700 mb-1">Días de trabajo</label>
+                            <input type="number" value={formData.rotation_days_on} onChange={e => setFormData({...formData, rotation_days_on: e.target.value})}
+                              min="1" max="30" placeholder="Ej: 4"
+                              className="w-full px-3 py-2 border border-purple-200 rounded-lg outline-none text-sm" />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-purple-700 mb-1">Días de descanso</label>
+                            <input type="number" value={formData.rotation_days_off} onChange={e => setFormData({...formData, rotation_days_off: e.target.value})}
+                              min="1" max="30" placeholder="Ej: 4"
+                              className="w-full px-3 py-2 border border-purple-200 rounded-lg outline-none text-sm" />
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-purple-700 mb-1">Fecha inicio del ciclo</label>
+                          <input type="date" value={formData.rotation_start_date} onChange={e => setFormData({...formData, rotation_start_date: e.target.value})}
+                            className="w-full px-3 py-2 border border-purple-200 rounded-lg outline-none text-sm" />
+                        </div>
+                        <p className="text-xs text-purple-600">Ej: 4x4 = 4 días trabajando, 4 días libres. 7x7 = una semana sí, una no.</p>
                       </div>
                     )}
                   </div>

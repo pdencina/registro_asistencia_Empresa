@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Clock, LogIn, LogOut, Filter, Trash2, AlertTriangle } from 'lucide-react';
+import { Clock, LogIn, LogOut, Filter, Trash2, AlertTriangle, Camera, X } from 'lucide-react';
 import { attendanceApi } from '../api';
 
 export default function AttendancePage() {
   const [records, setRecords] = useState([]);
+  const [viewPhoto, setViewPhoto] = useState(null);
   const [view, setView] = useState('today');
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [deleting, setDeleting] = useState(false);
@@ -141,13 +142,24 @@ export default function AttendancePage() {
                   </td>
                   <td className="px-6 py-4 text-gray-500">{record.department || '—'}</td>
                   <td className="px-6 py-4 text-right">
-                    <button
-                      onClick={() => setDeleteRecord(record)}
-                      className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                    <div className="flex items-center justify-end gap-1">
+                      {record.photo_snapshot_url && (
+                        <button
+                          onClick={() => setViewPhoto({ url: record.photo_snapshot_url, name: `${record.first_name} ${record.last_name}`, time: new Date(record.timestamp).toLocaleString('es-CL'), type: record.type })}
+                          className="p-2 text-primary-500 hover:text-primary-700 hover:bg-primary-50 rounded-lg transition-all"
+                          title="Ver foto del marcaje"
+                        >
+                          <Camera className="w-4 h-4" />
+                        </button>
+                      )}
+                      <button
+                        onClick={() => setDeleteRecord(record)}
+                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
                       title="Eliminar registro"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -183,6 +195,23 @@ export default function AttendancePage() {
                 className="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium transition-all disabled:opacity-50">
                 {deleting ? 'Eliminando...' : 'Eliminar'}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Modal Ver foto del marcaje */}
+      {viewPhoto && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4" onClick={() => setViewPhoto(null)}>
+          <div className="bg-white rounded-2xl overflow-hidden w-full max-w-sm shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="relative">
+              <img src={viewPhoto.url} alt="Foto marcaje" className="w-full aspect-[4/3] object-cover" />
+              <button onClick={() => setViewPhoto(null)} className="absolute top-3 right-3 w-8 h-8 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center">
+                <X className="w-4 h-4" />
+              </button>
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+                <p className="text-white font-medium">{viewPhoto.name}</p>
+                <p className="text-white/80 text-sm">{viewPhoto.type === 'entry' ? 'Entrada' : 'Salida'} · {viewPhoto.time}</p>
+              </div>
             </div>
           </div>
         </div>

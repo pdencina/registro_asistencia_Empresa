@@ -17,13 +17,21 @@ module.exports = async function handler(req, res) {
       is_default BOOLEAN DEFAULT false,
       block2_entry_time TIME,
       block2_exit_time TIME,
+      shift_type VARCHAR(20) DEFAULT 'fixed',
+      rotation_days_on INTEGER,
+      rotation_days_off INTEGER,
+      rotation_start_date DATE,
       created_at TIMESTAMPTZ DEFAULT NOW()
     )
   `);
 
-  // Add block2 columns if table already exists
+  // Add new columns if table already exists
   await sql('ALTER TABLE work_schedules ADD COLUMN IF NOT EXISTS block2_entry_time TIME');
   await sql('ALTER TABLE work_schedules ADD COLUMN IF NOT EXISTS block2_exit_time TIME');
+  await sql('ALTER TABLE work_schedules ADD COLUMN IF NOT EXISTS shift_type VARCHAR(20) DEFAULT \'fixed\'');
+  await sql('ALTER TABLE work_schedules ADD COLUMN IF NOT EXISTS rotation_days_on INTEGER');
+  await sql('ALTER TABLE work_schedules ADD COLUMN IF NOT EXISTS rotation_days_off INTEGER');
+  await sql('ALTER TABLE work_schedules ADD COLUMN IF NOT EXISTS rotation_start_date DATE');
 
   await sql(`
     CREATE TABLE IF NOT EXISTS employee_schedules (
@@ -77,10 +85,14 @@ module.exports = async function handler(req, res) {
 
     // POST: Create a new schedule
     if (req.method === 'POST') {
-      const { name, entry_time, exit_time, tolerance_minutes, is_default, block2_entry_time, block2_exit_time } = req.body;
+      const { name, entry_time, exit_time, tolerance_minutes, is_default, block2_entry_time, block2_exit_time, shift_type, rotation_days_on, rotation_days_off, rotation_start_date } = req.body;
 
       if (!name || !entry_time || !exit_time) {
         return res.status(400).json({ error: 'Nombre, hora de entrada y salida son obligatorios' });
+      }
+
+      if (shift_type === 'rotating' && (!rotation_days_on || !rotation_days_off)) {
+        return res.status(400).json({ error: 'Para turnos rotativos se requieren días de trabajo y descanso' });
       }
 
       // If setting as default, unset others
@@ -89,17 +101,17 @@ module.exports = async function handler(req, res) {
       }
 
       const [schedule] = await sql(`
-        INSERT INTO work_schedules (id, name, entry_time, exit_time, tolerance_minutes, is_default, block2_entry_time, block2_exit_time)
-        VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7)
+        INSERT INTO work_schedules (id, name, entry_time, exit_time, tolerance_minutes, is_default, block2_entry_time, block2_exit_time, shift_type, rotation_days_on, rotation_days_off, rotation_start_date)
+        VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
         RETURNING *
-      `, [name, entry_time, exit_time, tolerance_minutes || 10, is_default || false, block2_entry_time || null, block2_exit_time || null]);
+      `, [name, entry_time, exit_time, tolerance_minutes || 10, is_default || false, block2_entry_time || null, block2_exit_time || null, shift_type || 'fixed', rotation_days_on || null, rotation_days_off || null, rotation_start_date || null]);
 
       return res.status(201).json(schedule);
     }
 
     // PUT: Update a schedule
     if (req.method === 'PUT') {
-      const { id, name, entry_time, exit_time, tolerance_minutes, is_default, block2_entry_time, block2_exit_time } = req.body;
+      const { id, name, entry_time, exit_time, tolerance_minutes, is_default, block2_entry_time, block2_exit_time, shift_type, rotation_days_on, rotation_days_off, rotation_start_date } = req.body;
 
       if (!id) return res.status(400).json({ error: 'id es requerido' });
 
@@ -108,9 +120,9 @@ module.exports = async function handler(req, res) {
       }
 
       await sql(`
-        UPDATE work_schedules SET name = $1, entry_time = $2, exit_time = $3, tolerance_minutes = $4, is_default = $5, block2_entry_time = $6, block2_exit_time = $7
-        WHERE id = $8
-      `, [name, entry_time, exit_time, tolerance_minutes, is_default, block2_entry_time || null, block2_exit_time || null, id]);
+        UPDATE work_schedules SET name = $1, entry_time = $2, exit_time = $3, tolerance_minutes = $4, is_default = $5, block2_entry_time = $6, block2_exit_time = $7, shift_type = $8, rotation_days_on = $9, rotation_days_off = $10, rotation_start_date = $11
+        WHERE id = $12
+      `, [name, entry_time, exit_time, tolerance_minutes, is_default, block2_entry_time || null, block2_exit_time || null, shift_type || 'fixed', rotation_days_on || null, rotation_days_off || null, rotation_start_date || null, id]);
 
       const [updated] = await sql('SELECT * FROM work_schedules WHERE id = $1', [id]);
       return res.status(200).json(updated);

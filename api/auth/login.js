@@ -46,25 +46,44 @@ module.exports = async function handler(req, res) {
       return res.status(401).json({ error: 'Credenciales incorrectas' });
     }
 
-    // Verificar email
-    if (tenant.admin_email.toLowerCase() !== email.toLowerCase()) {
-      return res.status(401).json({ error: 'Credenciales incorrectas' });
+    // Login exitoso — check if it's the main admin or a tenant_user
+    // First try: main admin
+    if (tenant.admin_email.toLowerCase() === email.toLowerCase() && tenant.admin_password === password) {
+      return res.status(200).json({
+        success: true,
+        tenant_id: tenant.id,
+        tenant_name: tenant.name,
+        tenant_slug: tenant.slug,
+        plan: tenant.plan,
+        admin_email: tenant.admin_email,
+        role: 'admin',
+      });
     }
 
-    // Verificar contraseña
-    if (tenant.admin_password !== password) {
-      return res.status(401).json({ error: 'Credenciales incorrectas' });
+    // Second try: tenant_users table
+    try {
+      const [user] = await sql(
+        'SELECT * FROM tenant_users WHERE tenant_id = $1 AND email = $2 AND active = true',
+        [tenant.id, email.toLowerCase()]
+      );
+      if (user && user.password === password) {
+        return res.status(200).json({
+          success: true,
+          tenant_id: tenant.id,
+          tenant_name: tenant.name,
+          tenant_slug: tenant.slug,
+          plan: tenant.plan,
+          admin_email: user.email,
+          role: user.role,
+          user_name: user.name,
+          user_department: user.department,
+        });
+      }
+    } catch (e) {
+      // Table might not exist yet
     }
 
-    // Login exitoso
-    return res.status(200).json({
-      success: true,
-      tenant_id: tenant.id,
-      tenant_name: tenant.name,
-      tenant_slug: tenant.slug,
-      plan: tenant.plan,
-      admin_email: tenant.admin_email,
-    });
+    return res.status(401).json({ error: 'Credenciales incorrectas' });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }

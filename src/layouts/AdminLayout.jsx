@@ -20,6 +20,7 @@ export default function AdminLayout() {
   const navigate = useNavigate();
   const { tenant } = useParams();
   const basePath = tenant ? `/admin/${tenant}` : '/admin';
+  const role = sessionStorage.getItem('admin_role') || 'admin';
 
   useEffect(() => {
     const interval = setInterval(() => setTime(new Date()), 1000);
@@ -120,12 +121,12 @@ export default function AdminLayout() {
           <NavItem to={`${basePath}/employees`} icon={<Users className="w-5 h-5" />} label="Equipo" />
           <NavItem to={`${basePath}/attendance`} icon={<ClipboardList className="w-5 h-5" />} label="Asistencia" />
           <NavItem to={`${basePath}/register`} icon={<Camera className="w-5 h-5" />} label="Registrar" />
-          <NavItem to={`${basePath}/schedules`} icon={<Clock className="w-5 h-5" />} label="Horarios" />
-          <NavItem to={`${basePath}/overtime`} icon={<Clock className="w-5 h-5" />} label="Hrs Extra" />
-          <NavItem to={`${basePath}/medical-leaves`} icon={<FileText className="w-5 h-5" />} label="Licencias" />
+          {role !== 'supervisor' && <NavItem to={`${basePath}/schedules`} icon={<Clock className="w-5 h-5" />} label="Horarios" />}
+          {role !== 'supervisor' && <NavItem to={`${basePath}/overtime`} icon={<Clock className="w-5 h-5" />} label="Hrs Extra" />}
+          {role !== 'supervisor' && <NavItem to={`${basePath}/medical-leaves`} icon={<FileText className="w-5 h-5" />} label="Licencias" />}
           <NavItem to={`${basePath}/leave-requests`} icon={<Palmtree className="w-5 h-5" />} label="Permisos" />
           <NavItem to={`${basePath}/calendar`} icon={<Calendar className="w-5 h-5" />} label="Calendario" />
-          <NavItem to={`${basePath}/settings`} icon={<Settings className="w-5 h-5" />} label="Config" />
+          {role === 'admin' && <NavItem to={`${basePath}/settings`} icon={<Settings className="w-5 h-5" />} label="Config" />}
         </div>
       </nav>
     </div>

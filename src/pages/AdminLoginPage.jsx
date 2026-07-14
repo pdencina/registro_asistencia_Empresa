@@ -34,6 +34,7 @@ export default function AdminLoginPage({ onLogin }) {
         sessionStorage.setItem('admin_auth', 'true');
         sessionStorage.setItem('admin_tenant', data.tenant_slug);
         sessionStorage.setItem('admin_email', data.admin_email);
+        sessionStorage.setItem('admin_role', data.role || 'admin');
         onLogin();
       } else {
         const data = await res.json();
