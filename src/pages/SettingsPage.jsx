@@ -74,7 +74,7 @@ export default function SettingsPage() {
       const res = await fetch(`${API_BASE}/contracts?tenant=${slug}`);
       if (res.ok) {
         const data = await res.json();
-        if (data.contract?.estado === 'firmado') {
+        if (data.contract?.estado === 'firmado' || data.contract?.estado === 'firmado_cliente') {
           setContractData(data.contract);
         }
       }
