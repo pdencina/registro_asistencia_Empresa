@@ -153,6 +153,7 @@ export default function OvertimePage() {
               <p className="text-gray-500">No hay registros en este período</p>
             </div>
           ) : (
+            <>
             <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
               <table className="w-full">
                 <thead>
@@ -253,6 +254,7 @@ export default function OvertimePage() {
                 </div>
               </div>
             )}
+            </>
           )}
         </>
       )}
