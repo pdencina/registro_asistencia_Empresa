@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { Loader, MapPinOff, WifiOff } from 'lucide-react';
 import CheckInPage from '../pages/CheckInPage';
 import DeviceActivationPage from '../pages/DeviceActivationPage';
@@ -7,6 +8,7 @@ import { getDeviceId } from '../utils/deviceId';
 import { getCurrentPosition, isWithinAllowedRadius, saveAuthorizedLocation } from '../utils/geolocation';
 
 export default function KioskLayout() {
+  const { tenant } = useParams();
   const [time, setTime] = useState(new Date());
   const [deviceStatus, setDeviceStatus] = useState('checking'); // checking | authorized | unauthorized | out_of_range
   const [locationInfo, setLocationInfo] = useState(null);
@@ -22,7 +24,9 @@ export default function KioskLayout() {
   useEffect(() => {
     async function loadLogo() {
       try {
-        const res = await fetch('/api/settings/logo');
+        const res = await fetch('/api/settings/logo', {
+          headers: tenant ? { 'x-tenant-slug': tenant } : {},
+        });
         if (res.ok) {
           const data = await res.json();
           if (data.logo_url) setTenantLogo(data.logo_url);
@@ -30,7 +34,7 @@ export default function KioskLayout() {
       } catch (e) {}
     }
     loadLogo();
-  }, []);
+  }, [tenant]);
 
   // Listen for online/offline events
   useEffect(() => {

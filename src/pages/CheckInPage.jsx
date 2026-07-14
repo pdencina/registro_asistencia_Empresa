@@ -29,6 +29,7 @@ export default function CheckInPage() {
   const [loading, setLoading] = useState(false);
   const [modelsLoaded, setModelsLoaded] = useState(false);
   const [modelLoadError, setModelLoadError] = useState('');
+  const [tenantLogo, setTenantLogo] = useState(null);
   const [faceMatcher, setFaceMatcher] = useState(null);
   const [loadingDescriptors, setLoadingDescriptors] = useState(false);
   // Early exit state
@@ -43,6 +44,20 @@ export default function CheckInPage() {
 
   const webcamRef = useRef(null);
   const detectionInterval = useRef(null);
+
+  // Load tenant logo
+  useEffect(() => {
+    async function loadLogo() {
+      try {
+        const res = await fetch('/api/settings/logo');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.logo_url) setTenantLogo(data.logo_url);
+        }
+      } catch (e) {}
+    }
+    loadLogo();
+  }, []);
 
   // Load face-api models on mount
   useEffect(() => {
@@ -416,7 +431,11 @@ export default function CheckInPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[80vh] p-6 bg-gray-50">
         <div className="text-center max-w-sm w-full">
-          <img src="/logo-flexio.svg" alt="Flexio" className="h-8 mx-auto mb-8" />
+          {tenantLogo ? (
+            <img src={tenantLogo} alt="Logo empresa" className="h-10 mx-auto mb-8 max-w-[180px] object-contain" />
+          ) : (
+            <img src="/logo-flexio.svg" alt="Flexio" className="h-8 mx-auto mb-8" />
+          )}
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Registrar asistencia</h2>
           <p className="text-sm text-gray-500 mb-10">Selecciona tu método de marcaje</p>
 
