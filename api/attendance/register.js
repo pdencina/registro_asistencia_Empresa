@@ -65,7 +65,7 @@ module.exports = async function handler(req, res) {
     if (employee.email) {
       const RESEND_API_KEY = process.env.RESEND_API_KEY;
       if (RESEND_API_KEY) {
-        await sendAttendanceEmail(RESEND_API_KEY, employee, type, now).catch(err => {
+        await sendAttendanceEmail(RESEND_API_KEY, employee, type, now, notes).catch(err => {
           console.error('Error enviando notificación:', err);
         });
       }
@@ -77,7 +77,7 @@ module.exports = async function handler(req, res) {
   }
 };
 
-async function sendAttendanceEmail(apiKey, employee, type, timestamp) {
+async function sendAttendanceEmail(apiKey, employee, type, timestamp, notes) {
   const TZ = 'America/Santiago';
   const date = new Date(timestamp);
   const dateStr = date.toLocaleDateString('es-CL', { timeZone: TZ, day: '2-digit', month: '2-digit', year: 'numeric' });
@@ -143,6 +143,13 @@ async function sendAttendanceEmail(apiKey, employee, type, timestamp) {
               <td style="padding:12px 16px;font-size:13px;color:#64748b;background:#f8fafc;border-bottom:1px solid #e2e8f0;">Fecha</td>
               <td style="padding:12px 16px;font-size:14px;color:#0f172a;border-bottom:1px solid #e2e8f0;">${dateStr} (${dayStr})</td>
             </tr>
+            ${notes ? `<tr>
+              <td style="padding:12px 16px;font-size:13px;color:#64748b;background:#f8fafc;">Ubicación</td>
+              <td style="padding:12px 16px;font-size:13px;color:#0f172a;">📍 ${notes}</td>
+            </tr>` : `<tr>
+              <td style="padding:12px 16px;font-size:13px;color:#64748b;background:#f8fafc;">Ubicación</td>
+              <td style="padding:12px 16px;font-size:13px;color:#0f172a;">📍 Dispositivo autorizado (kiosco)</td>
+            </tr>`}
           </table>
         </td></tr>
 
