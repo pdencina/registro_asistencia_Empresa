@@ -162,6 +162,17 @@ async function main() {
       exitDate.setHours(Math.floor(exitMinutes / 60), exitMinutes % 60, randomBetween(0, 59), 0);
 
       try {
+        // Create ISO timestamps in Chile timezone (UTC-4)
+        // Format: YYYY-MM-DDTHH:MM:SS-04:00
+        const dateStr = day.toISOString().split('T')[0];
+        const entryTime = minutesToTime(entryMinutes);
+        const exitTime = minutesToTime(exitMinutes);
+        const entrySeconds = String(randomBetween(0, 59)).padStart(2, '0');
+        const exitSeconds = String(randomBetween(0, 59)).padStart(2, '0');
+
+        const entryTimestamp = `${dateStr}T${entryTime}:${entrySeconds}-04:00`;
+        const exitTimestamp = `${dateStr}T${exitTime}:${exitSeconds}-04:00`;
+
         // Register entry via seed endpoint (with custom timestamp)
         await fetch(`${BASE_URL}/api/attendance/seed`, {
           method: 'POST',
@@ -173,7 +184,7 @@ async function main() {
             tenant_slug: TENANT_SLUG,
             employee_id: emp.id,
             type: 'entry',
-            timestamp: entryDate.toISOString(),
+            timestamp: entryTimestamp,
           }),
         });
         totalEntries++;
@@ -189,7 +200,7 @@ async function main() {
             tenant_slug: TENANT_SLUG,
             employee_id: emp.id,
             type: 'exit',
-            timestamp: exitDate.toISOString(),
+            timestamp: exitTimestamp,
           }),
         });
         totalExits++;
