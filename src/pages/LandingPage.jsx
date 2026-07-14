@@ -413,17 +413,6 @@ export default function LandingPage() {
       </section>
 
       {/* Social proof */}
-      <section className="py-12 bg-gray-50 border-y border-gray-100">
-        <div className="max-w-5xl mx-auto px-4 text-center">
-          <p className="text-sm text-gray-500 mb-6">Empresas que confían en Flexio</p>
-          <div className="flex flex-wrap justify-center items-center gap-8 opacity-60">
-            <span className="text-xl font-bold text-gray-400">Constructora Acme</span>
-            <span className="text-xl font-bold text-gray-400">Logística Sur</span>
-            <span className="text-xl font-bold text-gray-400">Retail Plus</span>
-            <span className="text-xl font-bold text-gray-400">Minera Andina</span>
-          </div>
-        </div>
-      </section>
 
       {/* Features */}
       <section id="features" className="py-20 px-4 sm:px-6 lg:px-8">
