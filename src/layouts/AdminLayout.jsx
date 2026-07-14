@@ -49,11 +49,7 @@ export default function AdminLayout() {
       {/* Header */}
       <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          {tenantLogo ? (
-            <img src={tenantLogo} alt="Logo empresa" className="h-10 max-w-[160px] object-contain" />
-          ) : (
-            <img src="/logo-flexio.svg" alt="Flexio" className="h-8" />
-          )}
+          <img src="/logo-flexio.svg" alt="Flexio" className="h-8" />
           <div className="border-l border-gray-200 pl-3">
             <p className="text-xs text-gray-500">Panel Administrador</p>
           </div>

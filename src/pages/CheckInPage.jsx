@@ -432,7 +432,7 @@ export default function CheckInPage() {
       <div className="flex flex-col items-center justify-center min-h-[80vh] p-6 bg-gray-50">
         <div className="text-center max-w-sm w-full">
           {tenantLogo ? (
-            <img src={tenantLogo} alt="Logo empresa" className="h-10 mx-auto mb-8 max-w-[180px] object-contain" />
+            <img src={tenantLogo} alt="Logo empresa" className="h-16 mx-auto mb-8 max-w-[200px] object-contain" />
           ) : (
             <img src="/logo-flexio.svg" alt="Flexio" className="h-8 mx-auto mb-8" />
           )}

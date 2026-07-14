@@ -147,10 +147,9 @@ export default function MobileCheckInPage() {
       <div className="min-h-screen bg-gray-50 flex flex-col">
         <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            {tenantLogo ? (
-              <img src={tenantLogo} alt="Logo empresa" className="h-7 max-w-[120px] object-contain" />
-            ) : (
-              <img src="/logo-flexio.svg" alt="Flexio" className="h-6" />
+            <img src="/logo-flexio.svg" alt="Flexio" className="h-6" />
+            {tenantLogo && (
+              <img src={tenantLogo} alt="Logo empresa" className="h-6 max-w-[80px] object-contain border-l border-gray-200 pl-2 ml-1" />
             )}
             <span className="text-xs text-gray-400">Marcaje Móvil</span>
           </div>
@@ -223,10 +222,9 @@ export default function MobileCheckInPage() {
       <div className="min-h-screen bg-gray-50 flex flex-col">
         <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            {tenantLogo ? (
-              <img src={tenantLogo} alt="Logo empresa" className="h-7 max-w-[120px] object-contain" />
-            ) : (
-              <img src="/logo-flexio.svg" alt="Flexio" className="h-6" />
+            <img src="/logo-flexio.svg" alt="Flexio" className="h-6" />
+            {tenantLogo && (
+              <img src={tenantLogo} alt="Logo empresa" className="h-6 max-w-[80px] object-contain border-l border-gray-200 pl-2 ml-1" />
             )}
           </div>
           {location && (
