@@ -53,9 +53,32 @@ export default function SuperAdminDashboard({ onLogout }) {
           <img src="/logo-flexio.svg" alt="Flexio" className="h-7 brightness-200" />
           <span className="text-sm text-gray-400 border-l border-gray-600 pl-3">Super Admin</span>
         </div>
-        <button onClick={onLogout} className="text-sm text-gray-400 hover:text-red-400 transition-colors">
-          Cerrar sesión
-        </button>
+        <div className="flex items-center gap-4">
+          <button
+            onClick={async () => {
+              if (!confirm('¿BORRAR TODA LA DATA? Esto eliminará empresas, empleados, registros, contratos. No se puede deshacer.')) return;
+              if (!confirm('¿Estás SEGURO? Escribe "reset" mentalmente antes de confirmar...')) return;
+              const token = sessionStorage.getItem('superadmin_token');
+              const res = await fetch('/api/superadmin/reset-data', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` },
+              });
+              if (res.ok) {
+                alert('Base de datos limpia. Recargando...');
+                loadTenants();
+              } else {
+                const err = await res.json();
+                alert(err.error || 'Error');
+              }
+            }}
+            className="text-xs text-gray-600 hover:text-red-400 transition-colors"
+          >
+            Reset DB
+          </button>
+          <button onClick={onLogout} className="text-sm text-gray-400 hover:text-red-400 transition-colors">
+            Cerrar sesión
+          </button>
+        </div>
       </header>
 
       <div className="max-w-6xl mx-auto p-6">
