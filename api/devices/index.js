@@ -53,16 +53,17 @@ module.exports = async function handler(req, res) {
         return res.status(403).json({ error: `Límite de ${tenant.max_devices} dispositivo(s) alcanzado. Actualiza tu plan.` });
       }
 
-      // Check if already exists for this tenant
+      // Check if already exists (for any tenant with this device_id)
       const [existing] = await sql(
-        'SELECT * FROM authorized_devices WHERE device_id = $1 AND tenant_id = $2',
-        [device_id, tenant.id]
+        'SELECT * FROM authorized_devices WHERE device_id = $1',
+        [device_id]
       );
 
       if (existing) {
+        // Reasignar dispositivo a este tenant (o reactivar si ya era de este tenant)
         await sql(
-          'UPDATE authorized_devices SET active = true, name = $1, lat = $3, lng = $4, updated_at = NOW() WHERE device_id = $2 AND tenant_id = $5',
-          [name || existing.name, device_id, lat || null, lng || null, tenant.id]
+          'UPDATE authorized_devices SET active = true, tenant_id = $1, name = $2, lat = $3, lng = $4, updated_at = NOW() WHERE device_id = $5',
+          [tenant.id, name || existing.name, lat || null, lng || null, device_id]
         );
       } else {
         await sql(
