@@ -3,14 +3,32 @@ import { MapPin, Shield, Loader, ToggleLeft, ToggleRight, Building2, Upload, Tra
 
 const API_BASE = '/api';
 
+function getTenantSlug() {
+  const path = window.location.pathname;
+  const match = path.match(/^\/admin\/([^/]+)/);
+  return match ? match[1] : null;
+}
+
+function tenantHeaders() {
+  const slug = getTenantSlug();
+  return slug ? { 'x-tenant-slug': slug } : {};
+}
+
 export default function SettingsPage() {
   const [settings, setSettings] = useState({ geolocation_enabled: true });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
+  const [messageType, setMessageType] = useState('success'); // 'success' | 'error'
   const [logoUrl, setLogoUrl] = useState(null);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const logoInputRef = useRef(null);
+
+  function showMessage(text, type = 'success', duration = 3000) {
+    setMessage(text);
+    setMessageType(type);
+    if (duration) setTimeout(() => setMessage(''), duration);
+  }
 
   useEffect(() => {
     loadSettings();
@@ -19,7 +37,9 @@ export default function SettingsPage() {
 
   async function loadSettings() {
     try {
-      const res = await fetch(`${API_BASE}/settings`);
+      const res = await fetch(`${API_BASE}/settings`, {
+        headers: { ...tenantHeaders() },
+      });
       if (res.ok) {
         const data = await res.json();
         setSettings(data);
@@ -33,7 +53,9 @@ export default function SettingsPage() {
 
   async function loadLogo() {
     try {
-      const res = await fetch(`${API_BASE}/settings/logo`);
+      const res = await fetch(`${API_BASE}/settings/logo`, {
+        headers: { ...tenantHeaders() },
+      });
       if (res.ok) {
         const data = await res.json();
         setLogoUrl(data.logo_url);
@@ -48,14 +70,12 @@ export default function SettingsPage() {
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      setMessage('Error: Solo se permiten archivos de imagen');
-      setTimeout(() => setMessage(''), 3000);
+      showMessage('Solo se permiten archivos de imagen', 'error');
       return;
     }
 
     if (file.size > 2 * 1024 * 1024) {
-      setMessage('Error: El archivo no debe superar 2 MB');
-      setTimeout(() => setMessage(''), 3000);
+      showMessage('El archivo no debe superar 2 MB', 'error');
       return;
     }
 
@@ -68,26 +88,24 @@ export default function SettingsPage() {
         const base64 = reader.result;
         const res = await fetch(`${API_BASE}/settings/logo`, {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', ...tenantHeaders() },
           body: JSON.stringify({ logo: base64 }),
         });
 
         if (res.ok) {
           const data = await res.json();
           setLogoUrl(data.logo_url);
-          setMessage('Logo actualizado correctamente');
+          showMessage('Logo actualizado correctamente');
         } else {
           const err = await res.json();
-          setMessage(err.error || 'Error al subir logo');
+          showMessage(err.error || 'Error al subir logo', 'error');
         }
         setUploadingLogo(false);
-        setTimeout(() => setMessage(''), 3000);
       };
       reader.readAsDataURL(file);
     } catch (err) {
-      setMessage('Error de conexión');
+      showMessage('Error de conexión', 'error');
       setUploadingLogo(false);
-      setTimeout(() => setMessage(''), 3000);
     }
 
     // Reset input
@@ -98,16 +116,18 @@ export default function SettingsPage() {
     if (!confirm('¿Eliminar el logo de la empresa?')) return;
     setUploadingLogo(true);
     try {
-      const res = await fetch(`${API_BASE}/settings/logo`, { method: 'DELETE' });
+      const res = await fetch(`${API_BASE}/settings/logo`, { method: 'DELETE', headers: { ...tenantHeaders() } });
       if (res.ok) {
         setLogoUrl(null);
-        setMessage('Logo eliminado');
+        showMessage('Logo eliminado');
+      } else {
+        const err = await res.json();
+        showMessage(err.error || 'Error al eliminar', 'error');
       }
     } catch (err) {
-      setMessage('Error de conexión');
+      showMessage('Error de conexión', 'error');
     } finally {
       setUploadingLogo(false);
-      setTimeout(() => setMessage(''), 3000);
     }
   }
 
@@ -118,21 +138,20 @@ export default function SettingsPage() {
       const newValue = !settings.geolocation_enabled;
       const res = await fetch(`${API_BASE}/settings`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...tenantHeaders() },
         body: JSON.stringify({ geolocation_enabled: newValue }),
       });
       if (res.ok) {
         setSettings({ ...settings, geolocation_enabled: newValue });
-        setMessage(newValue ? 'Geolocalización activada' : 'Geolocalización desactivada');
+        showMessage(newValue ? 'Geolocalización activada' : 'Geolocalización desactivada');
       } else {
         const err = await res.json();
-        setMessage(err.error || 'Error al guardar');
+        showMessage(err.error || 'Error al guardar', 'error');
       }
     } catch (err) {
-      setMessage('Error de conexión');
+      showMessage('Error de conexión', 'error');
     } finally {
       setSaving(false);
-      setTimeout(() => setMessage(''), 3000);
     }
   }
 
@@ -150,7 +169,7 @@ export default function SettingsPage() {
 
       {message && (
         <div className={`mb-6 p-3 rounded-xl text-sm font-medium ${
-          message.includes('Error') ? 'bg-red-50 text-red-700' : 'bg-emerald-50 text-emerald-700'
+          messageType === 'error' ? 'bg-red-50 text-red-700' : 'bg-emerald-50 text-emerald-700'
         }`}>
           {message}
         </div>
