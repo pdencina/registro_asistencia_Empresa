@@ -105,7 +105,7 @@ module.exports = async function handler(req, res) {
     } else {
       await sql(`
         INSERT INTO contracts (id, tenant_id, plan, modalidad, precio, firmante_nombre, firmante_rut, firmante_email, firma_digital, firmado_at, auditoria_firma, estado)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'firmado_cliente')
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'firmado')
       `, [
         contractId,
         tenant.id,
@@ -125,7 +125,7 @@ module.exports = async function handler(req, res) {
     if (firmante_email) {
       const RESEND_API_KEY = process.env.RESEND_API_KEY;
       if (RESEND_API_KEY) {
-        const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'notificaciones@flexio.cl';
+        const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || process.env.NOTIFICATION_FROM_EMAIL || 'notificaciones@flexio.cl';
         const planNombres = { basico: 'Básico', profesional: 'Profesional', enterprise: 'Enterprise' };
         const planNombre = planNombres[plan || tenant.plan] || plan || tenant.plan;
         const precioFormatted = precio ? new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(precio) : '';
@@ -186,7 +186,7 @@ module.exports = async function handler(req, res) {
   </table>
 </body></html>`;
 
-        fetch('https://api.resend.com/emails', {
+        await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${RESEND_API_KEY}`,
@@ -198,6 +198,11 @@ module.exports = async function handler(req, res) {
             subject: `Contrato firmado — ${tenant.name} · Flexio`,
             html: emailHtml,
           }),
+        }).then(async (r) => {
+          if (!r.ok) {
+            const errBody = await r.text();
+            console.error('Resend error:', r.status, errBody);
+          }
         }).catch(err => console.error('Error enviando email de contrato:', err));
       }
     }
