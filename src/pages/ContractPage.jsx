@@ -92,6 +92,9 @@ export default function ContractPage() {
       });
 
       if (res.ok) {
+        const data = await res.json();
+        // Recargar datos del contrato para mostrar la vista firmada
+        await loadContract();
         setSigned(true);
       } else {
         const err = await res.json();
@@ -106,6 +109,22 @@ export default function ContractPage() {
 
   function formatPrice(n) {
     return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(n);
+  }
+
+  function formatRut(value) {
+    let clean = value.replace(/[^0-9kK]/g, '').toUpperCase();
+    if (clean.length === 0) return '';
+    let dv = clean.slice(-1);
+    let body = clean.slice(0, -1);
+    if (body.length === 0) return clean;
+    let formatted = '';
+    let count = 0;
+    for (let i = body.length - 1; i >= 0; i--) {
+      formatted = body[i] + formatted;
+      count++;
+      if (count === 3 && i > 0) { formatted = '.' + formatted; count = 0; }
+    }
+    return formatted + '-' + dv;
   }
 
   function getTodayFormatted() {
@@ -131,26 +150,63 @@ export default function ContractPage() {
     );
   }
 
-  // Ya firmado
-  if (signed) {
+  // Ya firmado — mostrar contrato completo con firmas
+  if (signed && contract) {
+    const signedPlan = PLANES[contract.plan] || PLANES.basico;
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
-        <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md w-full text-center">
-          <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <CheckCircle className="w-10 h-10 text-emerald-600" />
+      <div className="min-h-screen bg-gray-50 py-8 px-4">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-6">
+            <img src="/logo-flexio.svg" alt="Flexio" className="h-8 mx-auto mb-4" />
+            <div className="inline-flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-2 rounded-full text-sm font-medium">
+              <CheckCircle className="w-4 h-4" />
+              Contrato firmado digitalmente
+            </div>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Contrato Firmado</h1>
-          <p className="text-gray-600 mb-4">
-            El contrato de prestación de servicios para <strong>{tenantData?.name}</strong> ha sido firmado exitosamente.
+
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-6">
+            <h1 className="text-xl font-bold text-gray-900 text-center mb-6">CONTRATO DE PRESTACIÓN DE SERVICIOS SaaS</h1>
+            <div className="prose prose-sm max-w-none text-gray-700 space-y-4">
+              <p><strong>Fecha de firma:</strong> {new Date(contract.firmado_at).toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+              <p><strong>Empresa:</strong> {tenantData?.name} — RUT {tenantData?.rut_empresa || 'No registrado'}</p>
+              <p><strong>Plan:</strong> {signedPlan.nombre} — {formatPrice(contract.precio)} ({contract.modalidad})</p>
+              <p><strong>Firmante:</strong> {contract.firmante_nombre} — RUT {contract.firmante_rut}</p>
+            </div>
+
+            {/* Firmas */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-10 pt-8 border-t border-gray-200">
+              <div className="text-center">
+                <p className="text-xs text-gray-400 uppercase tracking-wide mb-3">Por el Prestador</p>
+                <div className="h-20 flex items-center justify-center">
+                  <p className="text-gray-500 italic text-sm">Firma digital registrada</p>
+                </div>
+                <div className="border-t border-gray-300 pt-2 mt-2">
+                  <p className="text-sm font-medium text-gray-900">Pablo Encina Acevedo</p>
+                  <p className="text-xs text-gray-500">RUT 17.339.278-8</p>
+                  <p className="text-xs text-gray-500">Flexio</p>
+                </div>
+              </div>
+              <div className="text-center">
+                <p className="text-xs text-gray-400 uppercase tracking-wide mb-3">Por el Cliente</p>
+                <div className="h-20 flex items-center justify-center">
+                  {contract.firma_digital ? (
+                    <img src={contract.firma_digital} alt="Firma" className="h-16 object-contain" />
+                  ) : (
+                    <p className="text-gray-400 italic text-sm">—</p>
+                  )}
+                </div>
+                <div className="border-t border-gray-300 pt-2 mt-2">
+                  <p className="text-sm font-medium text-gray-900">{contract.firmante_nombre}</p>
+                  <p className="text-xs text-gray-500">RUT {contract.firmante_rut}</p>
+                  <p className="text-xs text-gray-500">{tenantData?.name}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <p className="text-xs text-gray-400 text-center">
+            Documento firmado electrónicamente conforme a la Ley N° 19.799. Evidencia de auditoría registrada con hash SHA-256.
           </p>
-          <p className="text-sm text-gray-400">
-            Se ha registrado la firma con evidencia de auditoría (IP, timestamp, hash SHA-256).
-          </p>
-          {contract?.firmado_at && (
-            <p className="text-xs text-gray-400 mt-4">
-              Firmado el {new Date(contract.firmado_at).toLocaleString('es-CL')}
-            </p>
-          )}
         </div>
       </div>
     );
@@ -181,10 +237,13 @@ export default function ContractPage() {
                 En Santiago de Chile, a {getTodayFormatted()}, comparecen:
               </p>
               <p>
-                <strong>EL PRESTADOR:</strong> Pablo Encina Acevedo, quien presta los servicios objeto de este Contrato bajo la marca comercial "Flexio", en adelante "el Consultor" o "el Prestador".
+                <strong>EL PRESTADOR:</strong> Pablo Encina Acevedo, RUT 17.339.278-8, con domicilio en San Eugenio 1331, Depto 1603 B, Santiago, quien presta los servicios objeto de este Contrato bajo la marca comercial "Flexio", en calidad de prestador de servicios profesionales independientes (persona natural, boleta de honorarios), en adelante "el Consultor" o "el Prestador".
               </p>
               <p>
-                <strong>EL CLIENTE:</strong> {tenantData?.name || '[NOMBRE EMPRESA]'}, RUT {tenantData?.rut_empresa || '[RUT EMPRESA]'}, en adelante "el Cliente".
+                <strong>EL CLIENTE:</strong> {tenantData?.name || '[NOMBRE EMPRESA]'}, RUT {tenantData?.rut_empresa || '[RUT EMPRESA]'}, representada por su representante legal debidamente facultado, en adelante "el Cliente".
+              </p>
+              <p className="text-sm text-gray-500 italic">
+                Se deja constancia de que "Flexio" es la marca comercial bajo la cual el Consultor presta sus servicios, no constituyendo una persona jurídica distinta del Consultor para los efectos de este Contrato.
               </p>
             </section>
 
@@ -297,14 +356,56 @@ export default function ContractPage() {
             <section>
               <h3 className="text-lg font-bold text-gray-900">10. Terminación</h3>
               <p>
-                El Cliente podrá cancelar el Servicio en cualquier momento mediante aviso escrito con al menos 15 días de anticipación. En la modalidad mensual, la cancelación surte efecto al término del mes facturado.
+                El Cliente podrá cancelar el Servicio en cualquier momento mediante aviso escrito con al menos 15 días de anticipación. En la modalidad mensual, la cancelación surte efecto al término del mes facturado. En la modalidad anual, no proceden devoluciones por el período ya pagado y no utilizado, salvo pacto distinto.
               </p>
             </section>
 
             <section>
-              <h3 className="text-lg font-bold text-gray-900">11. Legislación aplicable</h3>
+              <h3 className="text-lg font-bold text-gray-900">11. Obligaciones del Prestador</h3>
+              <ul className="list-disc pl-5 space-y-1 text-sm">
+                <li>Poner a disposición del Cliente el Servicio conforme al plan contratado.</li>
+                <li>Brindar soporte técnico según el nivel correspondiente al plan.</li>
+                <li>Mantener la confidencialidad y seguridad de los datos del Cliente.</li>
+                <li>Informar oportunamente sobre mantenciones programadas.</li>
+                <li>Garantizar una disponibilidad mínima del 99% mensual del Servicio.</li>
+              </ul>
+            </section>
+
+            <section>
+              <h3 className="text-lg font-bold text-gray-900">12. Obligaciones del Cliente</h3>
+              <ul className="list-disc pl-5 space-y-1 text-sm">
+                <li>Pagar oportunamente el precio pactado.</li>
+                <li>Obtener y mantener el consentimiento informado de cada colaborador cuyos datos biométricos sean tratados.</li>
+                <li>Utilizar el Servicio conforme a su finalidad y a la normativa vigente.</li>
+                <li>Designar un administrador interno como contraparte técnica.</li>
+              </ul>
+            </section>
+
+            <section>
+              <h3 className="text-lg font-bold text-gray-900">13. Confidencialidad</h3>
               <p>
-                El presente Contrato se rige por las leyes de la República de Chile. Las partes fijan domicilio en Santiago y se someten a la jurisdicción de sus tribunales ordinarios.
+                Cada parte se obliga a mantener en reserva toda información confidencial de la otra parte a la que tenga acceso con ocasión del presente Contrato, y a no divulgarla a terceros sin autorización previa, salvo que la ley exija lo contrario. Esta obligación subsistirá por un plazo de 2 años después de terminado el Contrato.
+              </p>
+            </section>
+
+            <section>
+              <h3 className="text-lg font-bold text-gray-900">14. Limitación de responsabilidad</h3>
+              <p>
+                Flexio no será responsable por daños indirectos, lucro cesante o pérdida de datos derivados de causas ajenas a su control, incluyendo fallas de conectividad, energía o hardware del Cliente. La responsabilidad total de Flexio no excederá el monto efectivamente pagado por el Cliente durante los últimos 3 meses de servicio.
+              </p>
+            </section>
+
+            <section>
+              <h3 className="text-lg font-bold text-gray-900">15. Legislación aplicable y jurisdicción</h3>
+              <p>
+                El presente Contrato se rige por las leyes de la República de Chile. Para todos los efectos legales, las partes fijan su domicilio en la ciudad de Santiago y se someten a la jurisdicción de sus tribunales ordinarios de justicia.
+              </p>
+            </section>
+
+            <section>
+              <h3 className="text-lg font-bold text-gray-900">16. Validez de la firma electrónica</h3>
+              <p>
+                Las partes reconocen y aceptan que la firma electrónica simple utilizada en este documento tiene plena validez legal conforme a la Ley N° 19.799 sobre Documentos Electrónicos, Firma Electrónica y Servicios de Certificación. La firma se registra con evidencia de auditoría que incluye: dirección IP del firmante, timestamp en formato ISO 8601, user-agent del navegador, y hash SHA-256 tanto del documento como de la imagen de firma.
               </p>
             </section>
           </div>
@@ -341,7 +442,7 @@ export default function ContractPage() {
               <input
                 type="text"
                 value={firmante.rut}
-                onChange={e => setFirmante({ ...firmante, rut: e.target.value })}
+                onChange={e => setFirmante({ ...firmante, rut: formatRut(e.target.value) })}
                 placeholder="12.345.678-9"
                 required
                 className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none"

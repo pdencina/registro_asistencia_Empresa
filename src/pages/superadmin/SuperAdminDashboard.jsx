@@ -187,8 +187,15 @@ export default function SuperAdminDashboard({ onLogout }) {
                           href={`/contrato/${tenant.slug}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="p-1.5 rounded-lg text-primary-400 hover:bg-primary-500/10 transition-all"
-                          title="Ver contrato"
+                          className={`p-1.5 rounded-lg transition-all ${
+                            tenant.contract_status === 'firmado'
+                              ? 'text-emerald-400 hover:bg-emerald-500/10'
+                              : 'text-gray-500 hover:bg-gray-600/30'
+                          }`}
+                          title={tenant.contract_status === 'firmado'
+                            ? `Contrato firmado por ${tenant.contract_firmante} el ${new Date(tenant.contract_firmado_at).toLocaleDateString('es-CL')}`
+                            : 'Contrato pendiente — Enviar link al cliente'
+                          }
                         >
                           <FileText className="w-4 h-4" />
                         </a>

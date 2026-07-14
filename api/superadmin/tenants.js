@@ -35,9 +35,13 @@ module.exports = async function handler(req, res) {
       const tenants = await sql(`
         SELECT t.*,
                (SELECT COUNT(*) FROM employees e WHERE e.tenant_id = t.id) as employee_count,
-               s.status as subscription_status
+               s.status as subscription_status,
+               c.estado as contract_status,
+               c.firmado_at as contract_firmado_at,
+               c.firmante_nombre as contract_firmante
         FROM tenants t
         LEFT JOIN subscriptions s ON s.tenant_id = t.id
+        LEFT JOIN contracts c ON c.tenant_id = t.id AND c.estado = 'firmado'
         ORDER BY t.created_at DESC
       `);
 
