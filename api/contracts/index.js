@@ -63,9 +63,9 @@ module.exports = async function handler(req, res) {
 
     // Precios por plan
     const precios = {
-      basico: 39990,
-      profesional: 79990,
-      enterprise: 149990,
+      basico: 59990,
+      profesional: 119990,
+      enterprise: 199990,
     };
 
     return res.status(200).json({

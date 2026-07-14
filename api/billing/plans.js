@@ -16,7 +16,7 @@ module.exports = async function handler(req, res) {
     {
       id: 'basico',
       name: 'Básico',
-      price: 39990,
+      price: 59990,
       currency: 'CLP',
       interval: 'monthly',
       max_employees: 30,
@@ -27,7 +27,7 @@ module.exports = async function handler(req, res) {
     {
       id: 'profesional',
       name: 'Profesional',
-      price: 79990,
+      price: 119990,
       currency: 'CLP',
       interval: 'monthly',
       max_employees: 100,
@@ -38,7 +38,7 @@ module.exports = async function handler(req, res) {
     {
       id: 'enterprise',
       name: 'Enterprise',
-      price: 149990,
+      price: 199990,
       currency: 'CLP',
       interval: 'monthly',
       max_employees: 9999,

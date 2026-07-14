@@ -43,9 +43,9 @@ module.exports = async function handler(req, res) {
 
     // Precios por plan (CLP)
     const planPrices = {
-      basico: { amount: 39990, reason: 'Flexio Básico - Control de Asistencia' },
-      profesional: { amount: 79990, reason: 'Flexio Profesional - Control de Asistencia' },
-      enterprise: { amount: 149990, reason: 'Flexio Enterprise - Control de Asistencia' },
+      basico: { amount: 59990, reason: 'Flexio Básico - Control de Asistencia' },
+      profesional: { amount: 119990, reason: 'Flexio Profesional - Control de Asistencia' },
+      enterprise: { amount: 199990, reason: 'Flexio Enterprise - Control de Asistencia' },
     };
 
     const selectedPlan = planPrices[plan];

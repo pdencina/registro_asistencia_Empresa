@@ -4,9 +4,9 @@ import { CheckCircle, Loader, FileText } from 'lucide-react';
 import SignatureCanvas from '../components/SignatureCanvas';
 
 const PLANES = {
-  basico: { nombre: 'Básico', precio: 39990, empleados: 30, dispositivos: 1 },
-  profesional: { nombre: 'Profesional', precio: 79990, empleados: 100, dispositivos: 3 },
-  enterprise: { nombre: 'Enterprise', precio: 149990, empleados: 300, dispositivos: 10 },
+  basico: { nombre: 'Básico', precio: 59990, empleados: 30, dispositivos: 1 },
+  profesional: { nombre: 'Profesional', precio: 119990, empleados: 100, dispositivos: 3 },
+  enterprise: { nombre: 'Enterprise', precio: 199990, empleados: 300, dispositivos: 10 },
 };
 
 export default function ContractPage() {
@@ -72,7 +72,7 @@ export default function ContractPage() {
 
     try {
       const plan = selectedPlan || 'basico';
-      const precio = PLANES[plan]?.precio || 39990;
+      const precio = PLANES[plan]?.precio || 59990;
       const precioFinal = modalidad === 'anual' ? Math.round(precio * 12 * 0.8) : precio;
 
       const res = await fetch('/api/contracts/sign', {

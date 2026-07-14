@@ -107,7 +107,7 @@ export default function LandingPage() {
   const plans = [
     {
       name: 'Básico',
-      price: billingCycle === 'monthly' ? '39.990' : '31.990',
+      price: billingCycle === 'monthly' ? '59.990' : '47.990',
       period: '/mes',
       description: 'Ideal para PYMEs y equipos pequeños',
       features: [
@@ -123,7 +123,7 @@ export default function LandingPage() {
     },
     {
       name: 'Profesional',
-      price: billingCycle === 'monthly' ? '79.990' : '63.990',
+      price: billingCycle === 'monthly' ? '119.990' : '95.990',
       period: '/mes',
       description: 'Para empresas en crecimiento',
       features: [
@@ -141,7 +141,7 @@ export default function LandingPage() {
     },
     {
       name: 'Enterprise',
-      price: '149.990',
+      price: '199.990',
       period: '/mes',
       description: 'Para grandes organizaciones',
       features: [
@@ -794,9 +794,9 @@ export default function LandingPage() {
                       className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none text-gray-700"
                     >
                       <option value="">No estoy seguro</option>
-                      <option value="basico">Básico ($39.990/mes)</option>
-                      <option value="profesional">Profesional ($79.990/mes)</option>
-                      <option value="enterprise">Enterprise ($149.990/mes)</option>
+                      <option value="basico">Básico ($59.990/mes)</option>
+                      <option value="profesional">Profesional ($119.990/mes)</option>
+                      <option value="enterprise">Enterprise ($199.990/mes)</option>
                       <option value="corporativo">Corporativo (a medida)</option>
                     </select>
                   </div>

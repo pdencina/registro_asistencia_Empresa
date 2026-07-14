@@ -46,7 +46,7 @@ module.exports = async function handler(req, res) {
       auto_recurring: {
         frequency: 1,
         frequency_type: 'months',
-        transaction_amount: 39990,
+        transaction_amount: 59990,
         currency_id: 'CLP',
         repetitions: null, // infinito
       },
@@ -57,7 +57,7 @@ module.exports = async function handler(req, res) {
       auto_recurring: {
         frequency: 1,
         frequency_type: 'months',
-        transaction_amount: 79990,
+        transaction_amount: 119990,
         currency_id: 'CLP',
         repetitions: null,
       },
@@ -68,7 +68,7 @@ module.exports = async function handler(req, res) {
       auto_recurring: {
         frequency: 1,
         frequency_type: 'months',
-        transaction_amount: 149990,
+        transaction_amount: 199990,
         currency_id: 'CLP',
         repetitions: null,
       },
