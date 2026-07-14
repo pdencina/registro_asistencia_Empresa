@@ -9,6 +9,7 @@ import NoTenantPage from './pages/NoTenantPage';
 import MobileCheckInPage from './pages/MobileCheckInPage';
 import PinCheckInPage from './pages/PinCheckInPage';
 import UniversalCheckInPage from './pages/UniversalCheckInPage';
+import ContractPage from './pages/ContractPage';
 import TermsPage from './pages/legal/TermsPage';
 import PrivacyPage from './pages/legal/PrivacyPage';
 import DpaPage from './pages/legal/DpaPage';
@@ -36,6 +37,9 @@ function App() {
 
         {/* Acceso universal: flexio.cl/mi */}
         <Route path="/mi" element={<UniversalCheckInPage />} />
+
+        {/* Contrato digital: flexio.cl/contrato/slug */}
+        <Route path="/contrato/:tenant" element={<ContractPage />} />
 
         {/* App sin slug: mostrar mensaje */}
         <Route path="/app" element={<NoTenantPage />} />

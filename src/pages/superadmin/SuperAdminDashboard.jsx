@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Building2, Users, Plus, Search, ToggleLeft, ToggleRight, Edit2, Trash2 } from 'lucide-react';
+import { Building2, Users, Plus, Search, ToggleLeft, ToggleRight, Edit2, Trash2, FileText } from 'lucide-react';
 import CreateTenantModal from './CreateTenantModal';
 
 export default function SuperAdminDashboard({ onLogout }) {
@@ -162,6 +162,15 @@ export default function SuperAdminDashboard({ onLogout }) {
                     </td>
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-1">
+                        <a
+                          href={`/contrato/${tenant.slug}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-1.5 rounded-lg text-primary-400 hover:bg-primary-500/10 transition-all"
+                          title="Ver contrato"
+                        >
+                          <FileText className="w-4 h-4" />
+                        </a>
                         <button
                           onClick={() => toggleTenant(tenant.id, tenant.active)}
                           className={`p-1.5 rounded-lg transition-all ${tenant.active ? 'text-emerald-400 hover:bg-emerald-500/10' : 'text-gray-500 hover:bg-gray-600/30'}`}
