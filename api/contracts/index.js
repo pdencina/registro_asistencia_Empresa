@@ -27,6 +27,26 @@ module.exports = async function handler(req, res) {
       return res.status(404).json({ error: 'Empresa no encontrada' });
     }
 
+    // Asegurar que la tabla contracts existe
+    await sql(`
+      CREATE TABLE IF NOT EXISTS contracts (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        tenant_id UUID NOT NULL REFERENCES tenants(id),
+        plan VARCHAR(50) NOT NULL,
+        modalidad VARCHAR(20) NOT NULL DEFAULT 'mensual',
+        precio INTEGER,
+        firmante_nombre VARCHAR(200),
+        firmante_rut VARCHAR(20),
+        firmante_email VARCHAR(200),
+        firma_digital TEXT,
+        firmado_at TIMESTAMPTZ,
+        auditoria_firma JSONB,
+        estado VARCHAR(20) DEFAULT 'pendiente',
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW()
+      )
+    `);
+
     // Buscar contrato existente
     const [contract] = await sql(
       'SELECT * FROM contracts WHERE tenant_id = $1 ORDER BY created_at DESC LIMIT 1',
