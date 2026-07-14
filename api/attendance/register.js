@@ -65,7 +65,27 @@ module.exports = async function handler(req, res) {
     if (employee.email) {
       const RESEND_API_KEY = process.env.RESEND_API_KEY;
       if (RESEND_API_KEY) {
-        await sendAttendanceEmail(RESEND_API_KEY, employee, type, now, notes).catch(err => {
+        // Intentar obtener dirección legible de las coordenadas
+        let locationText = notes || null;
+        if (notes && notes.includes('GPS:')) {
+          const gpsMatch = notes.match(/GPS:\s*([-\d.]+),\s*([-\d.]+)/);
+          if (gpsMatch) {
+            const address = await reverseGeocode(gpsMatch[1], gpsMatch[2]);
+            if (address) locationText = address;
+          }
+        } else if (!notes) {
+          // Kiosco: buscar la ubicación del dispositivo en la BD
+          const [device] = await sql(
+            'SELECT lat, lng, name FROM authorized_devices WHERE tenant_id = $1 AND active = true LIMIT 1',
+            [tenant.id]
+          );
+          if (device && device.lat && device.lng) {
+            const address = await reverseGeocode(device.lat, device.lng);
+            locationText = address || `${device.name || 'Kiosco'} (${device.lat}, ${device.lng})`;
+          }
+        }
+
+        await sendAttendanceEmail(RESEND_API_KEY, employee, type, now, locationText).catch(err => {
           console.error('Error enviando notificación:', err);
         });
       }
@@ -207,4 +227,26 @@ async function sendAttendanceEmail(apiKey, employee, type, timestamp, notes) {
       html,
     }),
   });
+}
+
+async function reverseGeocode(lat, lng) {
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`,
+      { headers: { 'User-Agent': 'Flexio/1.0 (flexio.cl)' } }
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (data.address) {
+      const a = data.address;
+      const parts = [];
+      if (a.road) parts.push(a.road + (a.house_number ? ' ' + a.house_number : ''));
+      if (a.suburb || a.neighbourhood) parts.push(a.suburb || a.neighbourhood);
+      if (a.city || a.town || a.village) parts.push(a.city || a.town || a.village);
+      return parts.join(', ') || data.display_name?.split(',').slice(0, 3).join(',') || null;
+    }
+    return data.display_name?.split(',').slice(0, 3).join(',') || null;
+  } catch {
+    return null;
+  }
 }
