@@ -230,10 +230,14 @@ module.exports = async function handler(req, res) {
       if (!id) return res.status(400).json({ error: 'id es obligatorio' });
 
       // Eliminar en orden por foreign keys
+      try { await sql('DELETE FROM early_exits WHERE tenant_id = $1', [id]); } catch(e) {}
+      try { await sql('DELETE FROM early_exits WHERE attendance_record_id IN (SELECT id FROM attendance_records WHERE tenant_id = $1)', [id]); } catch(e) {}
+      try { await sql('DELETE FROM contracts WHERE tenant_id = $1', [id]); } catch(e) {}
       try { await sql('DELETE FROM attendance_records WHERE tenant_id = $1', [id]); } catch(e) {}
       try { await sql('DELETE FROM authorized_devices WHERE tenant_id = $1', [id]); } catch(e) {}
       try { await sql('DELETE FROM employee_schedules WHERE tenant_id = $1', [id]); } catch(e) {}
       try { await sql('DELETE FROM employees WHERE tenant_id = $1', [id]); } catch(e) {}
+      try { await sql('DELETE FROM schedules WHERE tenant_id = $1', [id]); } catch(e) {}
       try { await sql('DELETE FROM tenant_settings WHERE tenant_id = $1', [id]); } catch(e) {}
       try { await sql('DELETE FROM subscriptions WHERE tenant_id = $1', [id]); } catch(e) {}
       await sql('DELETE FROM tenants WHERE id = $1', [id]);
