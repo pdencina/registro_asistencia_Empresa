@@ -153,6 +153,7 @@ export default function ContractPage() {
   // Ya firmado — mostrar contrato completo con firmas
   if (signed && contract) {
     const signedPlan = PLANES[contract.plan] || PLANES.basico;
+    const fechaFirma = new Date(contract.firmado_at).toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric' });
     return (
       <div className="min-h-screen bg-gray-50 py-8 px-4">
         <div className="max-w-3xl mx-auto">
@@ -160,17 +161,89 @@ export default function ContractPage() {
             <img src="/logo-flexio.svg" alt="Flexio" className="h-8 mx-auto mb-4" />
             <div className="inline-flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-2 rounded-full text-sm font-medium">
               <CheckCircle className="w-4 h-4" />
-              Contrato firmado digitalmente
+              Contrato firmado digitalmente — {fechaFirma}
             </div>
           </div>
 
           <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-6">
-            <h1 className="text-xl font-bold text-gray-900 text-center mb-6">CONTRATO DE PRESTACIÓN DE SERVICIOS SaaS</h1>
-            <div className="prose prose-sm max-w-none text-gray-700 space-y-4">
-              <p><strong>Fecha de firma:</strong> {new Date(contract.firmado_at).toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
-              <p><strong>Empresa:</strong> {tenantData?.name} — RUT {tenantData?.rut_empresa || 'No registrado'}</p>
-              <p><strong>Plan:</strong> {signedPlan.nombre} — {formatPrice(contract.precio)} ({contract.modalidad})</p>
-              <p><strong>Firmante:</strong> {contract.firmante_nombre} — RUT {contract.firmante_rut}</p>
+            <h1 className="text-xl font-bold text-gray-900 text-center mb-8">CONTRATO DE PRESTACIÓN DE SERVICIOS SaaS</h1>
+            
+            <div className="prose prose-sm max-w-none text-gray-700 space-y-6">
+              <section>
+                <h3 className="text-base font-bold text-gray-900">1. Comparecientes</h3>
+                <p>En Santiago de Chile, a {fechaFirma}, comparecen:</p>
+                <p><strong>EL PRESTADOR:</strong> Pablo Encina Acevedo, RUT 17.339.278-8, con domicilio en San Eugenio 1331, Depto 1603 B, Santiago, quien presta los servicios bajo la marca comercial "Flexio".</p>
+                <p><strong>EL CLIENTE:</strong> {tenantData?.name}, RUT {tenantData?.rut_empresa || 'No registrado'}, representada por {contract.firmante_nombre}, RUT {contract.firmante_rut}.</p>
+              </section>
+
+              <section>
+                <h3 className="text-base font-bold text-gray-900">2. Objeto del contrato</h3>
+                <p>Flexio se obliga a prestar al Cliente el servicio de control de asistencia mediante reconocimiento facial (SaaS), y el Cliente se obliga a pagar el precio correspondiente.</p>
+              </section>
+
+              <section>
+                <h3 className="text-base font-bold text-gray-900">3. Plan contratado</h3>
+                <div className="bg-primary-50 border border-primary-200 rounded-xl p-4">
+                  <p className="font-bold text-primary-900">Plan {signedPlan.nombre}</p>
+                  <p className="text-sm text-primary-700">Hasta {signedPlan.empleados} colaboradores · {signedPlan.dispositivos} dispositivo{signedPlan.dispositivos > 1 ? 's' : ''}</p>
+                </div>
+              </section>
+
+              <section>
+                <h3 className="text-base font-bold text-gray-900">4. Modalidad y precio</h3>
+                <p>Modalidad: <strong>{contract.modalidad === 'anual' ? 'Anual (20% descuento)' : 'Mensual'}</strong></p>
+                <p>Precio acordado: <strong>{formatPrice(contract.precio)} {contract.modalidad === 'anual' ? '/año' : '/mes'}</strong></p>
+              </section>
+
+              <section>
+                <h3 className="text-base font-bold text-gray-900">5. Vigencia y renovación</h3>
+                <p>El Contrato entra en vigencia en la fecha de firma y se renueva automáticamente por períodos sucesivos iguales, salvo aviso con 15 días de anticipación.</p>
+              </section>
+
+              <section>
+                <h3 className="text-base font-bold text-gray-900">6. Período de prueba</h3>
+                <p>15 días corridos sin costo desde la activación del Servicio.</p>
+              </section>
+
+              <section>
+                <h3 className="text-base font-bold text-gray-900">7. Protección de datos</h3>
+                <p>Sujeto a Ley N° 19.628 y Ley N° 21.719. Encriptación TLS 1.3 en tránsito y AES-256 en reposo. El Cliente es responsable del consentimiento de sus colaboradores.</p>
+              </section>
+
+              <section>
+                <h3 className="text-base font-bold text-gray-900">8. Propiedad intelectual</h3>
+                <p>El software es propiedad exclusiva del Prestador. Se otorga licencia de uso no exclusiva vigente durante el Contrato.</p>
+              </section>
+
+              <section>
+                <h3 className="text-base font-bold text-gray-900">9. Terminación</h3>
+                <p>El Cliente puede cancelar con 15 días de aviso. En modalidad mensual, surte efecto al término del mes facturado.</p>
+              </section>
+
+              <section>
+                <h3 className="text-base font-bold text-gray-900">10. Obligaciones del Prestador</h3>
+                <p>Disponibilidad del servicio, soporte técnico, confidencialidad, y disponibilidad mínima del 99% mensual.</p>
+              </section>
+
+              <section>
+                <h3 className="text-base font-bold text-gray-900">11. Obligaciones del Cliente</h3>
+                <p>Pago oportuno, obtener consentimiento de colaboradores, uso conforme a normativa, designar administrador interno.</p>
+              </section>
+
+              <section>
+                <h3 className="text-base font-bold text-gray-900">12. Confidencialidad</h3>
+                <p>Ambas partes mantienen reserva sobre información confidencial. Subsiste 2 años post-término.</p>
+              </section>
+
+              <section>
+                <h3 className="text-base font-bold text-gray-900">13. Limitación de responsabilidad</h3>
+                <p>Responsabilidad máxima limitada a los últimos 3 meses de servicio pagados.</p>
+              </section>
+
+              <section>
+                <h3 className="text-base font-bold text-gray-900">14. Legislación aplicable</h3>
+                <p>Leyes de Chile. Domicilio en Santiago, tribunales ordinarios de justicia.</p>
+              </section>
             </div>
 
             {/* Firmas */}
