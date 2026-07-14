@@ -114,8 +114,8 @@ export default function AdminLayout() {
         </Routes>
       </main>
 
-      {/* Bottom Navigation */}
-      <nav className="bg-white border-t border-gray-200 px-2 py-2 overflow-x-auto">
+      {/* Bottom Navigation — Fixed */}
+      <nav className="bg-white border-t border-gray-200 px-2 py-2 overflow-x-auto sticky bottom-0 z-40">
         <div className="flex justify-around min-w-max mx-auto">
           <NavItem to={basePath} icon={<BarChart3 className="w-5 h-5" />} label="Dashboard" end />
           <NavItem to={`${basePath}/employees`} icon={<Users className="w-5 h-5" />} label="Equipo" />
