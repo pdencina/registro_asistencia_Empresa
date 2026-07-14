@@ -15,6 +15,25 @@ export default function DashboardPage() {
   const [todaySummary, setTodaySummary] = useState(null);
   const [absentToday, setAbsentToday] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [filters, setFilters] = useState({ department: '', employee_id: '' });
+  const [departments, setDepartments] = useState([]);
+  const [drillDown, setDrillDown] = useState(null); // { title, data[] }
+
+  useEffect(() => {
+    loadData();
+  }, [tab, filters]);
+
+  // Load departments for filter
+  useEffect(() => {
+    async function loadDepts() {
+      try {
+        const emps = await employeesApi.getAll({ active: '1' });
+        const depts = [...new Set(emps.map(e => e.department).filter(Boolean))].sort();
+        setDepartments(depts);
+      } catch (e) {}
+    }
+    loadDepts();
+  }, []);
 
   useEffect(() => {
     loadData();
@@ -40,7 +59,10 @@ export default function DashboardPage() {
         const presentIds = new Set(todayRecords.map(r => r.employee_id));
         setAbsentToday(allEmployees.filter(e => !presentIds.has(e.id)));
       }
-      const data = await attendanceApi.getReports(tab);
+      const params = { period: tab };
+      if (filters.department) params.department = filters.department;
+      if (filters.employee_id) params.employee_id = filters.employee_id;
+      const data = await attendanceApi.getReports(params);
       setReport(data);
     } catch (err) {
       console.error(err);
@@ -147,7 +169,117 @@ export default function DashboardPage() {
       XLSX.utils.book_append_sheet(wb, wsDept, 'Por Departamento');
     }
 
+    // Sheet 8: Registros Detallados (cada entrada/salida individual)
+    if (report.all_records && report.all_records.length > 0) {
+      const regRows = [['Fecha', 'Día', 'Hora', 'Tipo', 'Nombre', 'Apellido', 'RUT', 'Departamento', 'Notas/Ubicación']];
+      for (const r of report.all_records) {
+        regRows.push([
+          r.record_date,
+          r.day_name,
+          r.record_time,
+          r.type === 'entry' ? 'Entrada' : 'Salida',
+          r.first_name,
+          r.last_name,
+          r.rut || '',
+          r.department || '',
+          r.notes || '',
+        ]);
+      }
+      const wsReg = XLSX.utils.aoa_to_sheet(regRows);
+      XLSX.utils.book_append_sheet(wb, wsReg, 'Registros Detallados');
+    }
+
     XLSX.writeFile(wb, `Flexio-Reporte-${report.period}-${report.start_date}.xlsx`);
+  }
+
+  // Drill-down: show people behind a data point
+  function drillDayAttendance(day) {
+    if (!report?.all_records) return;
+    const records = report.all_records.filter(r => r.record_date === day.date);
+    const uniqueEmployees = {};
+    for (const r of records) {
+      if (!uniqueEmployees[r.employee_id]) {
+        uniqueEmployees[r.employee_id] = { ...r, records: [] };
+      }
+      uniqueEmployees[r.employee_id].records.push({ type: r.type, time: r.record_time });
+    }
+    setDrillDown({
+      title: `${day.date} — ${day.present} presentes (${day.rate}%)`,
+      subtitle: new Date(day.date + 'T12:00:00').toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' }),
+      data: Object.values(uniqueEmployees).map(e => ({
+        name: `${e.first_name} ${e.last_name}`,
+        department: e.department,
+        detail: e.records.map(r => `${r.type === 'entry' ? '→' : '←'} ${r.time}`).join('  '),
+      })),
+    });
+  }
+
+  function drillDayOfWeek(dow) {
+    if (!report?.all_records) return;
+    const dayNames = { 'Lunes': 'Mon', 'Martes': 'Tue', 'Miércoles': 'Wed', 'Jueves': 'Thu', 'Viernes': 'Fri' };
+    const records = report.all_records.filter(r => {
+      const d = new Date(r.record_date + 'T12:00:00');
+      const dayOfWeek = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'][d.getDay()];
+      return dayOfWeek === dow.name;
+    });
+    const uniqueEmployees = {};
+    for (const r of records) {
+      const key = `${r.employee_id}-${r.record_date}`;
+      if (!uniqueEmployees[key]) {
+        uniqueEmployees[key] = { ...r, records: [] };
+      }
+      uniqueEmployees[key].records.push({ type: r.type, time: r.record_time });
+    }
+    setDrillDown({
+      title: `${dow.name} — ${dow.avg_attendance}% asistencia promedio`,
+      subtitle: `${dow.entries} ingresos · ${dow.late} llegadas tarde`,
+      data: Object.values(uniqueEmployees).map(e => ({
+        name: `${e.first_name} ${e.last_name}`,
+        department: e.department,
+        detail: `${e.record_date} — ${e.records.map(r => `${r.type === 'entry' ? '→' : '←'} ${r.time}`).join('  ')}`,
+      })),
+    });
+  }
+
+  function drillTardiness(emp) {
+    setDrillDown({
+      title: `Atrasos de ${emp.first_name} ${emp.last_name}`,
+      subtitle: `${emp.late_count} atrasos · ${emp.total_late_minutes} min acumulados`,
+      data: emp.dates_late.map(d => ({
+        name: d.date,
+        department: new Date(d.date + 'T12:00:00').toLocaleDateString('es-CL', { weekday: 'long' }),
+        detail: `Ingresó ${d.time} (+${d.minutes_late} min tarde)`,
+      })),
+    });
+  }
+
+  function drillAbsence(emp) {
+    setDrillDown({
+      title: `Inasistencias de ${emp.first_name} ${emp.last_name}`,
+      subtitle: `${emp.days_absent} días ausente · ${emp.attendance_rate}% asistencia`,
+      data: (emp.absent_dates || []).map(d => ({
+        name: d,
+        department: new Date(d + 'T12:00:00').toLocaleDateString('es-CL', { weekday: 'long' }),
+        detail: 'Sin registro',
+      })),
+    });
+  }
+
+  function drillDepartment(dept) {
+    if (!report?.absence_list) return;
+    const emps = report.absence_list.filter(e => (e.department || 'Sin departamento') === dept.name);
+    setDrillDown({
+      title: `Departamento: ${dept.name}`,
+      subtitle: `${dept.employees} colaboradores · ${dept.total_entries} ingresos · ${dept.late} atrasos`,
+      data: emps.map(e => {
+        const tardyData = report.tardiness_ranking.find(t => t.employee_id === e.id);
+        return {
+          name: `${e.first_name} ${e.last_name}`,
+          department: `${e.days_present} días · ${e.attendance_rate}%`,
+          detail: tardyData?.late_count > 0 ? `${tardyData.late_count} atrasos` : 'Sin atrasos',
+        };
+      }),
+    });
   }
 
   if (loading && !report) {
@@ -193,10 +325,37 @@ export default function DashboardPage() {
 
       {/* Period info */}
       {report && tab !== 'today' && (
-        <p className="text-sm text-gray-500 mb-6">
-          <Calendar className="w-4 h-4 inline mr-1" />
-          {report.start_date} al {report.end_date} · {report.working_days} días hábiles · Horario: {report.schedule.entry_time} (+{report.schedule.tolerance_minutes} min tolerancia)
-        </p>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-6">
+          <p className="text-sm text-gray-500">
+            <Calendar className="w-4 h-4 inline mr-1" />
+            {report.start_date} al {report.end_date} · {report.working_days} días hábiles · Horario: {report.schedule.entry_time} (+{report.schedule.tolerance_minutes} min)
+          </p>
+        </div>
+      )}
+
+      {/* Filters */}
+      {tab !== 'today' && (
+        <div className="flex flex-wrap items-center gap-3 mb-6 p-3 bg-gray-50 rounded-xl">
+          <span className="text-sm text-gray-500 font-medium">Filtros:</span>
+          <select
+            value={filters.department}
+            onChange={e => setFilters(f => ({ ...f, department: e.target.value }))}
+            className="text-sm px-3 py-2 border border-gray-200 rounded-lg bg-white focus:ring-2 focus:ring-primary-500 outline-none"
+          >
+            <option value="">Todos los departamentos</option>
+            {departments.map(d => (
+              <option key={d} value={d}>{d}</option>
+            ))}
+          </select>
+          {(filters.department || filters.employee_id) && (
+            <button
+              onClick={() => setFilters({ department: '', employee_id: '' })}
+              className="text-xs text-primary-600 hover:text-primary-700 font-medium"
+            >
+              Limpiar filtros
+            </button>
+          )}
+        </div>
       )}
 
       {/* KPI Cards */}
@@ -301,14 +460,14 @@ export default function DashboardPage() {
                   const height = d.rate;
                   const dayLabel = new Date(d.date + 'T12:00:00').toLocaleDateString('es-CL', { weekday: 'short', day: 'numeric' });
                   return (
-                    <div key={i} className="flex-1 flex flex-col items-center gap-1">
-                      <span className="text-[10px] text-gray-500 font-medium">{d.rate}%</span>
-                      <div className="w-full relative rounded-t-md overflow-hidden" style={{ height: `${Math.max(height, 4)}%` }}>
+                    <div key={i} className="flex-1 flex flex-col items-center gap-1 cursor-pointer group" onClick={() => drillDayAttendance(d)}>
+                      <span className="text-[10px] text-gray-500 font-medium group-hover:text-primary-600">{d.rate}%</span>
+                      <div className="w-full relative rounded-t-md overflow-hidden group-hover:ring-2 group-hover:ring-primary-300 transition-all" style={{ height: `${Math.max(height, 4)}%` }}>
                         <div className={`absolute inset-0 rounded-t-md ${
                           d.rate >= 90 ? 'bg-emerald-500' : d.rate >= 70 ? 'bg-amber-400' : 'bg-red-400'
                         }`} />
                       </div>
-                      <span className="text-[9px] text-gray-400 truncate w-full text-center">{dayLabel}</span>
+                      <span className="text-[9px] text-gray-400 truncate w-full text-center group-hover:text-primary-600">{dayLabel}</span>
                     </div>
                   );
                 })}
@@ -326,7 +485,7 @@ export default function DashboardPage() {
                 </div>
                 <div className="space-y-2">
                   {report.day_of_week.map(d => (
-                    <div key={d.name} className="flex items-center gap-3">
+                    <div key={d.name} className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 rounded-lg p-1 -m-1 transition-all" onClick={() => drillDayOfWeek(d)}>
                       <span className="text-sm text-gray-600 w-20 shrink-0">{d.name}</span>
                       <div className="flex-1 h-6 bg-gray-100 rounded-full overflow-hidden relative">
                         <div
@@ -357,7 +516,7 @@ export default function DashboardPage() {
                 </div>
                 <div className="space-y-2">
                   {report.department_breakdown.map(dept => (
-                    <div key={dept.name} className="flex items-center gap-3 p-2.5 bg-gray-50 rounded-xl">
+                    <div key={dept.name} className="flex items-center gap-3 p-2.5 bg-gray-50 rounded-xl cursor-pointer hover:bg-primary-50 hover:border-primary-200 border border-transparent transition-all" onClick={() => drillDepartment(dept)}>
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-gray-900 text-sm truncate">{dept.name}</p>
                         <p className="text-xs text-gray-400">{dept.employees} colaboradores</p>
@@ -392,7 +551,7 @@ export default function DashboardPage() {
               </div>
               <div className="space-y-2 max-h-[400px] overflow-y-auto">
                 {report.tardiness_ranking.filter(e => e.late_count > 0).map((emp, i) => (
-                  <div key={emp.employee_id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                  <div key={emp.employee_id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl cursor-pointer hover:bg-amber-50 transition-all" onClick={() => drillTardiness(emp)}>
                     <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
                       i === 0 ? 'bg-red-100 text-red-700' : i === 1 ? 'bg-orange-100 text-orange-700' : 'bg-gray-100 text-gray-600'
                     }`}>
@@ -476,7 +635,7 @@ export default function DashboardPage() {
                   {report.absence_list.map(emp => {
                     const tardyData = report.tardiness_ranking.find(t => t.employee_id === emp.id);
                     return (
-                      <tr key={emp.id} className="border-b border-gray-50 hover:bg-gray-50/50">
+                      <tr key={emp.id} className="border-b border-gray-50 hover:bg-primary-50/30 cursor-pointer transition-all" onClick={() => emp.days_absent > 0 && drillAbsence(emp)}>
                         <td className="py-3">
                           <div className="flex items-center gap-2">
                             <Avatar name={`${emp.first_name} ${emp.last_name}`} photo={emp.photo_url} size="xs" />
@@ -516,6 +675,49 @@ export default function DashboardPage() {
             </div>
           </div>
         </>
+      )}
+
+      {/* Drill-Down Modal */}
+      {drillDown && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setDrillDown(null)}>
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] overflow-hidden flex flex-col" onClick={e => e.stopPropagation()}>
+            {/* Header */}
+            <div className="p-5 border-b border-gray-100">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-bold text-gray-900 text-lg">{drillDown.title}</h3>
+                  {drillDown.subtitle && <p className="text-sm text-gray-500 mt-0.5">{drillDown.subtitle}</p>}
+                </div>
+                <button onClick={() => setDrillDown(null)} className="p-2 hover:bg-gray-100 rounded-xl text-gray-400 transition-all">
+                  <span className="text-xl leading-none">&times;</span>
+                </button>
+              </div>
+              <p className="text-xs text-gray-400 mt-2">{drillDown.data.length} registro{drillDown.data.length !== 1 ? 's' : ''}</p>
+            </div>
+            {/* Content */}
+            <div className="flex-1 overflow-y-auto p-4">
+              <div className="space-y-2">
+                {drillDown.data.map((item, i) => (
+                  <div key={i} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                    <span className="w-7 h-7 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center text-xs font-bold shrink-0">
+                      {i + 1}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-gray-900 text-sm">{item.name}</p>
+                      <p className="text-xs text-gray-400">{item.department || ''}</p>
+                    </div>
+                    {item.detail && (
+                      <p className="text-xs text-gray-500 font-mono shrink-0">{item.detail}</p>
+                    )}
+                  </div>
+                ))}
+                {drillDown.data.length === 0 && (
+                  <p className="text-center text-gray-400 py-8 text-sm">Sin datos para mostrar</p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

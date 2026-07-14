@@ -86,7 +86,10 @@ export const attendanceApi = {
     const query = new URLSearchParams(params).toString();
     return request(`/attendance/overtime${query ? `?${query}` : ''}`);
   },
-  getReports: (period = 'today') => request(`/attendance/reports?period=${period}`),
+  getReports: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return request(`/attendance/reports${query ? `?${query}` : ''}`);
+  },
 };
 
 // Devices API

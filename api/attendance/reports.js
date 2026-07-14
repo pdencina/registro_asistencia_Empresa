@@ -15,14 +15,18 @@ module.exports = async function handler(req, res) {
   if (!tenant) return;
 
   const sql = getDb();
-  const { period } = req.query; // 'today' | 'week' | 'month'
+  const { period, department, employee_id, start, end: endParam } = req.query; // 'today' | 'week' | 'month'
 
   try {
     // Determine date range
     const now = new Date();
     let startDate, endDate;
 
-    if (period === 'month') {
+    if (start && endParam) {
+      // Custom date range from filters
+      startDate = start;
+      endDate = endParam;
+    } else if (period === 'month') {
       startDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
       const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
       endDate = lastDay.toISOString().split('T')[0];
@@ -78,6 +82,21 @@ module.exports = async function handler(req, res) {
     const [entryH, entryM] = defaultEntryTime.split(':').map(Number);
     const maxEntryMinutes = entryH * 60 + entryM + defaultTolerance;
 
+    // Build filter conditions
+    let extraFilter = '';
+    const extraParams = [];
+    let paramIdx = 5;
+    if (department) {
+      extraFilter += ` AND e.department = $${paramIdx}`;
+      extraParams.push(department);
+      paramIdx++;
+    }
+    if (employee_id) {
+      extraFilter += ` AND ar.employee_id = $${paramIdx}`;
+      extraParams.push(employee_id);
+      paramIdx++;
+    }
+
     const allEntries = await sql(`
       SELECT 
         ar.employee_id,
@@ -89,8 +108,26 @@ module.exports = async function handler(req, res) {
       WHERE ar.tenant_id = $2 AND ar.type = 'entry'
         AND date(ar.timestamp AT TIME ZONE $1) >= $3
         AND date(ar.timestamp AT TIME ZONE $1) <= $4
+        ${extraFilter}
       ORDER BY ar.timestamp
-    `, [TZ, tenant.id, startDate, endDate]);
+    `, [TZ, tenant.id, startDate, endDate, ...extraParams]);
+
+    // Get ALL records (entry + exit) for detailed export
+    const allRecords = await sql(`
+      SELECT 
+        ar.employee_id, ar.type, ar.notes,
+        e.first_name, e.last_name, e.department, e.rut,
+        to_char(ar.timestamp AT TIME ZONE $1, 'YYYY-MM-DD') as record_date,
+        to_char(ar.timestamp AT TIME ZONE $1, 'HH24:MI:SS') as record_time,
+        to_char(ar.timestamp AT TIME ZONE $1, 'Dy') as day_name
+      FROM attendance_records ar
+      JOIN employees e ON ar.employee_id = e.id
+      WHERE ar.tenant_id = $2
+        AND date(ar.timestamp AT TIME ZONE $1) >= $3
+        AND date(ar.timestamp AT TIME ZONE $1) <= $4
+        ${extraFilter}
+      ORDER BY ar.timestamp DESC
+    `, [TZ, tenant.id, startDate, endDate, ...extraParams]);
 
     // Calculate tardiness per employee
     const employeeStats = {};
@@ -269,6 +306,7 @@ module.exports = async function handler(req, res) {
       tardiness_ranking: tardinessRanking.slice(0, 30),
       punctuality_bonus: punctualEmployees.slice(0, 30),
       absence_list: absenceList,
+      all_records: allRecords,
     });
   } catch (error) {
     return res.status(500).json({ error: error.message });
