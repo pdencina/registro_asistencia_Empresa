@@ -98,6 +98,8 @@ export default function CheckInPage() {
       const labeledDescriptors = [];
       for (const emp of data) {
         if (!emp.photo_url) continue;
+        // Solo usar empleados que hayan autorizado el uso biométrico
+        if (emp.consent_status && emp.consent_status !== 'approved') continue;
         try {
           const img = await faceapi.fetchImage(emp.photo_url);
           const detection = await faceapi

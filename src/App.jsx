@@ -9,6 +9,7 @@ import NoTenantPage from './pages/NoTenantPage';
 import MobileCheckInPage from './pages/MobileCheckInPage';
 import PinCheckInPage from './pages/PinCheckInPage';
 import UniversalCheckInPage from './pages/UniversalCheckInPage';
+import ConsentPage from './pages/ConsentPage';
 import ContractPage from './pages/ContractPage';
 import TermsPage from './pages/legal/TermsPage';
 import PrivacyPage from './pages/legal/PrivacyPage';
@@ -40,6 +41,9 @@ function App() {
 
         {/* Contrato digital: flexio.cl/contrato/slug */}
         <Route path="/contrato/:tenant" element={<ContractPage />} />
+
+        {/* Consentimiento biométrico: flexio.cl/consentimiento/token */}
+        <Route path="/consentimiento/:token" element={<ConsentPage />} />
 
         {/* App sin slug: mostrar mensaje */}
         <Route path="/app" element={<NoTenantPage />} />
