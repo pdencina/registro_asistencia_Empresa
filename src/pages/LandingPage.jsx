@@ -261,6 +261,7 @@ export default function LandingPage() {
             <a href="#features" className="block text-gray-600 py-2">Funcionalidades</a>
             <a href="#pricing" className="block text-gray-600 py-2">Precios</a>
             <a href="#legal" className="block text-gray-600 py-2">Seguridad</a>
+            <a href="/mi" className="block text-gray-600 py-2">Marcar asistencia</a>
             <a href="/login" className="block text-gray-600 py-2">Iniciar sesión</a>
             <a href="https://wa.me/56949616038?text=Hola%2C%20me%20interesa%20Flexio%20para%20mi%20empresa" target="_blank" rel="noopener noreferrer" className="block w-full text-center px-5 py-2.5 bg-primary-600 text-white rounded-xl font-medium">
               Solicitar demo
