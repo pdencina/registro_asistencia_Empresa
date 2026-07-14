@@ -139,13 +139,34 @@ export default function SuperAdminDashboard({ onLogout }) {
                       </div>
                     </td>
                     <td className="px-5 py-4">
-                      <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                        tenant.plan === 'enterprise' ? 'bg-purple-500/20 text-purple-300' :
-                        tenant.plan === 'profesional' ? 'bg-primary-500/20 text-primary-300' :
-                        'bg-gray-600/30 text-gray-300'
-                      }`}>
-                        {tenant.plan}
-                      </span>
+                      <select
+                        value={tenant.plan}
+                        onChange={async (e) => {
+                          const newPlan = e.target.value;
+                          const token = sessionStorage.getItem('superadmin_token');
+                          const planLimits = {
+                            basico: { max_employees: 30, max_devices: 1 },
+                            profesional: { max_employees: 100, max_devices: 3 },
+                            enterprise: { max_employees: 300, max_devices: 10 },
+                          };
+                          const limits = planLimits[newPlan] || planLimits.basico;
+                          await fetch('/api/superadmin/tenants', {
+                            method: 'PUT',
+                            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ id: tenant.id, plan: newPlan, max_employees: limits.max_employees, max_devices: limits.max_devices }),
+                          });
+                          loadTenants();
+                        }}
+                        className={`text-xs px-2 py-1 rounded-full font-medium cursor-pointer border-0 outline-none ${
+                          tenant.plan === 'enterprise' ? 'bg-purple-500/20 text-purple-300' :
+                          tenant.plan === 'profesional' ? 'bg-primary-500/20 text-primary-300' :
+                          'bg-gray-600/30 text-gray-300'
+                        }`}
+                      >
+                        <option value="basico" className="bg-gray-800 text-gray-300">basico</option>
+                        <option value="profesional" className="bg-gray-800 text-primary-300">profesional</option>
+                        <option value="enterprise" className="bg-gray-800 text-purple-300">enterprise</option>
+                      </select>
                     </td>
                     <td className="px-5 py-4">
                       <span className="text-sm">{tenant.employee_count || 0} / {tenant.max_employees}</span>

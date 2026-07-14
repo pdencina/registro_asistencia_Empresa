@@ -19,6 +19,7 @@ export default function ContractPage() {
   // Form state
   const [firmante, setFirmante] = useState({ nombre: '', rut: '', email: '' });
   const [modalidad, setModalidad] = useState('mensual');
+  const [selectedPlan, setSelectedPlan] = useState('');
   const [consentimiento, setConsentimiento] = useState(false);
   const [firmaData, setFirmaData] = useState(null);
   const [saving, setSaving] = useState(false);
@@ -35,6 +36,7 @@ export default function ContractPage() {
         const data = await res.json();
         setTenantData(data.tenant);
         setContract(data.contract);
+        setSelectedPlan(data.tenant?.plan || 'basico');
         if (data.contract?.estado === 'firmado') {
           setSigned(true);
         }
@@ -69,7 +71,7 @@ export default function ContractPage() {
     setError('');
 
     try {
-      const plan = tenantData?.plan || 'basico';
+      const plan = selectedPlan || 'basico';
       const precio = PLANES[plan]?.precio || 39990;
       const precioFinal = modalidad === 'anual' ? Math.round(precio * 12 * 0.8) : precio;
 
@@ -154,7 +156,7 @@ export default function ContractPage() {
     );
   }
 
-  const plan = tenantData?.plan || 'basico';
+  const plan = selectedPlan || tenantData?.plan || 'basico';
   const planInfo = PLANES[plan] || PLANES.basico;
   const precioMensual = planInfo.precio;
   const precioAnual = Math.round(precioMensual * 12 * 0.8);
@@ -195,10 +197,36 @@ export default function ContractPage() {
 
             <section>
               <h3 className="text-lg font-bold text-gray-900">3. Plan contratado</h3>
+              <p className="text-sm text-gray-500 mb-4">Seleccione el plan que desea contratar:</p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 my-4">
+                {Object.entries(PLANES).map(([key, info]) => (
+                  <label
+                    key={key}
+                    className={`p-4 border-2 rounded-xl cursor-pointer transition-all ${
+                      plan === key
+                        ? 'border-primary-500 bg-primary-50 shadow-sm'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="plan"
+                      value={key}
+                      checked={plan === key}
+                      onChange={() => setSelectedPlan(key)}
+                      className="sr-only"
+                    />
+                    <p className="font-bold text-gray-900">{info.nombre}</p>
+                    <p className="text-xl font-bold text-primary-600 my-1">{formatPrice(info.precio)}<span className="text-sm font-normal text-gray-500">/mes</span></p>
+                    <p className="text-xs text-gray-500">Hasta {info.empleados} colaboradores</p>
+                    <p className="text-xs text-gray-500">{info.dispositivos} dispositivo{info.dispositivos > 1 ? 's' : ''}</p>
+                  </label>
+                ))}
+              </div>
               <div className="bg-primary-50 border border-primary-200 rounded-xl p-4 my-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-bold text-primary-900">Plan {planInfo.nombre}</p>
+                    <p className="font-bold text-primary-900">Plan seleccionado: {planInfo.nombre}</p>
                     <p className="text-sm text-primary-700">Hasta {planInfo.empleados} colaboradores · {planInfo.dispositivos} dispositivo{planInfo.dispositivos > 1 ? 's' : ''}</p>
                   </div>
                   <p className="text-xl font-bold text-primary-600">{formatPrice(precioMensual)}/mes</p>
