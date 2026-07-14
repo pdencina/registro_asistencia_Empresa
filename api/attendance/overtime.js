@@ -126,11 +126,30 @@ module.exports = async function handler(req, res) {
         const firstEntry = new Date(day.entries[0]);
         const lastExit = new Date(day.exits[day.exits.length - 1]);
 
+        // Calcular minutos trabajados
         const workedMinutes = Math.round((lastExit - firstEntry) / 60000);
         // Restar 30 min de colación si trabajó más de 5 horas
         const effectiveWorked = workedMinutes > 300 ? workedMinutes - 30 : workedMinutes;
 
-        const overtime = Math.max(0, effectiveWorked - defaultSchedule.daily_minutes);
+        // HORAS EXTRA: solo cuenta tiempo DESPUÉS de la hora de salida programada
+        // Llegar temprano NO genera horas extra
+        const exitTimeParts = defaultSchedule.exit_time.split(':');
+        const scheduledExitMinutes = parseInt(exitTimeParts[0]) * 60 + parseInt(exitTimeParts[1]);
+
+        // Convertir la hora de salida real a minutos desde medianoche (timezone local)
+        const exitLocal = new Date(lastExit.toLocaleString('en-US', { timeZone: TZ }));
+        const actualExitMinutes = exitLocal.getHours() * 60 + exitLocal.getMinutes();
+
+        // Solo hay hora extra si salió DESPUÉS de la hora programada
+        const overtime = Math.max(0, actualExitMinutes - scheduledExitMinutes);
+
+        // Hora de entrada real para detectar puntualidad/llegada temprana
+        const entryTimeParts = defaultSchedule.entry_time.split(':');
+        const scheduledEntryMinutes = parseInt(entryTimeParts[0]) * 60 + parseInt(entryTimeParts[1]);
+        const entryLocal = new Date(firstEntry.toLocaleString('en-US', { timeZone: TZ }));
+        const actualEntryMinutes = entryLocal.getHours() * 60 + entryLocal.getMinutes();
+        const arrivedEarly = actualEntryMinutes < scheduledEntryMinutes;
+        const minutesEarly = arrivedEarly ? scheduledEntryMinutes - actualEntryMinutes : 0;
 
         totalWorkedMinutes += effectiveWorked;
         totalOvertimeMinutes += overtime;
@@ -143,6 +162,17 @@ module.exports = async function handler(req, res) {
             exit: lastExit.toLocaleTimeString('es-CL', { timeZone: TZ, hour: '2-digit', minute: '2-digit' }),
             worked_minutes: effectiveWorked,
             overtime_minutes: overtime,
+            reason: 'post_exit', // Solo por quedarse después
+          });
+        }
+
+        // Registrar llegada temprana (para bono puntualidad)
+        if (arrivedEarly) {
+          if (!emp.early_days) emp.early_days = [];
+          emp.early_days.push({
+            date: dateKey,
+            entry: firstEntry.toLocaleTimeString('es-CL', { timeZone: TZ, hour: '2-digit', minute: '2-digit' }),
+            minutes_early: minutesEarly,
           });
         }
       }
@@ -159,11 +189,18 @@ module.exports = async function handler(req, res) {
         total_overtime_hours: Math.floor(totalOvertimeMinutes / 60),
         total_overtime_minutes: totalOvertimeMinutes % 60,
         overtime_days: dailyDetail,
+        early_arrival_days: emp.early_days || [],
+        early_arrival_count: (emp.early_days || []).length,
       });
     }
 
     // Ordenar por más horas extra
     results.sort((a, b) => (b.total_overtime_hours * 60 + b.total_overtime_minutes) - (a.total_overtime_hours * 60 + a.total_overtime_minutes));
+
+    // Punctuality bonus: employees sorted by most early arrivals
+    const punctualityRanking = [...results]
+      .filter(r => r.early_arrival_count > 0)
+      .sort((a, b) => b.early_arrival_count - a.early_arrival_count);
 
     return res.status(200).json({
       period: { start_date, end_date },
@@ -171,8 +208,12 @@ module.exports = async function handler(req, res) {
       summary: {
         total_employees: results.length,
         employees_with_overtime: results.filter(r => r.total_overtime_hours > 0 || r.total_overtime_minutes > 0).length,
+        employees_always_punctual: results.filter(r => r.early_arrival_count > 0 && r.total_overtime_hours === 0 && r.total_overtime_minutes === 0).length,
+        total_early_arrivals: results.reduce((sum, r) => sum + r.early_arrival_count, 0),
       },
+      note: 'Las horas extra solo se calculan cuando el colaborador permanece DESPUÉS de la hora de salida programada. Llegar temprano NO genera horas extra.',
       employees: results,
+      punctuality_ranking: punctualityRanking,
     });
   } catch (error) {
     return res.status(500).json({ error: error.message });
