@@ -8,7 +8,8 @@ export default function SchedulesPage() {
   const [authorizers, setAuthorizers] = useState([]);
   const [activeTab, setActiveTab] = useState('schedules'); // schedules | assign | authorizers
   const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState({ name: '', entry_time: '08:30', exit_time: '18:00', tolerance_minutes: 10, is_default: false });
+  const [formData, setFormData] = useState({ name: '', entry_time: '08:30', exit_time: '18:00', tolerance_minutes: 10, is_default: false, block2_entry_time: '', block2_exit_time: '' });
+  const [showBlock2, setShowBlock2] = useState(false);
   const [newAuthorizer, setNewAuthorizer] = useState({ name: '', position: '' });
   const [assignData, setAssignData] = useState({ employee_id: '', schedule_id: '', custom_entry_time: '', custom_exit_time: '' });
   const [message, setMessage] = useState('');
@@ -31,9 +32,15 @@ export default function SchedulesPage() {
   async function handleCreateSchedule(e) {
     e.preventDefault();
     try {
-      await schedulesApi.create(formData);
+      const payload = { ...formData };
+      if (!showBlock2) {
+        payload.block2_entry_time = null;
+        payload.block2_exit_time = null;
+      }
+      await schedulesApi.create(payload);
       setShowForm(false);
-      setFormData({ name: '', entry_time: '08:30', exit_time: '18:00', tolerance_minutes: 10, is_default: false });
+      setShowBlock2(false);
+      setFormData({ name: '', entry_time: '08:30', exit_time: '18:00', tolerance_minutes: 10, is_default: false, block2_entry_time: '', block2_exit_time: '' });
       loadData();
       showMsg('Horario creado');
     } catch (err) { showMsg(err.message); }
@@ -125,6 +132,9 @@ export default function SchedulesPage() {
                   </div>
                   <p className="text-sm text-gray-500 mt-1">
                     {sch.entry_time?.slice(0,5)} — {sch.exit_time?.slice(0,5)} · {sch.tolerance_minutes} min tolerancia
+                    {sch.block2_entry_time && sch.block2_exit_time && (
+                      <span className="ml-2 text-primary-600 font-medium">+ Bloque 2: {sch.block2_entry_time?.slice(0,5)} — {sch.block2_exit_time?.slice(0,5)}</span>
+                    )}
                   </p>
                 </div>
                 <button onClick={() => handleDeleteSchedule(sch.id)} className="p-2 text-gray-400 hover:text-red-600 rounded-lg">
@@ -173,6 +183,31 @@ export default function SchedulesPage() {
                       className="w-4 h-4 rounded border-gray-300 text-primary-600" />
                     <span className="text-sm text-gray-700">Horario por defecto</span>
                   </label>
+
+                  {/* Block 2 (Split shift) */}
+                  <div className="border-t border-gray-200 pt-4">
+                    <label className="flex items-center gap-2 cursor-pointer mb-3">
+                      <input type="checkbox" checked={showBlock2} onChange={e => setShowBlock2(e.target.checked)}
+                        className="w-4 h-4 rounded border-gray-300 text-primary-600" />
+                      <span className="text-sm text-gray-700 font-medium">Jornada partida (2 bloques)</span>
+                    </label>
+                    {showBlock2 && (
+                      <div className="grid grid-cols-2 gap-3 bg-blue-50 p-3 rounded-xl">
+                        <div>
+                          <label className="block text-xs font-medium text-blue-700 mb-1">Bloque 2 — Entrada</label>
+                          <input type="time" value={formData.block2_entry_time} onChange={e => setFormData({...formData, block2_entry_time: e.target.value})}
+                            className="w-full px-3 py-2 border border-blue-200 rounded-lg outline-none text-sm" />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-blue-700 mb-1">Bloque 2 — Salida</label>
+                          <input type="time" value={formData.block2_exit_time} onChange={e => setFormData({...formData, block2_exit_time: e.target.value})}
+                            className="w-full px-3 py-2 border border-blue-200 rounded-lg outline-none text-sm" />
+                        </div>
+                        <p className="col-span-2 text-xs text-blue-600">Ej: Bloque 1 (08:00-13:00), Bloque 2 (15:00-18:00)</p>
+                      </div>
+                    )}
+                  </div>
+
                   <button type="submit" className="btn-primary w-full">Crear Horario</button>
                 </form>
               </div>

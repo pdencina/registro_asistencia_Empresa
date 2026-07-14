@@ -62,7 +62,8 @@ module.exports = async function handler(req, res) {
       // Get employee-specific schedule or fall back to default
       const [assignment] = await sql(`
         SELECT es.*, ws.name as schedule_name, ws.entry_time as schedule_entry, 
-               ws.exit_time as schedule_exit, ws.tolerance_minutes
+               ws.exit_time as schedule_exit, ws.tolerance_minutes,
+               ws.block2_entry_time, ws.block2_exit_time
         FROM employee_schedules es
         LEFT JOIN work_schedules ws ON es.schedule_id = ws.id
         WHERE es.employee_id = $1
@@ -75,6 +76,9 @@ module.exports = async function handler(req, res) {
           tolerance_minutes: assignment.tolerance_minutes || 10,
           schedule_name: assignment.schedule_name || 'Personalizado',
           is_custom: !!assignment.custom_entry_time,
+          block2_entry_time: assignment.block2_entry_time || null,
+          block2_exit_time: assignment.block2_exit_time || null,
+          has_block2: !!(assignment.block2_entry_time && assignment.block2_exit_time),
         });
       }
 

@@ -15,9 +15,15 @@ module.exports = async function handler(req, res) {
       exit_time TIME NOT NULL DEFAULT '18:00',
       tolerance_minutes INTEGER NOT NULL DEFAULT 10,
       is_default BOOLEAN DEFAULT false,
+      block2_entry_time TIME,
+      block2_exit_time TIME,
       created_at TIMESTAMPTZ DEFAULT NOW()
     )
   `);
+
+  // Add block2 columns if table already exists
+  await sql('ALTER TABLE work_schedules ADD COLUMN IF NOT EXISTS block2_entry_time TIME');
+  await sql('ALTER TABLE work_schedules ADD COLUMN IF NOT EXISTS block2_exit_time TIME');
 
   await sql(`
     CREATE TABLE IF NOT EXISTS employee_schedules (
@@ -71,7 +77,7 @@ module.exports = async function handler(req, res) {
 
     // POST: Create a new schedule
     if (req.method === 'POST') {
-      const { name, entry_time, exit_time, tolerance_minutes, is_default } = req.body;
+      const { name, entry_time, exit_time, tolerance_minutes, is_default, block2_entry_time, block2_exit_time } = req.body;
 
       if (!name || !entry_time || !exit_time) {
         return res.status(400).json({ error: 'Nombre, hora de entrada y salida son obligatorios' });
@@ -83,17 +89,17 @@ module.exports = async function handler(req, res) {
       }
 
       const [schedule] = await sql(`
-        INSERT INTO work_schedules (id, name, entry_time, exit_time, tolerance_minutes, is_default)
-        VALUES (gen_random_uuid(), $1, $2, $3, $4, $5)
+        INSERT INTO work_schedules (id, name, entry_time, exit_time, tolerance_minutes, is_default, block2_entry_time, block2_exit_time)
+        VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7)
         RETURNING *
-      `, [name, entry_time, exit_time, tolerance_minutes || 10, is_default || false]);
+      `, [name, entry_time, exit_time, tolerance_minutes || 10, is_default || false, block2_entry_time || null, block2_exit_time || null]);
 
       return res.status(201).json(schedule);
     }
 
     // PUT: Update a schedule
     if (req.method === 'PUT') {
-      const { id, name, entry_time, exit_time, tolerance_minutes, is_default } = req.body;
+      const { id, name, entry_time, exit_time, tolerance_minutes, is_default, block2_entry_time, block2_exit_time } = req.body;
 
       if (!id) return res.status(400).json({ error: 'id es requerido' });
 
@@ -102,9 +108,9 @@ module.exports = async function handler(req, res) {
       }
 
       await sql(`
-        UPDATE work_schedules SET name = $1, entry_time = $2, exit_time = $3, tolerance_minutes = $4, is_default = $5
-        WHERE id = $6
-      `, [name, entry_time, exit_time, tolerance_minutes, is_default, id]);
+        UPDATE work_schedules SET name = $1, entry_time = $2, exit_time = $3, tolerance_minutes = $4, is_default = $5, block2_entry_time = $6, block2_exit_time = $7
+        WHERE id = $8
+      `, [name, entry_time, exit_time, tolerance_minutes, is_default, block2_entry_time || null, block2_exit_time || null, id]);
 
       const [updated] = await sql('SELECT * FROM work_schedules WHERE id = $1', [id]);
       return res.status(200).json(updated);
