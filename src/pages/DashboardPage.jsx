@@ -192,6 +192,50 @@ export default function DashboardPage() {
     XLSX.writeFile(wb, `Flexio-Reporte-${report.period}-${report.start_date}.xlsx`);
   }
 
+  async function exportLibroDT() {
+    if (!report) return;
+    try {
+      const data = await attendanceApi.getLibroAsistencia(report.start_date, report.end_date);
+      const wb = XLSX.utils.book_new();
+
+      // Header info sheet
+      const infoRows = [
+        ['LIBRO DE ASISTENCIA — FORMATO DIRECCIÓN DEL TRABAJO'],
+        [],
+        ['Empresa:', data.empresa.nombre],
+        ['RUT Empresa:', data.empresa.rut],
+        ['Período:', `${data.periodo.start_date} al ${data.periodo.end_date}`],
+        ['Total Colaboradores:', data.total_empleados],
+        ['Días Hábiles:', data.total_dias_habiles],
+        [],
+        ['Art. 33 Código del Trabajo — Registro electrónico con validación biométrica facial.'],
+        ['Este documento debe conservarse por un mínimo de 5 años.'],
+      ];
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(infoRows), 'Información');
+
+      // Main attendance book
+      const libroRows = [['Fecha', 'Día', 'RUT', 'Apellido, Nombre', 'Departamento', 'Cargo', 'Hora Entrada', 'Hora Salida', 'Horas Trabajadas', 'Método Validación', 'Observación']];
+      for (const r of data.registros) {
+        libroRows.push([
+          r.fecha, r.dia, r.rut, r.nombre, r.departamento, r.cargo,
+          r.hora_entrada, r.hora_salida, r.horas_trabajadas,
+          r.metodo_validacion, r.observacion,
+        ]);
+      }
+      const wsLibro = XLSX.utils.aoa_to_sheet(libroRows);
+      // Set column widths
+      wsLibro['!cols'] = [
+        { wch: 12 }, { wch: 12 }, { wch: 14 }, { wch: 25 }, { wch: 15 },
+        { wch: 15 }, { wch: 12 }, { wch: 12 }, { wch: 14 }, { wch: 22 }, { wch: 22 },
+      ];
+      XLSX.utils.book_append_sheet(wb, wsLibro, 'Libro de Asistencia');
+
+      XLSX.writeFile(wb, `Libro-Asistencia-DT-${data.empresa.nombre.replace(/\s+/g, '-')}-${data.periodo.start_date}.xlsx`);
+    } catch (err) {
+      console.error('Error exportando libro DT:', err);
+    }
+  }
+
   // Drill-down: show people behind a data point
   function drillDayAttendance(day) {
     if (!report?.all_records) return;
@@ -329,6 +373,15 @@ export default function DashboardPage() {
             >
               <Download className="w-4 h-4" />
               Excel
+            </button>
+          )}
+          {report && tab !== 'today' && (
+            <button
+              onClick={exportLibroDT}
+              className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-medium transition-all"
+            >
+              <Download className="w-4 h-4" />
+              Libro DT
             </button>
           )}
         </div>

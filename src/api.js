@@ -90,6 +90,7 @@ export const attendanceApi = {
     const query = new URLSearchParams(params).toString();
     return request(`/attendance/reports${query ? `?${query}` : ''}`);
   },
+  getLibroAsistencia: (start_date, end_date) => request(`/attendance/libro-asistencia?start_date=${start_date}&end_date=${end_date}`),
 };
 
 // Devices API
