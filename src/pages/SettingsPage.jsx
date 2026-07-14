@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { MapPin, Shield, Loader, ToggleLeft, ToggleRight, Building2, Upload, Trash2 } from 'lucide-react';
+import { MapPin, Shield, Loader, ToggleLeft, ToggleRight, Building2, Upload, Trash2, FileText, ExternalLink, Printer } from 'lucide-react';
 
 const API_BASE = '/api';
 
@@ -22,6 +22,7 @@ export default function SettingsPage() {
   const [messageType, setMessageType] = useState('success'); // 'success' | 'error'
   const [logoUrl, setLogoUrl] = useState(null);
   const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [contractData, setContractData] = useState(null);
   const logoInputRef = useRef(null);
 
   function showMessage(text, type = 'success', duration = 3000) {
@@ -33,6 +34,7 @@ export default function SettingsPage() {
   useEffect(() => {
     loadSettings();
     loadLogo();
+    loadContract();
   }, []);
 
   async function loadSettings() {
@@ -59,6 +61,22 @@ export default function SettingsPage() {
       if (res.ok) {
         const data = await res.json();
         setLogoUrl(data.logo_url);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function loadContract() {
+    const slug = getTenantSlug();
+    if (!slug) return;
+    try {
+      const res = await fetch(`${API_BASE}/contracts?tenant=${slug}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.contract?.estado === 'firmado') {
+          setContractData(data.contract);
+        }
       }
     } catch (err) {
       console.error(err);
@@ -261,6 +279,56 @@ export default function SettingsPage() {
             )}
           </button>
         </div>
+      </div>
+
+      {/* Contrato */}
+      <div className="card mt-6">
+        <div className="flex items-center gap-3 mb-6">
+          <FileText className="w-5 h-5 text-primary-600" />
+          <h3 className="font-bold text-gray-900">Contrato de Servicio</h3>
+        </div>
+
+        {contractData ? (
+          <div>
+            <div className="flex items-center gap-3 p-4 bg-emerald-50 border border-emerald-200 rounded-xl mb-4">
+              <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center shrink-0">
+                <FileText className="w-5 h-5 text-emerald-600" />
+              </div>
+              <div className="flex-1">
+                <p className="font-medium text-emerald-900">Contrato firmado</p>
+                <p className="text-sm text-emerald-700">
+                  Firmado por {contractData.firmante_nombre} el {new Date(contractData.firmado_at).toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric' })}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <a
+                href={`/contrato/${getTenantSlug()}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-xl text-sm font-medium transition-all"
+              >
+                <ExternalLink className="w-4 h-4" />
+                Ver contrato completo
+              </a>
+              <button
+                onClick={() => {
+                  const win = window.open(`/contrato/${getTenantSlug()}`, '_blank');
+                  setTimeout(() => win?.print(), 1500);
+                }}
+                className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-50 transition-all"
+              >
+                <Printer className="w-4 h-4" />
+                Exportar PDF
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="p-4 bg-gray-50 rounded-xl text-center">
+            <p className="text-sm text-gray-500 mb-2">No hay contrato firmado aún.</p>
+            <p className="text-xs text-gray-400">El contrato será proporcionado por Flexio para su firma digital.</p>
+          </div>
+        )}
       </div>
     </div>
   );
