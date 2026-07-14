@@ -73,7 +73,8 @@ module.exports = async function handler(req, res) {
       metodo: 'firma_electronica_simple',
     };
 
-    // Insertar o actualizar contrato
+    // Insertar o actualizar contrato — estado 'firmado' directamente
+    // (la firma del prestador está pre-insertada en el contrato)
     const [existing] = await sql(
       'SELECT id FROM contracts WHERE tenant_id = $1 AND estado = $2',
       [tenant.id, 'pendiente']
@@ -87,7 +88,7 @@ module.exports = async function handler(req, res) {
           plan = $1, modalidad = $2, precio = $3,
           firmante_nombre = $4, firmante_rut = $5, firmante_email = $6,
           firma_digital = $7, firmado_at = $8, auditoria_firma = $9,
-          estado = 'firmado_cliente', updated_at = NOW()
+          estado = 'firmado', updated_at = NOW()
         WHERE id = $10
       `, [
         plan || tenant.plan,

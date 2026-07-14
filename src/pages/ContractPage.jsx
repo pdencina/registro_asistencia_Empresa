@@ -37,7 +37,7 @@ export default function ContractPage() {
         setTenantData(data.tenant);
         setContract(data.contract);
         setSelectedPlan(data.tenant?.plan || 'basico');
-        if (data.contract?.estado === 'firmado' || data.contract?.estado === 'firmado_cliente') {
+        if (data.contract?.estado === 'firmado') {
           setSigned(true);
         }
       } else {
@@ -154,23 +154,15 @@ export default function ContractPage() {
   if (signed && contract) {
     const signedPlan = PLANES[contract.plan] || PLANES.basico;
     const fechaFirma = new Date(contract.firmado_at).toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric' });
-    const bothSigned = contract.prestador_firma;
     return (
       <div className="min-h-screen bg-gray-50 py-8 px-4">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-6">
             <img src="/logo-flexio.svg" alt="Flexio" className="h-8 mx-auto mb-4" />
-            {bothSigned ? (
-              <div className="inline-flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-2 rounded-full text-sm font-medium">
-                <CheckCircle className="w-4 h-4" />
-                Contrato firmado por ambas partes — {fechaFirma}
-              </div>
-            ) : (
-              <div className="inline-flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-700 px-4 py-2 rounded-full text-sm font-medium">
-                <FileText className="w-4 h-4" />
-                Pendiente firma del Prestador (Flexio)
-              </div>
-            )}
+            <div className="inline-flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-2 rounded-full text-sm font-medium">
+              <CheckCircle className="w-4 h-4" />
+              Contrato firmado digitalmente — {fechaFirma}
+            </div>
           </div>
 
           <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-6">
@@ -259,11 +251,7 @@ export default function ContractPage() {
               <div className="text-center">
                 <p className="text-xs text-gray-400 uppercase tracking-wide mb-3">Por el Prestador</p>
                 <div className="h-20 flex items-center justify-center">
-                  {contract.prestador_firma ? (
-                    <img src={contract.prestador_firma} alt="Firma Prestador" className="h-16 object-contain" />
-                  ) : (
-                    <p className="text-amber-500 italic text-sm">Pendiente de firma</p>
-                  )}
+                  <p className="text-2xl font-signature italic text-gray-800" style={{ fontFamily: 'cursive' }}>Pablo Encina A.</p>
                 </div>
                 <div className="border-t border-gray-300 pt-2 mt-2">
                   <p className="text-sm font-medium text-gray-900">Pablo Encina Acevedo</p>

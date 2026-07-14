@@ -85,15 +85,15 @@ export default function AdminLayout() {
       </main>
 
       {/* Bottom Navigation */}
-      <nav className="bg-white border-t border-gray-200 px-4 py-2">
-        <div className="flex justify-around max-w-3xl mx-auto">
-          <NavItem to={basePath} icon={<BarChart3 className="w-6 h-6" />} label="Dashboard" end />
-          <NavItem to={`${basePath}/employees`} icon={<Users className="w-6 h-6" />} label="Colaboradores" />
-          <NavItem to={`${basePath}/attendance`} icon={<ClipboardList className="w-6 h-6" />} label="Asistencia" />
-          <NavItem to={`${basePath}/register`} icon={<Camera className="w-6 h-6" />} label="Registrar" />
-          <NavItem to={`${basePath}/schedules`} icon={<Clock className="w-6 h-6" />} label="Horarios" />
-          <NavItem to={`${basePath}/overtime`} icon={<Clock className="w-6 h-6" />} label="Hrs Extra" />
-          <NavItem to={`${basePath}/settings`} icon={<Settings className="w-6 h-6" />} label="Config" />
+      <nav className="bg-white border-t border-gray-200 px-2 py-2 overflow-x-auto">
+        <div className="flex justify-around min-w-max mx-auto">
+          <NavItem to={basePath} icon={<BarChart3 className="w-5 h-5" />} label="Dashboard" end />
+          <NavItem to={`${basePath}/employees`} icon={<Users className="w-5 h-5" />} label="Equipo" />
+          <NavItem to={`${basePath}/attendance`} icon={<ClipboardList className="w-5 h-5" />} label="Asistencia" />
+          <NavItem to={`${basePath}/register`} icon={<Camera className="w-5 h-5" />} label="Registrar" />
+          <NavItem to={`${basePath}/schedules`} icon={<Clock className="w-5 h-5" />} label="Horarios" />
+          <NavItem to={`${basePath}/overtime`} icon={<Clock className="w-5 h-5" />} label="Hrs Extra" />
+          <NavItem to={`${basePath}/settings`} icon={<Settings className="w-5 h-5" />} label="Config" />
         </div>
       </nav>
     </div>
@@ -106,7 +106,7 @@ function NavItem({ to, icon, label, end }) {
       to={to}
       end={end}
       className={({ isActive }) =>
-        `flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-all ${
+        `flex flex-col items-center gap-0.5 px-2 sm:px-3 py-2 rounded-xl transition-all whitespace-nowrap ${
           isActive
             ? 'text-primary-600 bg-primary-50'
             : 'text-gray-400 hover:text-gray-600'
