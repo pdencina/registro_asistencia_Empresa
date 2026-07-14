@@ -172,7 +172,7 @@ export default function ContractPage() {
               <section>
                 <h3 className="text-base font-bold text-gray-900">1. Comparecientes</h3>
                 <p>En Santiago de Chile, a {fechaFirma}, comparecen:</p>
-                <p><strong>EL PRESTADOR:</strong> Pablo Encina Acevedo, RUT 17.339.278-8, con domicilio en San Eugenio 1331, Depto 1603 B, Santiago, quien presta los servicios bajo la marca comercial "Flexio".</p>
+                <p><strong>EL PRESTADOR:</strong> Pablo David Encina Acevedo, RUT 17.339.278-8, con domicilio en San Eugenio 1331, Depto 1603 B, Santiago, quien presta los servicios bajo la marca comercial "Flexio".</p>
                 <p><strong>EL CLIENTE:</strong> {tenantData?.name}, RUT {tenantData?.rut_empresa || 'No registrado'}, representada por {contract.firmante_nombre}, RUT {contract.firmante_rut}.</p>
               </section>
 
@@ -192,7 +192,7 @@ export default function ContractPage() {
               <section>
                 <h3 className="text-base font-bold text-gray-900">4. Modalidad y precio</h3>
                 <p>Modalidad: <strong>{contract.modalidad === 'anual' ? 'Anual (20% descuento)' : 'Mensual'}</strong></p>
-                <p>Precio acordado: <strong>{formatPrice(contract.precio)} {contract.modalidad === 'anual' ? '/año' : '/mes'}</strong></p>
+                <p>Precio acordado: <strong>{formatPrice(contract.precio)} + IVA {contract.modalidad === 'anual' ? '/año' : '/mes'}</strong></p>
               </section>
 
               <section>
@@ -251,10 +251,10 @@ export default function ContractPage() {
               <div className="text-center">
                 <p className="text-xs text-gray-400 uppercase tracking-wide mb-3">Por el Prestador</p>
                 <div className="h-20 flex items-center justify-center">
-                  <p className="text-2xl font-signature italic text-gray-800" style={{ fontFamily: 'cursive' }}>Pablo Encina A.</p>
+                  <img src="/firma-prestador.png" alt="Firma Pablo David Encina Acevedo" className="h-16 object-contain" />
                 </div>
                 <div className="border-t border-gray-300 pt-2 mt-2">
-                  <p className="text-sm font-medium text-gray-900">Pablo Encina Acevedo</p>
+                  <p className="text-sm font-medium text-gray-900">Pablo David Encina Acevedo</p>
                   <p className="text-xs text-gray-500">RUT 17.339.278-8</p>
                   <p className="text-xs text-gray-500">Flexio</p>
                 </div>
@@ -319,7 +319,7 @@ export default function ContractPage() {
                 En Santiago de Chile, a {getTodayFormatted()}, comparecen:
               </p>
               <p>
-                <strong>EL PRESTADOR:</strong> Pablo Encina Acevedo, RUT 17.339.278-8, con domicilio en San Eugenio 1331, Depto 1603 B, Santiago, quien presta los servicios objeto de este Contrato bajo la marca comercial "Flexio", en calidad de prestador de servicios profesionales independientes (persona natural, boleta de honorarios), en adelante "el Consultor" o "el Prestador".
+                <strong>EL PRESTADOR:</strong> Pablo David Encina Acevedo, RUT 17.339.278-8, con domicilio en San Eugenio 1331, Depto 1603 B, Santiago, quien presta los servicios objeto de este Contrato bajo la marca comercial "Flexio", en calidad de prestador de servicios profesionales independientes (persona natural, boleta de honorarios), en adelante "el Consultor" o "el Prestador".
               </p>
               <p>
                 <strong>EL CLIENTE:</strong> {tenantData?.name || '[NOMBRE EMPRESA]'}, RUT {tenantData?.rut_empresa || '[RUT EMPRESA]'}, representada por su representante legal debidamente facultado, en adelante "el Cliente".
@@ -374,7 +374,7 @@ export default function ContractPage() {
                 </div>
               </div>
               <p className="text-sm text-gray-500">
-                Todos los planes incluyen: reconocimiento facial, panel de reportes online y soporte según nivel de plan. Precios en pesos chilenos (CLP), sin IVA.
+                Todos los planes incluyen: reconocimiento facial, panel de reportes online y soporte según nivel de plan. Precios en pesos chilenos (CLP) + IVA.
               </p>
             </section>
 
@@ -399,7 +399,7 @@ export default function ContractPage() {
             <section>
               <h3 className="text-lg font-bold text-gray-900">5. Precio y forma de pago</h3>
               <p>
-                Precio acordado: <strong>{modalidad === 'mensual' ? formatPrice(precioMensual) + ' mensual' : formatPrice(precioAnual) + ' anual'}</strong>.
+                Precio acordado: <strong>{modalidad === 'mensual' ? formatPrice(precioMensual) + ' + IVA mensual' : formatPrice(precioAnual) + ' + IVA anual'}</strong>.
                 Forma de pago: transferencia bancaria o tarjeta.
               </p>
               <p>
@@ -495,9 +495,21 @@ export default function ContractPage() {
 
         {/* Signing section */}
         <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+          {/* Firma del prestador (pre-insertada) */}
+          <div className="mb-8 pb-6 border-b border-gray-200">
+            <p className="text-xs text-gray-400 uppercase tracking-wide mb-3">Firma del Prestador (Flexio)</p>
+            <div className="flex items-center gap-4">
+              <img src="/firma-prestador.png" alt="Firma Pablo David Encina Acevedo" className="h-14 object-contain" />
+              <div>
+                <p className="text-sm font-medium text-gray-900">Pablo David Encina Acevedo</p>
+                <p className="text-xs text-gray-500">RUT 17.339.278-8 · Flexio</p>
+              </div>
+            </div>
+          </div>
+
           <div className="flex items-center gap-3 mb-6">
             <FileText className="w-5 h-5 text-primary-600" />
-            <h2 className="text-lg font-bold text-gray-900">Firma Digital del Contrato</h2>
+            <h2 className="text-lg font-bold text-gray-900">Firma del Cliente</h2>
           </div>
 
           {error && (

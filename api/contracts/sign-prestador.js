@@ -64,7 +64,7 @@ module.exports = async function handler(req, res) {
 
     const auditoria = {
       firmante: {
-        nombre: 'Pablo Encina Acevedo',
+        nombre: 'Pablo David Encina Acevedo',
         rut: '17.339.278-8',
         rol: 'prestador',
       },
