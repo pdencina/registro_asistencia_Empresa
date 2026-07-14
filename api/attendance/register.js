@@ -65,26 +65,28 @@ module.exports = async function handler(req, res) {
     if (employee.email) {
       const RESEND_API_KEY = process.env.RESEND_API_KEY;
       if (RESEND_API_KEY) {
-        // Obtener dirección real siempre (reverse geocoding)
+        // Obtener dirección real (con timeout, no bloquea el email)
         let locationText = null;
 
-        if (notes && notes.includes('GPS:')) {
-          // Marcaje móvil: tiene coordenadas en las notas
-          const gpsMatch = notes.match(/GPS:\s*([-\d.]+),\s*([-\d.]+)/);
-          if (gpsMatch) {
-            locationText = await reverseGeocode(gpsMatch[1], gpsMatch[2]);
+        try {
+          if (notes && notes.includes('GPS:')) {
+            const gpsMatch = notes.match(/GPS:\s*([-\d.]+),\s*([-\d.]+)/);
+            if (gpsMatch) {
+              locationText = await reverseGeocode(gpsMatch[1], gpsMatch[2]);
+            }
           }
-        }
 
-        if (!locationText) {
-          // Buscar ubicación del dispositivo registrado para este tenant
-          const [device] = await sql(
-            'SELECT lat, lng FROM authorized_devices WHERE tenant_id = $1 AND active = true LIMIT 1',
-            [tenant.id]
-          );
-          if (device && device.lat && device.lng) {
-            locationText = await reverseGeocode(device.lat, device.lng);
+          if (!locationText) {
+            const [device] = await sql(
+              'SELECT lat, lng FROM authorized_devices WHERE tenant_id = $1 AND active = true LIMIT 1',
+              [tenant.id]
+            );
+            if (device && device.lat && device.lng) {
+              locationText = await reverseGeocode(device.lat, device.lng);
+            }
           }
+        } catch (geoErr) {
+          // Geocoding failed, send email without location
         }
 
         await sendAttendanceEmail(RESEND_API_KEY, employee, type, now, locationText).catch(err => {
@@ -230,10 +232,13 @@ async function sendAttendanceEmail(apiKey, employee, type, timestamp, notes) {
 
 async function reverseGeocode(lat, lng) {
   try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 3000); // 3s max
     const res = await fetch(
       `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`,
-      { headers: { 'User-Agent': 'Flexio/1.0 (flexio.cl)' } }
+      { headers: { 'User-Agent': 'Flexio/1.0 (flexio.cl)' }, signal: controller.signal }
     );
+    clearTimeout(timeout);
     if (!res.ok) return null;
     const data = await res.json();
     if (data.address) {

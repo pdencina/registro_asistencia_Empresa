@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Routes, Route, NavLink, Navigate, useNavigate, useParams } from 'react-router-dom';
-import { Users, ClipboardList, BarChart3, LogOut, Camera, Settings, Clock, FileText } from 'lucide-react';
+import { Users, ClipboardList, BarChart3, LogOut, Camera, Settings, Clock, FileText, Palmtree } from 'lucide-react';
 import EmployeesPage from '../pages/EmployeesPage';
 import AttendancePage from '../pages/AttendancePage';
 import DashboardPage from '../pages/DashboardPage';
@@ -9,10 +9,13 @@ import SettingsPage from '../pages/SettingsPage';
 import SchedulesPage from '../pages/SchedulesPage';
 import OvertimePage from '../pages/OvertimePage';
 import MedicalLeavesPage from '../pages/MedicalLeavesPage';
+import LeaveRequestsPage from '../pages/LeaveRequestsPage';
+import OnboardingWizard from '../components/OnboardingWizard';
 
 export default function AdminLayout() {
   const [time, setTime] = useState(new Date());
   const [tenantLogo, setTenantLogo] = useState(null);
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const navigate = useNavigate();
   const { tenant } = useParams();
   const basePath = tenant ? `/admin/${tenant}` : '/admin';
@@ -38,6 +41,20 @@ export default function AdminLayout() {
     loadLogo();
   }, [tenant]);
 
+  // Show onboarding on first login
+  useEffect(() => {
+    const done = sessionStorage.getItem('onboarding_done');
+    if (!done) {
+      // Check if tenant has any employees — if not, show onboarding
+      fetch('/api/employees?active=1', { headers: tenant ? { 'x-tenant-slug': tenant } : {} })
+        .then(r => r.json())
+        .then(data => {
+          if (data.length === 0) setShowOnboarding(true);
+        })
+        .catch(() => {});
+    }
+  }, [tenant]);
+
   function handleLogout() {
     sessionStorage.removeItem('admin_auth');
     sessionStorage.removeItem('admin_tenant');
@@ -47,6 +64,13 @@ export default function AdminLayout() {
 
   return (
     <div className="min-h-screen flex flex-col">
+      {/* Onboarding Wizard */}
+      {showOnboarding && (
+        <OnboardingWizard
+          onComplete={() => setShowOnboarding(false)}
+          basePath={basePath}
+        />
+      )}
       {/* Header */}
       <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -81,6 +105,7 @@ export default function AdminLayout() {
           <Route path="/schedules" element={<SchedulesPage />} />
           <Route path="/overtime" element={<OvertimePage />} />
           <Route path="/medical-leaves" element={<MedicalLeavesPage />} />
+          <Route path="/leave-requests" element={<LeaveRequestsPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="*" element={<Navigate to={basePath} replace />} />
         </Routes>
@@ -96,6 +121,7 @@ export default function AdminLayout() {
           <NavItem to={`${basePath}/schedules`} icon={<Clock className="w-5 h-5" />} label="Horarios" />
           <NavItem to={`${basePath}/overtime`} icon={<Clock className="w-5 h-5" />} label="Hrs Extra" />
           <NavItem to={`${basePath}/medical-leaves`} icon={<FileText className="w-5 h-5" />} label="Licencias" />
+          <NavItem to={`${basePath}/leave-requests`} icon={<Palmtree className="w-5 h-5" />} label="Permisos" />
           <NavItem to={`${basePath}/settings`} icon={<Settings className="w-5 h-5" />} label="Config" />
         </div>
       </nav>

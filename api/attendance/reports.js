@@ -201,6 +201,19 @@ module.exports = async function handler(req, res) {
       `, [tenant.id, startDate, endDate]);
     } catch (e) {}
 
+    // Get approved leave requests (vacaciones/permisos) in this period
+    let approvedLeaves = [];
+    try {
+      approvedLeaves = await sql(`
+        SELECT employee_id, type, start_date, end_date, days, reason
+        FROM leave_requests
+        WHERE tenant_id = $1
+          AND status = 'approved'
+          AND start_date <= $3
+          AND end_date >= $2
+      `, [tenant.id, startDate, endDate]);
+    } catch (e) {}
+
     // Get unique days each employee had at least one entry
     const presenceDays = {};
     for (const entry of allEntries) {
@@ -212,15 +225,41 @@ module.exports = async function handler(req, res) {
       const daysPresent = presenceDays[emp.id] ? presenceDays[emp.id].size : 0;
       const daysAbsent = Math.max(0, workingDays - daysPresent);
       const attendanceRate = workingDays > 0 ? Math.round((daysPresent / workingDays) * 100) : 0;
-      const empLeaves = medicalLeaves.filter(l => l.employee_id === emp.id);
+      const empMedicalLeaves = medicalLeaves.filter(l => l.employee_id === emp.id);
+      const empApprovedLeaves = approvedLeaves.filter(l => l.employee_id === emp.id);
+      const hasJustification = empMedicalLeaves.length > 0 || empApprovedLeaves.length > 0;
+
+      // Count justified absence days
+      const justifiedDates = new Set();
+      for (const leave of [...empMedicalLeaves, ...empApprovedLeaves]) {
+        const s = new Date(leave.start_date + 'T12:00:00');
+        const e = new Date(leave.end_date + 'T12:00:00');
+        const cur = new Date(s);
+        while (cur <= e) {
+          if (cur.getDay() >= 1 && cur.getDay() <= 5) {
+            justifiedDates.add(cur.toISOString().split('T')[0]);
+          }
+          cur.setDate(cur.getDate() + 1);
+        }
+      }
+
+      const absentDates = getAbsentDates(startDate, endDate, presenceDays[emp.id] || new Set());
+      const justifiedAbsences = absentDates.filter(d => justifiedDates.has(d)).length;
+      const unjustifiedAbsences = daysAbsent - justifiedAbsences;
+
       return {
         ...emp,
         days_present: daysPresent,
         days_absent: daysAbsent,
+        justified_absences: justifiedAbsences,
+        unjustified_absences: Math.max(0, unjustifiedAbsences),
         attendance_rate: attendanceRate,
-        absent_dates: getAbsentDates(startDate, endDate, presenceDays[emp.id] || new Set()),
-        has_medical_leave: empLeaves.length > 0,
-        medical_leaves: empLeaves.map(l => ({ start_date: l.start_date, end_date: l.end_date, days: l.days, diagnosis: l.diagnosis, file_url: l.file_url })),
+        absent_dates: absentDates,
+        has_medical_leave: empMedicalLeaves.length > 0,
+        has_approved_leave: empApprovedLeaves.length > 0,
+        has_justification: hasJustification,
+        medical_leaves: empMedicalLeaves.map(l => ({ start_date: l.start_date, end_date: l.end_date, days: l.days, diagnosis: l.diagnosis, file_url: l.file_url })),
+        approved_leaves: empApprovedLeaves.map(l => ({ type: l.type, start_date: l.start_date, end_date: l.end_date, days: l.days, reason: l.reason })),
       };
     }).sort((a, b) => a.attendance_rate - b.attendance_rate);
 

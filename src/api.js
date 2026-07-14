@@ -139,3 +139,15 @@ export const medicalLeavesApi = {
   create: (data) => request('/medical-leaves', { method: 'POST', body: JSON.stringify(data) }),
   delete: (id) => request('/medical-leaves', { method: 'DELETE', body: JSON.stringify({ id }) }),
 };
+
+// Leave Requests API (Vacaciones/Permisos)
+export const leaveRequestsApi = {
+  getAll: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return request(`/leave-requests${query ? `?${query}` : ''}`);
+  },
+  create: (data) => request('/leave-requests', { method: 'POST', body: JSON.stringify(data) }),
+  approve: (id, approved_by) => request('/leave-requests', { method: 'PUT', body: JSON.stringify({ id, action: 'approve', approved_by }) }),
+  reject: (id, rejection_reason) => request('/leave-requests', { method: 'PUT', body: JSON.stringify({ id, action: 'reject', rejection_reason }) }),
+  delete: (id) => request('/leave-requests', { method: 'DELETE', body: JSON.stringify({ id }) }),
+};

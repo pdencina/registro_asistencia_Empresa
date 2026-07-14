@@ -305,24 +305,39 @@ export default function DashboardPage() {
   }
 
   function drillAbsence(emp) {
-    const items = (emp.absent_dates || []).map(d => ({
-      name: d,
-      department: new Date(d + 'T12:00:00').toLocaleDateString('es-CL', { weekday: 'long' }),
-      detail: 'Sin registro',
-    }));
-    // Add medical leave info at the top
+    const items = (emp.absent_dates || []).map(d => {
+      // Check if this date is justified
+      const isJustified = emp.medical_leaves?.some(l => d >= l.start_date && d <= l.end_date) ||
+                          emp.approved_leaves?.some(l => d >= l.start_date && d <= l.end_date);
+      return {
+        name: d,
+        department: new Date(d + 'T12:00:00').toLocaleDateString('es-CL', { weekday: 'long' }),
+        detail: isJustified ? '✅ Justificada' : '❌ Sin justificar',
+      };
+    });
+    // Add leave info at the top
     if (emp.medical_leaves && emp.medical_leaves.length > 0) {
       for (const ml of emp.medical_leaves) {
         items.unshift({
-          name: `📋 Licencia: ${ml.start_date} al ${ml.end_date}`,
+          name: `📋 Licencia Médica: ${ml.start_date} al ${ml.end_date}`,
           department: ml.diagnosis || '',
-          detail: ml.file_url ? '📎 Archivo adjunto' : '',
+          detail: ml.file_url ? '📎 Archivo' : '',
+        });
+      }
+    }
+    if (emp.approved_leaves && emp.approved_leaves.length > 0) {
+      for (const al of emp.approved_leaves) {
+        const typeLabels = { vacation: 'Vacaciones', personal: 'Permiso', medical: 'Licencia', family: 'Familiar', other: 'Otro' };
+        items.unshift({
+          name: `🏖️ ${typeLabels[al.type] || al.type}: ${al.start_date} al ${al.end_date}`,
+          department: al.reason || '',
+          detail: `${al.days} días aprobados`,
         });
       }
     }
     setDrillDown({
       title: `Inasistencias de ${emp.first_name} ${emp.last_name}`,
-      subtitle: `${emp.days_absent} días ausente · ${emp.attendance_rate}% asistencia${emp.has_medical_leave ? ' · Tiene licencia médica' : ''}`,
+      subtitle: `${emp.days_absent} ausencias (${emp.justified_absences || 0} justificadas, ${emp.unjustified_absences || 0} sin justificar)`,
       data: items,
     });
   }
@@ -801,7 +816,13 @@ export default function DashboardPage() {
                             {emp.days_absent}
                           </span>
                           {emp.has_medical_leave && (
-                            <span className="ml-1 text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full" title="Tiene licencia médica">LM</span>
+                            <span className="ml-1 text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full" title="Licencia médica">LM</span>
+                          )}
+                          {emp.has_approved_leave && (
+                            <span className="ml-1 text-[10px] bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full" title="Permiso aprobado">PA</span>
+                          )}
+                          {emp.unjustified_absences > 0 && (
+                            <span className="ml-1 text-[10px] bg-red-100 text-red-700 px-1.5 py-0.5 rounded-full" title="Sin justificar">{emp.unjustified_absences} s/j</span>
                           )}
                         </td>
                         <td className="py-3 text-center">
