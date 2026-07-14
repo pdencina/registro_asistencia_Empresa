@@ -30,6 +30,9 @@ async function migrate() {
       firma_digital TEXT,
       firmado_at TIMESTAMPTZ,
       auditoria_firma JSONB,
+      prestador_firma TEXT,
+      prestador_firmado_at TIMESTAMPTZ,
+      prestador_auditoria JSONB,
       estado VARCHAR(20) DEFAULT 'pendiente',
       created_at TIMESTAMPTZ DEFAULT NOW(),
       updated_at TIMESTAMPTZ DEFAULT NOW()

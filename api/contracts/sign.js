@@ -41,10 +41,10 @@ module.exports = async function handler(req, res) {
       return res.status(404).json({ error: 'Empresa no encontrada' });
     }
 
-    // Verificar que no tenga ya un contrato firmado
+    // Verificar que no tenga ya un contrato firmado por el cliente
     const [existingContract] = await sql(
-      'SELECT id FROM contracts WHERE tenant_id = $1 AND estado = $2',
-      [tenant.id, 'firmado']
+      'SELECT id, estado FROM contracts WHERE tenant_id = $1 AND estado IN ($2, $3)',
+      [tenant.id, 'firmado_cliente', 'firmado']
     );
     if (existingContract) {
       return res.status(409).json({ error: 'Ya existe un contrato firmado para esta empresa' });
@@ -87,7 +87,7 @@ module.exports = async function handler(req, res) {
           plan = $1, modalidad = $2, precio = $3,
           firmante_nombre = $4, firmante_rut = $5, firmante_email = $6,
           firma_digital = $7, firmado_at = $8, auditoria_firma = $9,
-          estado = 'firmado', updated_at = NOW()
+          estado = 'firmado_cliente', updated_at = NOW()
         WHERE id = $10
       `, [
         plan || tenant.plan,
@@ -104,7 +104,7 @@ module.exports = async function handler(req, res) {
     } else {
       await sql(`
         INSERT INTO contracts (id, tenant_id, plan, modalidad, precio, firmante_nombre, firmante_rut, firmante_email, firma_digital, firmado_at, auditoria_firma, estado)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'firmado')
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'firmado_cliente')
       `, [
         contractId,
         tenant.id,

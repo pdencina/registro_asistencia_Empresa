@@ -41,11 +41,19 @@ module.exports = async function handler(req, res) {
         firma_digital TEXT,
         firmado_at TIMESTAMPTZ,
         auditoria_firma JSONB,
+        prestador_firma TEXT,
+        prestador_firmado_at TIMESTAMPTZ,
+        prestador_auditoria JSONB,
         estado VARCHAR(20) DEFAULT 'pendiente',
         created_at TIMESTAMPTZ DEFAULT NOW(),
         updated_at TIMESTAMPTZ DEFAULT NOW()
       )
     `);
+
+    // Asegurar columnas nuevas si tabla ya existía
+    await sql(`ALTER TABLE contracts ADD COLUMN IF NOT EXISTS prestador_firma TEXT`);
+    await sql(`ALTER TABLE contracts ADD COLUMN IF NOT EXISTS prestador_firmado_at TIMESTAMPTZ`);
+    await sql(`ALTER TABLE contracts ADD COLUMN IF NOT EXISTS prestador_auditoria JSONB`);
 
     // Buscar contrato existente
     const [contract] = await sql(
@@ -80,6 +88,8 @@ module.exports = async function handler(req, res) {
         firmante_rut: contract.firmante_rut,
         firmado_at: contract.firmado_at,
         firma_digital: contract.firma_digital,
+        prestador_firma: contract.prestador_firma,
+        prestador_firmado_at: contract.prestador_firmado_at,
       } : null,
       precio_sugerido: precios[tenant.plan] || null,
     });

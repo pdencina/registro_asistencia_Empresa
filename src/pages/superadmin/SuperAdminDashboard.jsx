@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Building2, Users, Plus, Search, ToggleLeft, ToggleRight, Edit2, Trash2, FileText } from 'lucide-react';
+import { Building2, Users, Plus, Search, ToggleLeft, ToggleRight, Edit2, Trash2, FileText, PenTool } from 'lucide-react';
 import CreateTenantModal from './CreateTenantModal';
+import SignatureCanvas from '../../components/SignatureCanvas';
 
 export default function SuperAdminDashboard({ onLogout }) {
   const [tenants, setTenants] = useState([]);
@@ -8,6 +9,8 @@ export default function SuperAdminDashboard({ onLogout }) {
   const [search, setSearch] = useState('');
   const [showCreate, setShowCreate] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(null);
+  const [signContract, setSignContract] = useState(null);
+  const [signingLoading, setSigningLoading] = useState(false);
   const [stats, setStats] = useState({ total_tenants: 0, total_employees: 0, active_tenants: 0 });
 
   useEffect(() => { loadTenants(); }, []);
@@ -190,15 +193,28 @@ export default function SuperAdminDashboard({ onLogout }) {
                           className={`p-1.5 rounded-lg transition-all ${
                             tenant.contract_status === 'firmado'
                               ? 'text-emerald-400 hover:bg-emerald-500/10'
+                              : tenant.contract_status === 'firmado_cliente'
+                              ? 'text-amber-400 hover:bg-amber-500/10'
                               : 'text-gray-500 hover:bg-gray-600/30'
                           }`}
                           title={tenant.contract_status === 'firmado'
-                            ? `Contrato firmado por ${tenant.contract_firmante} el ${new Date(tenant.contract_firmado_at).toLocaleDateString('es-CL')}`
-                            : 'Contrato pendiente — Enviar link al cliente'
+                            ? `Contrato completo — firmado por ${tenant.contract_firmante}`
+                            : tenant.contract_status === 'firmado_cliente'
+                            ? 'Pendiente tu firma — click para ver'
+                            : 'Sin contrato — Enviar link al cliente'
                           }
                         >
                           <FileText className="w-4 h-4" />
                         </a>
+                        {tenant.contract_status === 'firmado_cliente' && (
+                          <button
+                            onClick={() => setSignContract(tenant)}
+                            className="p-1.5 rounded-lg text-amber-400 hover:bg-amber-500/10 transition-all animate-pulse"
+                            title="Firmar contrato (pendiente tu firma)"
+                          >
+                            <PenTool className="w-4 h-4" />
+                          </button>
+                        )}
                         <button
                           onClick={() => toggleTenant(tenant.id, tenant.active)}
                           className={`p-1.5 rounded-lg transition-all ${tenant.active ? 'text-emerald-400 hover:bg-emerald-500/10' : 'text-gray-500 hover:bg-gray-600/30'}`}
@@ -268,6 +284,77 @@ export default function SuperAdminDashboard({ onLogout }) {
                 Eliminar
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal firmar contrato como prestador */}
+      {signContract && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md">
+            <div className="text-center mb-4">
+              <div className="w-14 h-14 bg-amber-100 rounded-xl flex items-center justify-center mx-auto mb-3">
+                <PenTool className="w-7 h-7 text-amber-600" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-900">Firmar Contrato</h3>
+              <p className="text-sm text-gray-500 mt-1">
+                Contrato con <strong>{signContract.name}</strong>
+              </p>
+              <p className="text-xs text-gray-400 mt-1">
+                Firmado por el cliente: {signContract.contract_firmante}
+              </p>
+            </div>
+
+            <div className="mb-4">
+              <SignatureCanvas
+                onSign={async (firmaDataUrl) => {
+                  setSigningLoading(true);
+                  try {
+                    const token = sessionStorage.getItem('superadmin_token');
+                    // Necesitamos el contract_id - hacer fetch
+                    const contractRes = await fetch(`/api/contracts?tenant=${signContract.slug}`);
+                    const contractData = await contractRes.json();
+                    const contractId = contractData.contract?.id;
+
+                    if (!contractId) {
+                      alert('No se encontró el contrato');
+                      setSigningLoading(false);
+                      return;
+                    }
+
+                    const res = await fetch('/api/contracts/sign-prestador', {
+                      method: 'POST',
+                      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ contract_id: contractId, firma_data: firmaDataUrl }),
+                    });
+
+                    if (res.ok) {
+                      setSignContract(null);
+                      loadTenants();
+                    } else {
+                      const err = await res.json();
+                      alert(err.error || 'Error al firmar');
+                    }
+                  } catch (err) {
+                    alert('Error de conexión');
+                  } finally {
+                    setSigningLoading(false);
+                  }
+                }}
+                existingSignature={null}
+              />
+            </div>
+
+            {signingLoading && (
+              <p className="text-sm text-gray-500 text-center mb-3">Firmando...</p>
+            )}
+
+            <button
+              onClick={() => setSignContract(null)}
+              className="w-full py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium text-sm transition-all"
+            >
+              Cancelar
+            </button>
           </div>
         </div>
       )}

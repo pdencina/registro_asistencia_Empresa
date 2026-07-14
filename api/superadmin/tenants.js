@@ -41,7 +41,7 @@ module.exports = async function handler(req, res) {
                c.firmante_nombre as contract_firmante
         FROM tenants t
         LEFT JOIN subscriptions s ON s.tenant_id = t.id
-        LEFT JOIN contracts c ON c.tenant_id = t.id AND c.estado = 'firmado'
+        LEFT JOIN contracts c ON c.tenant_id = t.id AND c.estado IN ('firmado', 'firmado_cliente')
         ORDER BY t.created_at DESC
       `);
 
