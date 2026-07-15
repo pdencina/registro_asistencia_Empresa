@@ -342,32 +342,37 @@ export default function LandingPage() {
                 </div>
               </div>
 
-              {/* KPIs */}
+              {/* KPIs — CEO oriented */}
               <div className="grid grid-cols-4 gap-3 mb-4">
-                <div className="bg-white rounded-xl p-3 border border-gray-100">
-                  <p className="text-[10px] text-gray-500">Colaboradores</p>
-                  <p className="text-xl font-bold text-gray-900">69</p>
-                </div>
                 <div className="bg-white rounded-xl p-3 border border-gray-100">
                   <p className="text-[10px] text-gray-500">Tasa Asistencia</p>
                   <p className="text-xl font-bold text-emerald-600">92%</p>
+                  <p className="text-[10px] text-emerald-500">↑ +3% vs mes anterior</p>
                 </div>
                 <div className="bg-white rounded-xl p-3 border border-gray-100">
-                  <p className="text-[10px] text-gray-500">Llegadas Tarde</p>
-                  <p className="text-xl font-bold text-amber-500">12</p>
+                  <p className="text-[10px] text-gray-500">Horas Improductivas</p>
+                  <p className="text-xl font-bold text-red-500">47 hrs</p>
+                  <p className="text-[10px] text-red-400">por atrasos acumulados</p>
                 </div>
                 <div className="bg-white rounded-xl p-3 border border-gray-100">
-                  <p className="text-[10px] text-gray-500">Siempre Puntuales</p>
-                  <p className="text-xl font-bold text-emerald-600">28</p>
+                  <p className="text-[10px] text-gray-500">Cumplimiento DT</p>
+                  <p className="text-xl font-bold text-primary-600">100%</p>
+                  <p className="text-[10px] text-primary-500">Libro al día</p>
+                </div>
+                <div className="bg-white rounded-xl p-3 border border-gray-100">
+                  <p className="text-[10px] text-gray-500">Ahorro Estimado</p>
+                  <p className="text-xl font-bold text-emerald-600">$1.2M</p>
+                  <p className="text-[10px] text-emerald-500">vs control manual</p>
                 </div>
               </div>
 
-              {/* Suggestions */}
+              {/* Suggestions — action oriented */}
               <div className="bg-white rounded-xl border-l-4 border-primary-500 p-3 mb-4">
-                <p className="text-xs font-semibold text-gray-700 mb-1.5">Sugerencias del Sistema</p>
+                <p className="text-xs font-semibold text-gray-700 mb-1.5">⚡ Acciones Recomendadas</p>
                 <div className="space-y-1.5">
-                  <p className="text-[11px] text-emerald-700 bg-emerald-50 px-2 py-1 rounded">✓ 28 colaboradores tienen +90% puntualidad — <strong>Bono recomendado</strong></p>
-                  <p className="text-[11px] text-red-700 bg-red-50 px-2 py-1 rounded">⚠ 3 colaboradores con +5 atrasos — <strong>Requiere atención</strong></p>
+                  <p className="text-[11px] text-emerald-700 bg-emerald-50 px-2 py-1 rounded">💰 28 colaboradores merecen <strong>bono de puntualidad</strong> — mejora retención</p>
+                  <p className="text-[11px] text-red-700 bg-red-50 px-2 py-1 rounded">⚠️ Jorge Ramírez acumula 7 atrasos (171 min) — <strong>conversación urgente</strong></p>
+                  <p className="text-[11px] text-blue-700 bg-blue-50 px-2 py-1 rounded">📋 Libro DT listo para fiscalización — <strong>$0 riesgo de multas</strong></p>
                 </div>
               </div>
 
@@ -375,36 +380,38 @@ export default function LandingPage() {
               <div className="grid grid-cols-2 gap-3">
                 {/* Mini chart */}
                 <div className="bg-white rounded-xl p-3 border border-gray-100">
-                  <p className="text-xs font-semibold text-gray-700 mb-2">Tendencia de Asistencia</p>
+                  <p className="text-xs font-semibold text-gray-700 mb-2">Tendencia Mensual</p>
                   <div className="flex items-end gap-1 h-16">
-                    {[88, 92, 95, 90, 92, 88, 95, 100, 92, 96].map((v, i) => (
+                    {[82, 85, 88, 90, 87, 92, 94, 91, 95, 92, 96, 98].map((v, i) => (
                       <div key={i} className="flex-1 rounded-t-sm" style={{ height: `${v}%` }}>
-                        <div className={`w-full h-full rounded-t-sm ${v >= 90 ? 'bg-emerald-400' : 'bg-amber-400'}`} />
+                        <div className={`w-full h-full rounded-t-sm ${v >= 90 ? 'bg-emerald-400' : v >= 80 ? 'bg-amber-400' : 'bg-red-400'}`} />
                       </div>
                     ))}
                   </div>
+                  <p className="text-[9px] text-gray-400 mt-1 text-center">Ene → Dic · Asistencia mejorando +16%</p>
                 </div>
 
-                {/* Mini ranking */}
+                {/* Top performers */}
                 <div className="bg-white rounded-xl p-3 border border-gray-100">
-                  <p className="text-xs font-semibold text-gray-700 mb-2">Bono de Puntualidad</p>
+                  <p className="text-xs font-semibold text-gray-700 mb-2">Top Puntualidad</p>
                   <div className="space-y-1.5">
                     <div className="flex items-center gap-2">
-                      <span className="w-5 h-5 rounded-full bg-yellow-100 text-yellow-700 text-[9px] font-bold flex items-center justify-center">1</span>
+                      <span className="w-5 h-5 rounded-full bg-yellow-100 text-yellow-700 text-[9px] font-bold flex items-center justify-center">🥇</span>
                       <span className="text-xs text-gray-700 flex-1">Roberto Fuentes</span>
-                      <span className="text-[10px] text-emerald-600 font-bold">100%</span>
+                      <span className="text-[10px] text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.5 rounded">100%</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="w-5 h-5 rounded-full bg-gray-100 text-gray-600 text-[9px] font-bold flex items-center justify-center">2</span>
+                      <span className="w-5 h-5 rounded-full bg-gray-100 text-gray-600 text-[9px] font-bold flex items-center justify-center">🥈</span>
                       <span className="text-xs text-gray-700 flex-1">Andrea Soto</span>
-                      <span className="text-[10px] text-emerald-600 font-bold">100%</span>
+                      <span className="text-[10px] text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.5 rounded">100%</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="w-5 h-5 rounded-full bg-orange-100 text-orange-600 text-[9px] font-bold flex items-center justify-center">3</span>
+                      <span className="w-5 h-5 rounded-full bg-orange-100 text-orange-600 text-[9px] font-bold flex items-center justify-center">🥉</span>
                       <span className="text-xs text-gray-700 flex-1">Valentina Díaz</span>
-                      <span className="text-[10px] text-emerald-600 font-bold">95%</span>
+                      <span className="text-[10px] text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.5 rounded">95%</span>
                     </div>
                   </div>
+                  <p className="text-[9px] text-gray-400 mt-2 text-center">Click en cualquier dato para ver detalle →</p>
                 </div>
               </div>
             </div>
