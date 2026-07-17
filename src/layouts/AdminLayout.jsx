@@ -103,7 +103,6 @@ export default function AdminLayout() {
           <Route path="/employees" element={<EmployeesPage />} />
           <Route path="/attendance" element={<AttendancePage />} />
           <Route path="/register" element={<CheckInPage />} />
-          <Route path="/register" element={<CheckInPage />} />
           <Route path="/schedules" element={<SchedulesPage />} />
           <Route path="/overtime" element={<OvertimePage />} />
           <Route path="/medical-leaves" element={<MedicalLeavesPage />} />

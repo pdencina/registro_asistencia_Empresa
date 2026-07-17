@@ -38,10 +38,6 @@ export default function DashboardPage() {
     loadDepts();
   }, []);
 
-  useEffect(() => {
-    loadData();
-  }, [tab]);
-
   // Auto-refresh every 30s for today tab
   useEffect(() => {
     if (tab !== 'today') return;

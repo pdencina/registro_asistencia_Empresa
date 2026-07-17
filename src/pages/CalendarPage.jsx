@@ -114,7 +114,7 @@ export default function CalendarPage() {
         </button>
         <div className="text-center">
           <p className="text-lg font-bold text-gray-900 capitalize">{data?.month_name || ''} {year}</p>
-          <p className="text-xs text-gray-400">Horario: {data?.schedule.entry_time} (+{data?.schedule.tolerance} min)</p>
+          <p className="text-xs text-gray-400">Horario: {data?.schedule?.entry_time || '08:30'} (+{data?.schedule?.tolerance || 10} min)</p>
         </div>
         <button onClick={nextMonth} className="p-2 hover:bg-gray-100 rounded-lg transition-all">
           <ChevronRight className="w-5 h-5 text-gray-600" />
