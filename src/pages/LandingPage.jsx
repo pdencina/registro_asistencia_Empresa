@@ -242,182 +242,125 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Navbar */}
-      <nav className="fixed top-0 w-full bg-white/90 backdrop-blur-md border-b border-gray-100 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Navbar — Minimal */}
+      <nav className="fixed top-0 w-full bg-white/95 backdrop-blur-sm z-50">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-2">
-              <img src="/logo-flexio.svg" alt="Flexio" className="h-8" />
-              <span className="font-bold text-gray-900 text-lg">Flexio</span>
+            <div className="flex items-center gap-8">
+              <div className="flex items-center gap-2">
+                <img src="/logo-flexio.svg" alt="Flexio" className="h-7" />
+                <span className="font-bold text-gray-900 text-lg">Flexio</span>
+              </div>
+              <div className="hidden md:flex items-center gap-6">
+                <a href="#features" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">Soluciones</a>
+                <a href="#pricing" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">Planes</a>
+              </div>
             </div>
 
-            {/* Desktop nav */}
-            <div className="hidden md:flex items-center gap-8">
-              <a href="#features" className="text-sm text-gray-600 hover:text-primary-600 transition-colors">Funcionalidades</a>
-              <a href="#pricing" className="text-sm text-gray-600 hover:text-primary-600 transition-colors">Precios</a>
-              <a href="#legal" className="text-sm text-gray-600 hover:text-primary-600 transition-colors">Seguridad</a>
-              <a href="/mi" className="text-sm text-gray-600 hover:text-primary-600 transition-colors">Marcar asistencia</a>
-              <a href="/login" className="text-sm text-gray-600 hover:text-primary-600 transition-colors">Iniciar sesión</a>
-              <button onClick={() => setShowQuote(true)} className="px-5 py-2.5 bg-primary-600 text-white text-sm font-medium rounded-xl hover:bg-primary-700 transition-colors">
-                Cotizar
+            <div className="hidden md:flex items-center gap-4">
+              <a href="/login" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">Iniciar sesión</a>
+              <button onClick={() => setShowQuote(true)} className="px-5 py-2.5 bg-primary-600 text-white text-sm font-semibold rounded-full hover:bg-primary-700 transition-all">
+                Agendar demo
               </button>
             </div>
 
-            {/* Mobile menu button */}
             <button onClick={() => setMobileMenu(!mobileMenu)} className="md:hidden p-2">
               {mobileMenu ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
         </div>
 
-        {/* Mobile menu */}
         {mobileMenu && (
-          <div className="md:hidden bg-white border-t border-gray-100 px-4 py-4 space-y-3">
-            <a href="#features" className="block text-gray-600 py-2">Funcionalidades</a>
-            <a href="#pricing" className="block text-gray-600 py-2">Precios</a>
-            <a href="#legal" className="block text-gray-600 py-2">Seguridad</a>
+          <div className="md:hidden bg-white border-t border-gray-100 px-6 py-4 space-y-3">
+            <a href="#features" className="block text-gray-600 py-2">Soluciones</a>
+            <a href="#pricing" className="block text-gray-600 py-2">Planes</a>
             <a href="/mi" className="block text-gray-600 py-2">Marcar asistencia</a>
             <a href="/login" className="block text-gray-600 py-2">Iniciar sesión</a>
-            <a href="https://wa.me/56949616038?text=Hola%2C%20me%20interesa%20Flexio%20para%20mi%20empresa" target="_blank" rel="noopener noreferrer" className="block w-full text-center px-5 py-2.5 bg-primary-600 text-white rounded-xl font-medium">
-              Solicitar demo
+            <a href="https://wa.me/56949616038?text=Hola%2C%20me%20interesa%20Flexio%20para%20mi%20empresa" target="_blank" rel="noopener noreferrer" className="block w-full text-center px-5 py-3 bg-primary-600 text-white rounded-full font-semibold">
+              Agendar demo
             </a>
           </div>
         )}
       </nav>
 
-      {/* Hero */}
-      <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary-50 text-primary-700 rounded-full text-sm font-medium mb-6">
-            <CheckCircle className="w-4 h-4" />
-            Cumple con Ley 21.719 de Protección de Datos
+      {/* Hero — Split Layout */}
+      <section className="pt-24 pb-16 lg:pt-32 lg:pb-24 px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            {/* Left — Text */}
+            <div>
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-gray-900 leading-[1.1] tracking-tight">
+                Tu equipo{' '}
+                <span className="text-primary-600">marca</span>,{' '}
+                <br className="hidden sm:block" />
+                tú{' '}
+                <span className="text-primary-600">decides</span>.
+              </h1>
+              <p className="mt-6 text-lg text-gray-500 leading-relaxed max-w-lg">
+                Control de asistencia con reconocimiento facial. Sin fraude, sin tarjetas, sin contacto. Reportes inteligentes que te dicen quién premiar y quién necesita atención.
+              </p>
+              <div className="mt-8 flex flex-col sm:flex-row gap-3">
+                <a
+                  href="https://wa.me/56949616038?text=Hola%2C%20me%20interesa%20Flexio%20para%20mi%20empresa"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-7 py-3.5 bg-primary-600 text-white font-semibold rounded-full hover:bg-primary-700 transition-all text-center"
+                >
+                  Agendar una demo
+                </a>
+                <a href="/login" className="px-7 py-3.5 border-2 border-gray-200 text-gray-700 font-semibold rounded-full hover:border-gray-300 transition-all text-center">
+                  Iniciar sesión
+                </a>
+              </div>
+              <p className="mt-4 text-sm text-gray-400">15 días gratis · Sin tarjeta de crédito</p>
+            </div>
+
+            {/* Right — Dashboard Mockup */}
+            <div className="relative">
+              <div className="bg-primary-50 rounded-3xl p-4 lg:p-6">
+                <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
+                  {/* Browser dots */}
+                  <div className="bg-gray-50 border-b border-gray-100 px-4 py-2 flex items-center gap-1.5">
+                    <div className="w-2.5 h-2.5 rounded-full bg-red-400"></div>
+                    <div className="w-2.5 h-2.5 rounded-full bg-yellow-400"></div>
+                    <div className="w-2.5 h-2.5 rounded-full bg-green-400"></div>
+                  </div>
+
+                  {/* Mini dashboard */}
+                  <div className="p-4 space-y-3">
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="bg-emerald-50 rounded-lg p-3">
+                        <p className="text-[10px] text-emerald-600 font-medium">Tasa Asistencia</p>
+                        <p className="text-xl font-bold text-emerald-700">92%</p>
+                      </div>
+                      <div className="bg-primary-50 rounded-lg p-3">
+                        <p className="text-[10px] text-primary-600 font-medium">Ahorro Estimado</p>
+                        <p className="text-xl font-bold text-primary-700">$1.2M</p>
+                      </div>
+                    </div>
+
+                    {/* Floating cards */}
+                    <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 flex items-center gap-2">
+                      <CheckCircle className="w-5 h-5 text-emerald-600 shrink-0" />
+                      <p className="text-xs text-emerald-800 font-medium">28 colaboradores merecen bono de puntualidad</p>
+                    </div>
+
+                    <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-center gap-2">
+                      <Clock className="w-5 h-5 text-amber-600 shrink-0" />
+                      <p className="text-xs text-amber-800 font-medium">Jorge Ramírez: 7 atrasos — requiere atención</p>
+                    </div>
+
+                    <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 flex items-center gap-2">
+                      <Shield className="w-5 h-5 text-blue-600 shrink-0" />
+                      <p className="text-xs text-blue-800 font-medium">Libro DT listo para fiscalización</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-gray-900 leading-tight mb-6">
-            Control de asistencia con{' '}
-            <span className="text-primary-600">reconocimiento facial</span>
-          </h1>
-          <p className="text-lg sm:text-xl text-gray-500 max-w-2xl mx-auto mb-10">
-            Elimina el fraude en el registro de asistencia. Tu equipo marca con su rostro, 
-            sin contacto ni tarjetas. Reportes en tiempo real para tu empresa.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="https://wa.me/56949616038?text=Hola%2C%20me%20interesa%20Flexio%20para%20mi%20empresa" target="_blank" rel="noopener noreferrer" className="px-8 py-4 bg-primary-600 text-white font-semibold rounded-2xl hover:bg-primary-700 transition-all shadow-lg shadow-primary-200 text-lg flex items-center justify-center gap-2">
-              Solicitar demo gratuita
-              <ArrowRight className="w-5 h-5" />
-            </a>
-            <a href="#features" className="px-8 py-4 bg-gray-100 text-gray-700 font-semibold rounded-2xl hover:bg-gray-200 transition-all text-lg">
-              Ver funcionalidades
-            </a>
-          </div>
-          <p className="mt-4 text-sm text-gray-400">15 días de prueba sin costo · Sin permanencia mínima</p>
         </div>
       </section>
-
-      {/* Dashboard Preview */}
-      <section className="pb-20 px-4 sm:px-6 lg:px-8 -mt-4">
-        <div className="max-w-5xl mx-auto">
-          <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden">
-            {/* Mock browser bar */}
-            <div className="bg-gray-100 border-b border-gray-200 px-4 py-2.5 flex items-center gap-2">
-              <div className="flex gap-1.5">
-                <div className="w-3 h-3 rounded-full bg-red-400"></div>
-                <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
-                <div className="w-3 h-3 rounded-full bg-green-400"></div>
-              </div>
-              <div className="flex-1 mx-4">
-                <div className="bg-white rounded-md px-3 py-1 text-xs text-gray-400 text-center border border-gray-200">
-                  flexio.cl/admin/tu-empresa
-                </div>
-              </div>
-            </div>
-
-            {/* Dashboard content */}
-            <div className="p-5 bg-gray-50">
-              {/* Header */}
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold text-gray-900">Dashboard</h3>
-                <div className="flex gap-1 bg-gray-100 rounded-lg p-0.5">
-                  <span className="px-3 py-1 text-xs bg-white shadow-sm rounded-md font-medium text-primary-600">Mes</span>
-                  <span className="px-3 py-1 text-xs text-gray-500">Semana</span>
-                </div>
-              </div>
-
-              {/* KPIs — CEO oriented */}
-              <div className="grid grid-cols-4 gap-3 mb-4">
-                <div className="bg-white rounded-xl p-3 border border-gray-100">
-                  <p className="text-[10px] text-gray-500">Tasa Asistencia</p>
-                  <p className="text-xl font-bold text-emerald-600">92%</p>
-                  <p className="text-[10px] text-emerald-500">↑ +3% vs mes anterior</p>
-                </div>
-                <div className="bg-white rounded-xl p-3 border border-gray-100">
-                  <p className="text-[10px] text-gray-500">Horas Improductivas</p>
-                  <p className="text-xl font-bold text-red-500">47 hrs</p>
-                  <p className="text-[10px] text-red-400">por atrasos acumulados</p>
-                </div>
-                <div className="bg-white rounded-xl p-3 border border-gray-100">
-                  <p className="text-[10px] text-gray-500">Cumplimiento DT</p>
-                  <p className="text-xl font-bold text-primary-600">100%</p>
-                  <p className="text-[10px] text-primary-500">Libro al día</p>
-                </div>
-                <div className="bg-white rounded-xl p-3 border border-gray-100">
-                  <p className="text-[10px] text-gray-500">Ahorro Estimado</p>
-                  <p className="text-xl font-bold text-emerald-600">$1.2M</p>
-                  <p className="text-[10px] text-emerald-500">vs control manual</p>
-                </div>
-              </div>
-
-              {/* Suggestions — action oriented */}
-              <div className="bg-white rounded-xl border-l-4 border-primary-500 p-3 mb-4">
-                <p className="text-xs font-semibold text-gray-700 mb-1.5">⚡ Acciones Recomendadas</p>
-                <div className="space-y-1.5">
-                  <p className="text-[11px] text-emerald-700 bg-emerald-50 px-2 py-1 rounded">💰 28 colaboradores merecen <strong>bono de puntualidad</strong> — mejora retención</p>
-                  <p className="text-[11px] text-red-700 bg-red-50 px-2 py-1 rounded">⚠️ Jorge Ramírez acumula 7 atrasos (171 min) — <strong>conversación urgente</strong></p>
-                  <p className="text-[11px] text-blue-700 bg-blue-50 px-2 py-1 rounded">📋 Libro DT listo para fiscalización — <strong>$0 riesgo de multas</strong></p>
-                </div>
-              </div>
-
-              {/* Chart + Rankings */}
-              <div className="grid grid-cols-2 gap-3">
-                {/* Mini chart */}
-                <div className="bg-white rounded-xl p-3 border border-gray-100">
-                  <p className="text-xs font-semibold text-gray-700 mb-2">Tendencia Mensual</p>
-                  <div className="flex items-end gap-1 h-16">
-                    {[82, 85, 88, 90, 87, 92, 94, 91, 95, 92, 96, 98].map((v, i) => (
-                      <div key={i} className="flex-1 rounded-t-sm" style={{ height: `${v}%` }}>
-                        <div className={`w-full h-full rounded-t-sm ${v >= 90 ? 'bg-emerald-400' : v >= 80 ? 'bg-amber-400' : 'bg-red-400'}`} />
-                      </div>
-                    ))}
-                  </div>
-                  <p className="text-[9px] text-gray-400 mt-1 text-center">Ene → Dic · Asistencia mejorando +16%</p>
-                </div>
-
-                {/* Top performers */}
-                <div className="bg-white rounded-xl p-3 border border-gray-100">
-                  <p className="text-xs font-semibold text-gray-700 mb-2">Top Puntualidad</p>
-                  <div className="space-y-1.5">
-                    <div className="flex items-center gap-2">
-                      <span className="w-5 h-5 rounded-full bg-yellow-100 text-yellow-700 text-[9px] font-bold flex items-center justify-center">🥇</span>
-                      <span className="text-xs text-gray-700 flex-1">Roberto Fuentes</span>
-                      <span className="text-[10px] text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.5 rounded">100%</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="w-5 h-5 rounded-full bg-gray-100 text-gray-600 text-[9px] font-bold flex items-center justify-center">🥈</span>
-                      <span className="text-xs text-gray-700 flex-1">Andrea Soto</span>
-                      <span className="text-[10px] text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.5 rounded">100%</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="w-5 h-5 rounded-full bg-orange-100 text-orange-600 text-[9px] font-bold flex items-center justify-center">🥉</span>
-                      <span className="text-xs text-gray-700 flex-1">Valentina Díaz</span>
-                      <span className="text-[10px] text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.5 rounded">95%</span>
-                    </div>
-                  </div>
-                  <p className="text-[9px] text-gray-400 mt-2 text-center">Click en cualquier dato para ver detalle →</p>
-                </div>
-              </div>
-            </div>
-          </div>
-          <p className="text-center text-sm text-gray-400 mt-4">Dashboard interactivo con sugerencias automáticas para la toma de decisiones</p>
-        </div>
       </section>
 
       {/* Social proof */}
