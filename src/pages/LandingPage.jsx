@@ -361,9 +361,6 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
-      </section>
-
-      {/* Social proof */}
 
       {/* Features */}
       <section id="features" className="py-20 px-4 sm:px-6 lg:px-8">
