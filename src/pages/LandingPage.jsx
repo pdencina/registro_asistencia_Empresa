@@ -317,45 +317,117 @@ export default function LandingPage() {
 
             {/* Right — Dashboard Mockup */}
             <div className="relative">
-              <div className="bg-primary-50 rounded-3xl p-4 lg:p-6">
+              <div className="bg-primary-50 rounded-3xl p-4 lg:p-5">
                 <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
                   {/* Browser dots */}
                   <div className="bg-gray-50 border-b border-gray-100 px-4 py-2 flex items-center gap-1.5">
                     <div className="w-2.5 h-2.5 rounded-full bg-red-400"></div>
                     <div className="w-2.5 h-2.5 rounded-full bg-yellow-400"></div>
                     <div className="w-2.5 h-2.5 rounded-full bg-green-400"></div>
+                    <span className="ml-3 text-[10px] text-gray-400">flexio.cl/admin/tu-empresa</span>
                   </div>
 
-                  {/* Mini dashboard */}
+                  {/* Dashboard content */}
                   <div className="p-4 space-y-3">
+                    {/* KPI Row */}
+                    <div className="grid grid-cols-4 gap-2">
+                      <div className="bg-emerald-50 rounded-lg p-2.5 text-center">
+                        <p className="text-lg font-bold text-emerald-700">92%</p>
+                        <p className="text-[9px] text-emerald-600">Asistencia</p>
+                      </div>
+                      <div className="bg-red-50 rounded-lg p-2.5 text-center">
+                        <p className="text-lg font-bold text-red-600">47h</p>
+                        <p className="text-[9px] text-red-500">Improductivas</p>
+                      </div>
+                      <div className="bg-primary-50 rounded-lg p-2.5 text-center">
+                        <p className="text-lg font-bold text-primary-700">100%</p>
+                        <p className="text-[9px] text-primary-600">Cumple DT</p>
+                      </div>
+                      <div className="bg-emerald-50 rounded-lg p-2.5 text-center">
+                        <p className="text-lg font-bold text-emerald-700">$1.2M</p>
+                        <p className="text-[9px] text-emerald-600">Ahorro</p>
+                      </div>
+                    </div>
+
+                    {/* Chart */}
+                    <div className="bg-gray-50 rounded-xl p-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-[10px] font-semibold text-gray-700">Tendencia 12 meses</p>
+                        <p className="text-[10px] text-emerald-600 font-medium">↑ +16%</p>
+                      </div>
+                      <div className="flex items-end gap-[3px] h-12">
+                        {[62, 68, 72, 78, 74, 82, 85, 80, 88, 85, 92, 96].map((v, i) => (
+                          <div key={i} className={`flex-1 rounded-t-sm ${v >= 85 ? 'bg-emerald-400' : v >= 70 ? 'bg-amber-300' : 'bg-red-300'}`} style={{ height: `${v}%` }} />
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Two columns */}
                     <div className="grid grid-cols-2 gap-2">
-                      <div className="bg-emerald-50 rounded-lg p-3">
-                        <p className="text-[10px] text-emerald-600 font-medium">Tasa Asistencia</p>
-                        <p className="text-xl font-bold text-emerald-700">92%</p>
+                      {/* Ranking atrasos */}
+                      <div className="bg-gray-50 rounded-xl p-2.5">
+                        <p className="text-[9px] font-semibold text-gray-600 mb-1.5">⚠️ Requieren atención</p>
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-1.5">
+                            <div className="w-4 h-4 rounded-full bg-red-100 flex items-center justify-center text-[7px] font-bold text-red-600">1</div>
+                            <span className="text-[10px] text-gray-700 flex-1">J. Ramírez</span>
+                            <span className="text-[9px] text-red-600 font-medium">7 atrasos</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <div className="w-4 h-4 rounded-full bg-orange-100 flex items-center justify-center text-[7px] font-bold text-orange-600">2</div>
+                            <span className="text-[10px] text-gray-700 flex-1">F. Torres</span>
+                            <span className="text-[9px] text-orange-600 font-medium">4 atrasos</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <div className="w-4 h-4 rounded-full bg-gray-100 flex items-center justify-center text-[7px] font-bold text-gray-600">3</div>
+                            <span className="text-[10px] text-gray-700 flex-1">C. Muñoz</span>
+                            <span className="text-[9px] text-amber-600 font-medium">4 atrasos</span>
+                          </div>
+                        </div>
                       </div>
-                      <div className="bg-primary-50 rounded-lg p-3">
-                        <p className="text-[10px] text-primary-600 font-medium">Ahorro Estimado</p>
-                        <p className="text-xl font-bold text-primary-700">$1.2M</p>
+
+                      {/* Bono puntualidad */}
+                      <div className="bg-gray-50 rounded-xl p-2.5">
+                        <p className="text-[9px] font-semibold text-gray-600 mb-1.5">🏆 Bono puntualidad</p>
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[10px]">🥇</span>
+                            <span className="text-[10px] text-gray-700 flex-1">R. Fuentes</span>
+                            <span className="text-[9px] text-emerald-600 font-bold">100%</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[10px]">🥈</span>
+                            <span className="text-[10px] text-gray-700 flex-1">A. Soto</span>
+                            <span className="text-[9px] text-emerald-600 font-bold">100%</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[10px]">🥉</span>
+                            <span className="text-[10px] text-gray-700 flex-1">V. Díaz</span>
+                            <span className="text-[9px] text-emerald-600 font-bold">95%</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
 
-                    {/* Floating cards */}
-                    <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 flex items-center gap-2">
-                      <CheckCircle className="w-5 h-5 text-emerald-600 shrink-0" />
-                      <p className="text-xs text-emerald-800 font-medium">28 colaboradores merecen bono de puntualidad</p>
-                    </div>
-
-                    <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-center gap-2">
-                      <Clock className="w-5 h-5 text-amber-600 shrink-0" />
-                      <p className="text-xs text-amber-800 font-medium">Jorge Ramírez: 7 atrasos — requiere atención</p>
-                    </div>
-
-                    <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 flex items-center gap-2">
-                      <Shield className="w-5 h-5 text-blue-600 shrink-0" />
-                      <p className="text-xs text-blue-800 font-medium">Libro DT listo para fiscalización</p>
+                    {/* Action suggestions */}
+                    <div className="space-y-1.5">
+                      <div className="bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2 flex items-center gap-2">
+                        <span className="text-[11px]">💰</span>
+                        <p className="text-[10px] text-emerald-800"><strong>28 colaboradores</strong> merecen bono — mejora retención</p>
+                      </div>
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 flex items-center gap-2">
+                        <span className="text-[11px]">📋</span>
+                        <p className="text-[10px] text-blue-800">Libro DT actualizado — <strong>$0 riesgo de multas</strong></p>
+                      </div>
                     </div>
                   </div>
                 </div>
+              </div>
+
+              {/* Floating badge */}
+              <div className="absolute -bottom-3 -left-3 bg-white shadow-lg rounded-full px-4 py-2 border border-gray-100 hidden lg:flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                <span className="text-xs text-gray-700 font-medium">En vivo · 69 colaboradores</span>
               </div>
             </div>
           </div>
