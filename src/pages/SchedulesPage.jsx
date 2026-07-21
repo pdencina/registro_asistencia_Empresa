@@ -104,7 +104,12 @@ export default function SchedulesPage() {
       <h2 className="text-2xl font-bold text-gray-900 mb-6">Horarios y Autorizadores</h2>
 
       {message && (
-        <div className="mb-4 p-3 rounded-xl bg-primary-50 text-primary-700 text-sm font-medium">{message}</div>
+        <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
+          <div className="bg-gray-900 text-white px-6 py-4 rounded-2xl shadow-2xl text-sm font-medium flex items-center gap-2 animate-bounce pointer-events-auto">
+            <svg className="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+            {message}
+          </div>
+        </div>
       )}
 
       {/* Tabs */}
