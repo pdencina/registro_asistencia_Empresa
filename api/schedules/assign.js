@@ -28,6 +28,11 @@ module.exports = async function handler(req, res) {
         updated_at TIMESTAMPTZ DEFAULT NOW()
       )
     `);
+    // Ensure columns exist if table was created with different schema
+    await sql('ALTER TABLE employee_schedules ADD COLUMN IF NOT EXISTS custom_entry_time TIME');
+    await sql('ALTER TABLE employee_schedules ADD COLUMN IF NOT EXISTS custom_exit_time TIME');
+    await sql('ALTER TABLE employee_schedules ADD COLUMN IF NOT EXISTS schedule_id UUID');
+    await sql('ALTER TABLE employee_schedules ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW()');
   } catch (e) {
     // Tables might already exist
   }
