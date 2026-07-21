@@ -194,9 +194,39 @@ export default function CheckInPage() {
             // AUTO-REGISTER: determine action and register immediately
             const nextAction = status?.next_action || (status?.status === 'present' ? 'exit' : 'entry');
             
-            // Skip tardiness fetch to speed up auto-register
-            // Register automatically
-            setTimeout(() => handleRegister(nextAction), 300);
+            // Register directly (not via state, to avoid closure issues)
+            setLoading(true);
+            try {
+              let photo_snapshot = null;
+              if (webcamRef.current) {
+                photo_snapshot = webcamRef.current.getScreenshot();
+              }
+
+              await attendanceApi.register({
+                employee_id: employee.id,
+                type: nextAction,
+                photo_snapshot,
+              });
+
+              // Build confirm data
+              const nowTime = new Date().toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+              setConfirmData({
+                actionType: nextAction,
+                employee: `${employee.first_name} ${employee.last_name}`,
+                time: nowTime,
+                todayEntry: nextAction === 'exit' && status?.last_record ? new Date(status.last_record.timestamp).toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' }) : null,
+              });
+
+              playSuccess();
+              setStep(STEP_CONFIRMED);
+              setTimeout(() => resetFlow(), 6000);
+            } catch (err) {
+              setErrorMsg(err.message || 'Error al registrar');
+              setStep(STEP_ERROR);
+              playError();
+            } finally {
+              setLoading(false);
+            }
           }
         }
       }
@@ -205,14 +235,15 @@ export default function CheckInPage() {
     }
   }
 
-  async function handleRegister(type) {
-    if (!recognizedEmployee) return;
+  async function handleRegister(type, employeeOverride) {
+    const emp = employeeOverride || recognizedEmployee;
+    if (!emp) return;
     setLoading(true);
     setErrorMsg('');
 
     try {
       // Use employeeStatus which already correctly knows today's state
-      const status = employeeStatus || await attendanceApi.getEmployeeStatus(recognizedEmployee.id);
+      const status = employeeStatus || await attendanceApi.getEmployeeStatus(emp.id);
 
       if (type === 'entry') {
         // Can't entry if already present or exited
