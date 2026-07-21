@@ -12,6 +12,7 @@ export default function SchedulesPage() {
   const [showBlock2, setShowBlock2] = useState(false);
   const [newAuthorizer, setNewAuthorizer] = useState({ name: '', position: '' });
   const [assignData, setAssignData] = useState({ employee_id: '', schedule_id: '', custom_entry_time: '', custom_exit_time: '' });
+  const [assignments, setAssignments] = useState([]);
   const [message, setMessage] = useState('');
 
   useEffect(() => { loadData(); }, []);
@@ -26,6 +27,18 @@ export default function SchedulesPage() {
       setSchedules(sch);
       setEmployees(emp);
       setAuthorizers(auth);
+
+      // Load assignments for each employee
+      const assigns = [];
+      for (const e of emp) {
+        try {
+          const schedule = await schedulesApi.getEmployeeSchedule(e.id);
+          if (schedule && schedule.schedule_name !== 'Por defecto') {
+            assigns.push({ ...e, schedule_name: schedule.schedule_name, entry_time: schedule.entry_time, exit_time: schedule.exit_time });
+          }
+        } catch (err) {}
+      }
+      setAssignments(assigns);
     } catch (err) { console.error(err); }
   }
 
@@ -72,6 +85,7 @@ export default function SchedulesPage() {
       await schedulesApi.assignSchedule(assignData);
       setAssignData({ employee_id: '', schedule_id: '', custom_entry_time: '', custom_exit_time: '' });
       showMsg('Horario asignado correctamente');
+      loadData();
     } catch (err) { showMsg(err.message); }
   }
 
@@ -330,6 +344,29 @@ export default function SchedulesPage() {
             )}
             <button type="submit" className="btn-primary w-full">Asignar Horario</button>
           </form>
+
+          {/* Current assignments */}
+          {assignments.length > 0 && (
+            <div className="mt-8 pt-6 border-t border-gray-200">
+              <h4 className="font-semibold text-gray-900 mb-3">Asignaciones actuales</h4>
+              <div className="space-y-2">
+                {assignments.map(a => (
+                  <div key={a.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                    <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center text-xs font-bold text-primary-700 shrink-0">
+                      {a.first_name[0]}{a.last_name[0]}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900">{a.first_name} {a.last_name}</p>
+                      <p className="text-xs text-gray-500">{a.schedule_name}</p>
+                    </div>
+                    <span className="text-xs text-gray-400">
+                      {a.entry_time?.slice(0,5)} — {a.exit_time?.slice(0,5)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
