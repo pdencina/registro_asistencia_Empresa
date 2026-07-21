@@ -8,7 +8,7 @@ export default function SchedulesPage() {
   const [authorizers, setAuthorizers] = useState([]);
   const [activeTab, setActiveTab] = useState('schedules'); // schedules | assign | authorizers
   const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState({ name: '', entry_time: '08:30', exit_time: '18:00', tolerance_minutes: 10, is_default: false, block2_entry_time: '', block2_exit_time: '', shift_type: 'fixed', rotation_days_on: '', rotation_days_off: '', rotation_start_date: '' });
+  const [formData, setFormData] = useState({ name: '', entry_time: '08:30', exit_time: '18:00', tolerance_minutes: 10, is_default: false, block2_entry_time: '', block2_exit_time: '', shift_type: 'fixed', rotation_days_on: '', rotation_days_off: '', rotation_start_date: '', weekly_hours: '' });
   const [showBlock2, setShowBlock2] = useState(false);
   const [newAuthorizer, setNewAuthorizer] = useState({ name: '', position: '' });
   const [assignData, setAssignData] = useState({ employee_id: '', schedule_id: '', custom_entry_time: '', custom_exit_time: '' });
@@ -42,10 +42,16 @@ export default function SchedulesPage() {
         payload.rotation_days_off = null;
         payload.rotation_start_date = null;
       }
+      if (payload.shift_type !== 'flexible') {
+        payload.weekly_hours = null;
+      }
+      if (payload.shift_type === 'flexible') {
+        payload.weekly_hours = parseInt(payload.weekly_hours) || null;
+      }
       await schedulesApi.create(payload);
       setShowForm(false);
       setShowBlock2(false);
-      setFormData({ name: '', entry_time: '08:30', exit_time: '18:00', tolerance_minutes: 10, is_default: false, block2_entry_time: '', block2_exit_time: '', shift_type: 'fixed', rotation_days_on: '', rotation_days_off: '', rotation_start_date: '' });
+      setFormData({ name: '', entry_time: '08:30', exit_time: '18:00', tolerance_minutes: 10, is_default: false, block2_entry_time: '', block2_exit_time: '', shift_type: 'fixed', rotation_days_on: '', rotation_days_off: '', rotation_start_date: '', weekly_hours: '' });
       loadData();
       showMsg('Horario creado');
     } catch (err) { showMsg(err.message); }
@@ -136,12 +142,18 @@ export default function SchedulesPage() {
                     {sch.is_default && <span className="text-xs bg-primary-100 text-primary-700 px-2 py-0.5 rounded-full">Por defecto</span>}
                   </div>
                   <p className="text-sm text-gray-500 mt-1">
-                    {sch.entry_time?.slice(0,5)} — {sch.exit_time?.slice(0,5)} · {sch.tolerance_minutes} min tolerancia
-                    {sch.block2_entry_time && sch.block2_exit_time && (
-                      <span className="ml-2 text-primary-600 font-medium">+ Bloque 2: {sch.block2_entry_time?.slice(0,5)} — {sch.block2_exit_time?.slice(0,5)}</span>
-                    )}
-                    {sch.shift_type === 'rotating' && (
-                      <span className="ml-2 text-purple-600 font-medium">· Rotativo {sch.rotation_days_on}x{sch.rotation_days_off}</span>
+                    {sch.shift_type === 'flexible' ? (
+                      <span className="text-indigo-600 font-medium">Flexible · {sch.weekly_hours}h/semana · Sin horario fijo</span>
+                    ) : (
+                      <>
+                        {sch.entry_time?.slice(0,5)} — {sch.exit_time?.slice(0,5)} · {sch.tolerance_minutes} min tolerancia
+                        {sch.block2_entry_time && sch.block2_exit_time && (
+                          <span className="ml-2 text-primary-600 font-medium">+ Bloque 2: {sch.block2_entry_time?.slice(0,5)} — {sch.block2_exit_time?.slice(0,5)}</span>
+                        )}
+                        {sch.shift_type === 'rotating' && (
+                          <span className="ml-2 text-purple-600 font-medium">· Rotativo {sch.rotation_days_on}x{sch.rotation_days_off}</span>
+                        )}
+                      </>
                     )}
                   </p>
                 </div>
@@ -223,7 +235,20 @@ export default function SchedulesPage() {
                       className="w-full px-4 py-3 border border-gray-200 rounded-xl outline-none mb-3">
                       <option value="fixed">Fijo (Lunes a Viernes)</option>
                       <option value="rotating">Rotativo (por ciclo)</option>
+                      <option value="flexible">Flexible (horas semanales)</option>
                     </select>
+
+                    {formData.shift_type === 'flexible' && (
+                      <div className="bg-indigo-50 p-3 rounded-xl space-y-3 mb-3">
+                        <div>
+                          <label className="block text-xs font-medium text-indigo-700 mb-1">Horas contratadas por semana</label>
+                          <input type="number" value={formData.weekly_hours || ''} onChange={e => setFormData({...formData, weekly_hours: e.target.value})}
+                            min="1" max="60" placeholder="Ej: 30"
+                            className="w-full px-3 py-2 border border-indigo-200 rounded-lg outline-none text-sm" />
+                        </div>
+                        <p className="text-xs text-indigo-600">Sin hora de entrada/salida fija. Solo se controla el total semanal. No genera atrasos.</p>
+                      </div>
+                    )}
 
                     {formData.shift_type === 'rotating' && (
                       <div className="bg-purple-50 p-3 rounded-xl space-y-3">
