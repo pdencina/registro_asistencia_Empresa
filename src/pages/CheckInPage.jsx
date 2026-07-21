@@ -176,28 +176,27 @@ export default function CheckInPage() {
             setRecognizedEmployee(employee);
             playRecognized();
             // Get status
+            let status = null;
             try {
-              const status = await attendanceApi.getEmployeeStatus(employee.id);
+              status = await attendanceApi.getEmployeeStatus(employee.id);
               setEmployeeStatus(status);
             } catch (e) {
               setEmployeeStatus(null);
             }
-            // Get tardiness info
-            try {
-              const tardiness = await tardinessApi.get(employee.id, 'week');
-              setEmployeeTardiness(tardiness);
-            } catch (e) {
-              setEmployeeTardiness(null);
-            }
-            // Get schedule
+            // Get schedule (for early exit detection)
             try {
               const schedule = await schedulesApi.getEmployeeSchedule(employee.id);
               setEmployeeSchedule(schedule);
             } catch (e) {
               setEmployeeSchedule(null);
             }
-            // Go directly to recognized (liveness disabled for now)
-            setStep(STEP_RECOGNIZED);
+
+            // AUTO-REGISTER: determine action and register immediately
+            const nextAction = status?.next_action || (status?.status === 'present' ? 'exit' : 'entry');
+            
+            // Skip tardiness fetch to speed up auto-register
+            // Register automatically
+            setTimeout(() => handleRegister(nextAction), 300);
           }
         }
       }
