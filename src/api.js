@@ -95,6 +95,10 @@ export const attendanceApi = {
     const query = new URLSearchParams(params).toString();
     return request(`/attendance/calendar${query ? `?${query}` : ''}`);
   },
+  getWeeklyHours: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return request(`/attendance/weekly-hours${query ? `?${query}` : ''}`);
+  },
 };
 
 // Devices API

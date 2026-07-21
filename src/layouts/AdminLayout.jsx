@@ -11,6 +11,7 @@ import OvertimePage from '../pages/OvertimePage';
 import MedicalLeavesPage from '../pages/MedicalLeavesPage';
 import LeaveRequestsPage from '../pages/LeaveRequestsPage';
 import CalendarPage from '../pages/CalendarPage';
+import WeeklyHoursPage from '../pages/WeeklyHoursPage';
 import OnboardingWizard from '../components/OnboardingWizard';
 
 export default function AdminLayout() {
@@ -108,6 +109,7 @@ export default function AdminLayout() {
           <Route path="/medical-leaves" element={<MedicalLeavesPage />} />
           <Route path="/leave-requests" element={<LeaveRequestsPage />} />
           <Route path="/calendar" element={<CalendarPage />} />
+          <Route path="/weekly-hours" element={<WeeklyHoursPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="*" element={<Navigate to={basePath} replace />} />
         </Routes>
@@ -125,6 +127,7 @@ export default function AdminLayout() {
           {role !== 'supervisor' && <NavItem to={`${basePath}/medical-leaves`} icon={<FileText className="w-5 h-5" />} label="Licencias" />}
           <NavItem to={`${basePath}/leave-requests`} icon={<Palmtree className="w-5 h-5" />} label="Permisos" />
           <NavItem to={`${basePath}/calendar`} icon={<Calendar className="w-5 h-5" />} label="Calendario" />
+          <NavItem to={`${basePath}/weekly-hours`} icon={<Clock className="w-5 h-5" />} label="Jornada" />
           {role === 'admin' && <NavItem to={`${basePath}/settings`} icon={<Settings className="w-5 h-5" />} label="Config" />}
         </div>
       </nav>

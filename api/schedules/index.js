@@ -32,6 +32,7 @@ module.exports = async function handler(req, res) {
   await sql('ALTER TABLE work_schedules ADD COLUMN IF NOT EXISTS rotation_days_on INTEGER');
   await sql('ALTER TABLE work_schedules ADD COLUMN IF NOT EXISTS rotation_days_off INTEGER');
   await sql('ALTER TABLE work_schedules ADD COLUMN IF NOT EXISTS rotation_start_date DATE');
+  await sql('ALTER TABLE work_schedules ADD COLUMN IF NOT EXISTS weekly_hours INTEGER');
 
   await sql(`
     CREATE TABLE IF NOT EXISTS employee_schedules (
@@ -95,16 +96,20 @@ module.exports = async function handler(req, res) {
         return res.status(400).json({ error: 'Para turnos rotativos se requieren días de trabajo y descanso' });
       }
 
+      if (shift_type === 'flexible' && !req.body.weekly_hours) {
+        return res.status(400).json({ error: 'Para jornada flexible se requieren las horas semanales contratadas' });
+      }
+
       // If setting as default, unset others
       if (is_default) {
         await sql('UPDATE work_schedules SET is_default = false');
       }
 
       const [schedule] = await sql(`
-        INSERT INTO work_schedules (id, name, entry_time, exit_time, tolerance_minutes, is_default, block2_entry_time, block2_exit_time, shift_type, rotation_days_on, rotation_days_off, rotation_start_date)
-        VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+        INSERT INTO work_schedules (id, name, entry_time, exit_time, tolerance_minutes, is_default, block2_entry_time, block2_exit_time, shift_type, rotation_days_on, rotation_days_off, rotation_start_date, weekly_hours)
+        VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
         RETURNING *
-      `, [name, entry_time, exit_time, tolerance_minutes || 10, is_default || false, block2_entry_time || null, block2_exit_time || null, shift_type || 'fixed', rotation_days_on || null, rotation_days_off || null, rotation_start_date || null]);
+      `, [name, entry_time || '00:00', exit_time || '00:00', tolerance_minutes || 10, is_default || false, block2_entry_time || null, block2_exit_time || null, shift_type || 'fixed', rotation_days_on || null, rotation_days_off || null, rotation_start_date || null, req.body.weekly_hours || null]);
 
       return res.status(201).json(schedule);
     }
