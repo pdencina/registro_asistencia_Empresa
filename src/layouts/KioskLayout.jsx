@@ -167,13 +167,23 @@ export default function KioskLayout() {
             <p className="text-xs text-gray-500">Sistema de Registro de Asistencia</p>
           </div>
         </div>
-        <div className="text-right">
-          <p className="text-sm font-medium text-gray-700">
-            {time.toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-          </p>
-          <p className="text-3xl font-bold text-primary-600">
-            {time.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-          </p>
+        <div className="flex items-center gap-4">
+          {/* Connectivity indicator */}
+          <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
+            isOffline ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'
+          }`}>
+            <WifiOff className={`w-3.5 h-3.5 ${isOffline ? 'block' : 'hidden'}`} />
+            <div className={`w-2 h-2 rounded-full ${isOffline ? 'bg-red-500' : 'bg-emerald-500 animate-pulse'}`}></div>
+            <span>{isOffline ? 'Sin conexión' : 'Conectado'}</span>
+          </div>
+          <div className="text-right">
+            <p className="text-sm font-medium text-gray-700">
+              {time.toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+            </p>
+            <p className="text-3xl font-bold text-primary-600">
+              {time.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+            </p>
+          </div>
         </div>
       </header>
 

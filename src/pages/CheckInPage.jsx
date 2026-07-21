@@ -861,57 +861,47 @@ export default function CheckInPage() {
   // STEP: CONFIRMED — Registro exitoso
   // ═══════════════════════════════════════════════════════════
   if (step === STEP_CONFIRMED && confirmData) {
+    const isEntry = confirmData.actionType === 'entry';
     return (
-      <div className="flex items-center justify-center min-h-[80vh] p-6 animate-fade-in">
-        <div className="w-full max-w-md p-10 rounded-3xl text-center bg-white border-2 border-emerald-200 shadow-xl">
-          <div className={`w-24 h-24 rounded-full mx-auto mb-6 flex items-center justify-center ${
-            confirmData.actionType === 'entry' ? 'bg-emerald-100' : 'bg-orange-100'
-          }`}>
-            {confirmData.actionType === 'entry' ? (
-              <LogIn className="w-14 h-14 text-emerald-600" />
+      <div className={`fixed inset-0 z-50 flex flex-col items-center justify-center p-6 ${
+        isEntry ? 'bg-gradient-to-b from-emerald-500 to-emerald-600' : 'bg-gradient-to-b from-orange-500 to-orange-600'
+      }`}>
+        {/* Check animation */}
+        <div className="w-28 h-28 rounded-full bg-white/20 flex items-center justify-center mb-6 animate-bounce">
+          <div className="w-20 h-20 rounded-full bg-white flex items-center justify-center">
+            {isEntry ? (
+              <CheckCircle className="w-12 h-12 text-emerald-600" />
             ) : (
-              <LogOut className="w-14 h-14 text-orange-600" />
+              <CheckCircle className="w-12 h-12 text-orange-600" />
             )}
           </div>
-
-          <p className={`text-3xl font-bold mb-2 ${
-            confirmData.actionType === 'entry' ? 'text-emerald-700' : 'text-orange-700'
-          }`}>
-            {confirmData.actionType === 'entry' ? '¡Ingreso Registrado!' : '¡Salida Registrada!'}
-          </p>
-
-          <p className="text-xl text-gray-700 mb-4">{confirmData.employee}</p>
-
-          {/* Resumen del día */}
-          <div className="bg-gray-50 rounded-2xl p-4 mt-4 space-y-2">
-            {confirmData.actionType === 'entry' ? (
-              <div className="flex items-center justify-center gap-2 text-gray-600">
-                <LogIn className="w-5 h-5 text-emerald-500" />
-                <span>Tu ingreso hoy: <strong>{confirmData.time} hrs</strong></span>
-              </div>
-            ) : (
-              <>
-                {confirmData.todayEntry && (
-                  <div className="flex items-center justify-center gap-2 text-gray-600">
-                    <LogIn className="w-5 h-5 text-emerald-500" />
-                    <span>Ingreso: <strong>{confirmData.todayEntry} hrs</strong></span>
-                  </div>
-                )}
-                <div className="flex items-center justify-center gap-2 text-gray-600">
-                  <LogOut className="w-5 h-5 text-orange-500" />
-                  <span>Salida: <strong>{confirmData.time} hrs</strong></span>
-                </div>
-                {confirmData.todayEntry && (
-                  <p className="text-sm text-gray-400 mt-2 pt-2 border-t border-gray-200">
-                    ¡Buen trabajo hoy! 🙌
-                  </p>
-                )}
-              </>
-            )}
-          </div>
-
-          <p className="text-sm text-gray-400 mt-6">Volviendo al inicio...</p>
         </div>
+
+        {/* Title */}
+        <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">
+          {isEntry ? 'Marca recibida' : 'Salida registrada'}
+        </h1>
+
+        {/* Time */}
+        <p className="text-white/90 text-lg mb-6">
+          Registramos tu hora de <strong>{isEntry ? 'entrada' : 'salida'}</strong> a las <strong>{confirmData.time}</strong>
+        </p>
+
+        {/* Employee name */}
+        <div className="bg-white/10 backdrop-blur-sm rounded-2xl px-6 py-4 text-center mb-6">
+          <p className="text-white font-semibold text-lg">{confirmData.employee}</p>
+          {confirmData.todayEntry && !isEntry && (
+            <p className="text-white/70 text-sm mt-1">Ingreso hoy: {confirmData.todayEntry} hrs</p>
+          )}
+        </div>
+
+        {/* Comprobante notice */}
+        <p className="text-white/70 text-sm">
+          Si la marca está correcta, te llegará el comprobante a tu correo.
+        </p>
+
+        {/* Auto-close indicator */}
+        <p className="text-white/40 text-xs mt-8">Volviendo al inicio...</p>
       </div>
     );
   }
