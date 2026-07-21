@@ -33,6 +33,10 @@ module.exports = async function handler(req, res) {
     await sql('ALTER TABLE employee_schedules ADD COLUMN IF NOT EXISTS custom_exit_time TIME');
     await sql('ALTER TABLE employee_schedules ADD COLUMN IF NOT EXISTS schedule_id UUID');
     await sql('ALTER TABLE employee_schedules ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW()');
+    // Ensure unique constraint on employee_id for UPSERT
+    try {
+      await sql('CREATE UNIQUE INDEX IF NOT EXISTS idx_employee_schedules_employee_id ON employee_schedules(employee_id)');
+    } catch (e) {}
   } catch (e) {
     // Tables might already exist
   }
