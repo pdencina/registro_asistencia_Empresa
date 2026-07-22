@@ -58,7 +58,7 @@ module.exports = async function handler(req, res) {
 
   // POST: Aprobar o rechazar el consentimiento
   if (req.method === 'POST') {
-    const { token, action } = req.body;
+    const { token, action, photo } = req.body;
 
     if (!token || !action) {
       return res.status(400).json({ error: 'Token y acción son requeridos' });
@@ -70,7 +70,7 @@ module.exports = async function handler(req, res) {
 
     try {
       const [employee] = await sql(
-        'SELECT id, consent_status FROM employees WHERE consent_token = $1 AND active = true',
+        'SELECT id, consent_status, tenant_id FROM employees WHERE consent_token = $1 AND active = true',
         [token]
       );
 
@@ -86,14 +86,35 @@ module.exports = async function handler(req, res) {
       const timestamp = new Date().toISOString();
       const status = action === 'approve' ? 'approved' : 'rejected';
 
-      await sql(`
-        UPDATE employees SET
-          consent_status = $1,
-          consent_at = $2,
-          consent_ip = $3,
-          updated_at = NOW()
-        WHERE consent_token = $4
-      `, [status, timestamp, typeof ip === 'string' ? ip.split(',')[0].trim() : 'desconocida', token]);
+      // If approving with photo, upload it
+      let photoUrl = null;
+      if (action === 'approve' && photo) {
+        try {
+          const { put } = require('@vercel/blob');
+          const buffer = Buffer.from(photo.replace(/^data:image\/\w+;base64,/, ''), 'base64');
+          const [tenant] = await sql('SELECT slug FROM tenants WHERE id = $1', [employee.tenant_id]);
+          const blob = await put(`employees/${tenant?.slug || 'default'}/${require('crypto').randomUUID()}.jpg`, buffer, {
+            access: 'public',
+            contentType: 'image/jpeg',
+          });
+          photoUrl = blob.url;
+        } catch (e) {
+          console.error('Error uploading consent photo:', e);
+        }
+      }
+
+      // Update employee
+      if (photoUrl) {
+        await sql(`
+          UPDATE employees SET consent_status = $1, consent_at = $2, consent_ip = $3, photo_url = $4, updated_at = NOW()
+          WHERE consent_token = $5
+        `, [status, timestamp, typeof ip === 'string' ? ip.split(',')[0].trim() : 'desconocida', photoUrl, token]);
+      } else {
+        await sql(`
+          UPDATE employees SET consent_status = $1, consent_at = $2, consent_ip = $3, updated_at = NOW()
+          WHERE consent_token = $4
+        `, [status, timestamp, typeof ip === 'string' ? ip.split(',')[0].trim() : 'desconocida', token]);
+      }
 
       // Enviar email de confirmación al trabajador
       const [empData] = await sql(`

@@ -403,6 +403,21 @@ export default function EmployeesPage() {
               <p className="font-bold text-gray-900 truncate">{employee.first_name} {employee.last_name}</p>
               <p className="text-sm text-gray-500">{employee.rut}</p>
               <p className="text-sm text-gray-400">{employee.department || '—'} · {employee.position || '—'}</p>
+              {/* Consent status badge */}
+              <div className="mt-1">
+                {employee.consent_status === 'approved' && employee.photo_url && (
+                  <span className="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-medium">✓ Facial activo</span>
+                )}
+                {employee.consent_status === 'approved' && !employee.photo_url && (
+                  <span className="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">⚠ Autorizado sin foto</span>
+                )}
+                {employee.consent_status === 'rejected' && (
+                  <span className="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">🔑 PIN activo</span>
+                )}
+                {(!employee.consent_status || employee.consent_status === 'pending') && (
+                  <span className="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full font-medium">⏳ Pendiente autorización</span>
+                )}
+              </div>
               <div className="flex gap-2 mt-2">
                 <button onClick={() => openForm(employee)} className="text-primary-600 hover:text-primary-800 p-1" title="Editar">
                   <Edit2 className="w-4 h-4" />

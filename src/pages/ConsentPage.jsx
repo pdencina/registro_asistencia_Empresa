@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { CheckCircle, XCircle, Loader, Shield, Camera, Fingerprint } from 'lucide-react';
+import Webcam from 'react-webcam';
 
 export default function ConsentPage() {
   const { token } = useParams();
@@ -10,6 +11,9 @@ export default function ConsentPage() {
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState(null); // 'approved' | 'rejected'
+  const [showSelfie, setShowSelfie] = useState(false);
+  const [selfieData, setSelfieData] = useState(null);
+  const webcamRef = useRef(null);
 
   useEffect(() => {
     loadData();
@@ -38,12 +42,18 @@ export default function ConsentPage() {
   }
 
   async function handleAction(action) {
+    if (action === 'approve' && !selfieData) {
+      // Show selfie step first
+      setShowSelfie(true);
+      return;
+    }
+
     setSubmitting(true);
     try {
       const res = await fetch('/api/auth/consent', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, action }),
+        body: JSON.stringify({ token, action, photo: selfieData || null }),
       });
       if (res.ok) {
         setResult(action === 'approve' ? 'approved' : 'rejected');
@@ -56,6 +66,12 @@ export default function ConsentPage() {
     } finally {
       setSubmitting(false);
     }
+  }
+
+  function captureSelfie() {
+    if (!webcamRef.current) return;
+    const photo = webcamRef.current.getScreenshot();
+    setSelfieData(photo);
   }
 
   if (loading) {
@@ -190,7 +206,61 @@ export default function ConsentPage() {
           </div>
         </div>
 
+        {/* Selfie step */}
+        {showSelfie && (
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-4">
+            <div className="text-center mb-4">
+              <Camera className="w-8 h-8 text-primary-600 mx-auto mb-2" />
+              <h2 className="font-bold text-gray-900">Tómate una selfie</h2>
+              <p className="text-sm text-gray-500">Esta foto se usará para el reconocimiento facial</p>
+            </div>
+
+            {!selfieData ? (
+              <>
+                <div className="rounded-2xl overflow-hidden bg-black mb-4 aspect-square max-w-[280px] mx-auto">
+                  <Webcam
+                    ref={webcamRef}
+                    audio={false}
+                    screenshotFormat="image/jpeg"
+                    videoConstraints={{ width: 480, height: 480, facingMode: 'user' }}
+                    className="w-full h-full object-cover"
+                    mirrored={true}
+                  />
+                </div>
+                <button
+                  onClick={captureSelfie}
+                  className="w-full py-3 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 transition-all flex items-center justify-center gap-2"
+                >
+                  <Camera className="w-5 h-5" /> Tomar foto
+                </button>
+              </>
+            ) : (
+              <>
+                <div className="rounded-2xl overflow-hidden mb-4 max-w-[280px] mx-auto">
+                  <img src={selfieData} alt="Tu selfie" className="w-full aspect-square object-cover" />
+                </div>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setSelfieData(null)}
+                    className="flex-1 py-3 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-all"
+                  >
+                    Repetir
+                  </button>
+                  <button
+                    onClick={() => handleAction('approve')}
+                    disabled={submitting}
+                    className="flex-1 py-3 bg-emerald-600 text-white font-semibold rounded-xl hover:bg-emerald-700 transition-all disabled:opacity-50"
+                  >
+                    {submitting ? 'Guardando...' : 'Confirmar y autorizar'}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
         {/* Botones de acción */}
+        {!showSelfie && (
         <div className="space-y-3">
           <button
             onClick={() => handleAction('approve')}
@@ -209,6 +279,7 @@ export default function ConsentPage() {
             No autorizo — usaré PIN
           </button>
         </div>
+        )}
 
         <p className="text-xs text-gray-400 text-center mt-4">
           Se registrará tu IP y la fecha como evidencia del consentimiento.
