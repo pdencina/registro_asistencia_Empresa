@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Clock, AlertTriangle, CheckCircle, TrendingUp } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Clock, AlertTriangle, CheckCircle, TrendingUp, Download } from 'lucide-react';
 import { attendanceApi } from '../api';
+import * as XLSX from 'xlsx';
 
 const DAY_NAMES = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
 
@@ -46,6 +47,32 @@ export default function WeeklyHoursPage() {
     return `${h}h ${m > 0 ? m + 'm' : ''}`.trim();
   }
 
+  function exportExcel() {
+    if (!data) return;
+    const wb = XLSX.utils.book_new();
+
+    const rows = [['Nombre', 'Departamento', 'Horario', 'Contrato (h)', 'Total Horas', 'Total Minutos', 'Porcentaje', 'Estado', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']];
+    for (const emp of data.employees) {
+      rows.push([
+        `${emp.first_name} ${emp.last_name}`,
+        emp.department || '',
+        emp.schedule_name,
+        emp.weekly_hours_contract || '—',
+        `${emp.total_hours}h ${emp.total_mins}m`,
+        emp.total_minutes,
+        emp.percentage !== null ? `${emp.percentage}%` : '—',
+        emp.status === 'exceeded' ? 'EXCEDIDA' : emp.status === 'warning' ? 'CERCA LÍMITE' : 'Normal',
+        ...emp.daily.map(d => d.minutes > 0 ? formatMinutes(d.minutes) : '—'),
+      ]);
+    }
+
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    ws['!cols'] = [{ wch: 22 }, { wch: 14 }, { wch: 18 }, { wch: 10 }, { wch: 12 }, { wch: 12 }, { wch: 10 }, { wch: 14 }, { wch: 8 }, { wch: 8 }, { wch: 8 }, { wch: 8 }, { wch: 8 }, { wch: 8 }, { wch: 8 }];
+    XLSX.utils.book_append_sheet(wb, ws, 'Jornada Semanal');
+
+    XLSX.writeFile(wb, `Flexio-Jornada-Semanal-${data.week_start}.xlsx`);
+  }
+
   if (loading && !data) {
     return (
       <div className="p-6 flex items-center justify-center h-96">
@@ -62,6 +89,11 @@ export default function WeeklyHoursPage() {
           <h2 className="text-2xl font-bold text-gray-900">Jornada Semanal</h2>
           <p className="text-sm text-gray-500 mt-1">Control de horas acumuladas por colaborador</p>
         </div>
+        {data && (
+          <button onClick={exportExcel} className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-medium hover:bg-emerald-700 transition-all">
+            <Download className="w-4 h-4" /> Exportar Excel
+          </button>
+        )}
       </div>
 
       {/* Week navigation */}
@@ -130,7 +162,12 @@ export default function WeeklyHoursPage() {
                 <div className="text-right shrink-0">
                   <p className="text-lg font-bold text-gray-900">{emp.total_hours}h{emp.total_mins > 0 ? ` ${emp.total_mins}m` : ''}</p>
                   {emp.weekly_hours_contract && (
-                    <p className="text-xs text-gray-500">de {emp.weekly_hours_contract}h contratadas</p>
+                    <>
+                      <p className="text-xs text-gray-500">de {emp.weekly_hours_contract}h contratadas</p>
+                      {emp.status === 'exceeded' && (
+                        <p className="text-xs text-red-600 font-semibold">+{Math.floor((emp.total_minutes - emp.weekly_hours_contract * 60) / 60)}h {(emp.total_minutes - emp.weekly_hours_contract * 60) % 60}m sobre el límite</p>
+                      )}
+                    </>
                   )}
                 </div>
                 {/* Status badge */}

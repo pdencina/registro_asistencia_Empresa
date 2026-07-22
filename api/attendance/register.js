@@ -95,6 +95,94 @@ module.exports = async function handler(req, res) {
       }
     }
 
+    // Check weekly hours limit after EXIT (alert admin if exceeded)
+    if (type === 'exit') {
+      try {
+        // Get employee's schedule
+        const [empSchedule] = await sql(`
+          SELECT ws.weekly_hours, ws.shift_type
+          FROM employee_schedules es
+          JOIN work_schedules ws ON es.schedule_id = ws.id
+          WHERE es.employee_id = $1
+        `, [employee_id]);
+
+        if (empSchedule && empSchedule.shift_type === 'flexible' && empSchedule.weekly_hours) {
+          // Calculate this week's total hours
+          const weekStart = new Date();
+          const day = weekStart.getDay();
+          weekStart.setDate(weekStart.getDate() - (day === 0 ? 6 : day - 1));
+          weekStart.setHours(0, 0, 0, 0);
+          const startStr = weekStart.toISOString().split('T')[0];
+
+          const weekRecords = await sql(`
+            SELECT type, timestamp
+            FROM attendance_records
+            WHERE tenant_id = $1 AND employee_id = $2
+              AND date(timestamp AT TIME ZONE 'America/Santiago') >= $3
+            ORDER BY timestamp
+          `, [tenant.id, employee_id, startStr]);
+
+          // Pair entries with exits to calculate total minutes
+          let totalMinutes = 0;
+          let lastEntry = null;
+          for (const r of weekRecords) {
+            if (r.type === 'entry') lastEntry = new Date(r.timestamp);
+            else if (r.type === 'exit' && lastEntry) {
+              const worked = Math.round((new Date(r.timestamp) - lastEntry) / 60000);
+              totalMinutes += worked > 300 ? worked - 30 : worked;
+              lastEntry = null;
+            }
+          }
+
+          const limitMinutes = empSchedule.weekly_hours * 60;
+          const percentage = Math.round((totalMinutes / limitMinutes) * 100);
+
+          // Alert admin if exceeded or at 90%
+          if (percentage >= 90 && tenant.admin_email) {
+            const RESEND_API_KEY = process.env.RESEND_API_KEY;
+            if (RESEND_API_KEY) {
+              const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'notificaciones@flexio.cl';
+              const exceeded = percentage >= 100;
+              const totalH = Math.floor(totalMinutes / 60);
+              const totalM = totalMinutes % 60;
+              const deltaMin = totalMinutes - limitMinutes;
+              const deltaH = Math.floor(Math.abs(deltaMin) / 60);
+              const deltaM = Math.abs(deltaMin) % 60;
+
+              const alertHtml = `
+<div style="font-family:sans-serif;max-width:500px;margin:0 auto;padding:20px;">
+  <div style="background:${exceeded ? '#dc2626' : '#f59e0b'};color:white;padding:16px 20px;border-radius:12px 12px 0 0;text-align:center;">
+    <h2 style="margin:0;font-size:18px;">${exceeded ? '⚠️ Jornada Excedida' : '⏰ Cerca del Límite Semanal'}</h2>
+  </div>
+  <div style="background:white;border:1px solid #e5e7eb;border-top:0;padding:24px;border-radius:0 0 12px 12px;">
+    <p style="margin:0 0 12px;color:#374151;"><strong>${employee.first_name} ${employee.last_name}</strong> ${exceeded ? 'excedió' : 'está cerca de'} su jornada semanal contratada.</p>
+    <table style="width:100%;font-size:14px;color:#4b5563;">
+      <tr><td style="padding:4px 0;">Contrato:</td><td style="font-weight:bold;">${empSchedule.weekly_hours}h semanales</td></tr>
+      <tr><td style="padding:4px 0;">Acumulado:</td><td style="font-weight:bold;">${totalH}h ${totalM}m (${percentage}%)</td></tr>
+      ${exceeded ? `<tr><td style="padding:4px 0;color:#dc2626;">Exceso:</td><td style="font-weight:bold;color:#dc2626;">+${deltaH}h ${deltaM}m</td></tr>` : ''}
+    </table>
+    <p style="margin:16px 0 0;font-size:12px;color:#9ca3af;">Flexio · Alerta automática de jornada</p>
+  </div>
+</div>`;
+
+              fetch('https://api.resend.com/emails', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  from: `Flexio <${FROM_EMAIL}>`,
+                  to: [tenant.admin_email],
+                  subject: `${exceeded ? '⚠️ Jornada excedida' : '⏰ Cerca del límite'} — ${employee.first_name} ${employee.last_name} (${percentage}%)`,
+                  html: alertHtml,
+                }),
+              }).catch(() => {});
+            }
+          }
+        }
+      } catch (e) {
+        // Non-critical, don't block response
+      }
+    }
+
     return res.status(201).json(record);
   } catch (error) {
     return res.status(500).json({ error: error.message });

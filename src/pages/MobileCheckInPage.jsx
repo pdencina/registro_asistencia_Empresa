@@ -21,6 +21,7 @@ export default function MobileCheckInPage() {
   const [error, setError] = useState('');
   const [confirmData, setConfirmData] = useState(null);
   const [tenantLogo, setTenantLogo] = useState(null);
+  const [eventName, setEventName] = useState('');
   const webcamRef = useRef(null);
 
   // Obtener GPS al montar
@@ -114,7 +115,10 @@ export default function MobileCheckInPage() {
         employee_id: employee.id,
         type,
         photo_snapshot: photo,
-        notes: location ? `GPS: ${location.lat.toFixed(6)}, ${location.lng.toFixed(6)} (±${Math.round(location.accuracy)}m)` : 'Sin GPS',
+        notes: [
+          location ? `GPS: ${location.lat.toFixed(6)}, ${location.lng.toFixed(6)} (±${Math.round(location.accuracy)}m)` : 'Sin GPS',
+          eventName ? `Evento: ${eventName}` : '',
+        ].filter(Boolean).join(' | '),
       });
 
       setConfirmData({
@@ -265,8 +269,19 @@ export default function MobileCheckInPage() {
             </div>
           )}
 
+          {/* Event/location field */}
+          <div className="mt-4 max-w-sm mx-auto">
+            <input
+              type="text"
+              value={eventName}
+              onChange={e => setEventName(e.target.value)}
+              placeholder="¿En qué evento/lugar estás? (opcional)"
+              className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 outline-none"
+            />
+          </div>
+
           {/* Action buttons */}
-          <div className="mt-6 space-y-3 max-w-sm mx-auto">
+          <div className="mt-4 space-y-3 max-w-sm mx-auto">
             {canEntry && (
               <button
                 onClick={() => handleRegister('entry')}
