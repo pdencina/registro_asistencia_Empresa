@@ -597,7 +597,7 @@ export default function LandingPage() {
             ))}
           </div>
           <p className="text-center text-sm text-gray-400 mt-8">
-            Precios en CLP (pesos chilenos) + IVA. Sin permanencia mínima.
+            Precios en CLP (pesos chilenos). IVA incluido. Sin permanencia mínima.
           </p>
         </div>
       </section>
