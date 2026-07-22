@@ -645,24 +645,18 @@ export default function EmployeesPage() {
               <p className="text-xs text-gray-500 mb-1 font-medium">El trabajador debe:</p>
               <ul className="text-xs text-gray-600 space-y-1 pl-3">
                 <li>1. Abrir el correo que recibió</li>
-                <li>2. Verificar que la foto corresponde a su persona</li>
-                <li>3. Autorizar o rechazar el uso biométrico</li>
+                <li>2. Tomarse una selfie desde su celular</li>
+                <li>3. Autorizar el reconocimiento facial (o elegir PIN)</li>
               </ul>
             </div>
             <p className="text-xs text-gray-400 mb-5">
               El reconocimiento facial solo se habilitará cuando el trabajador autorice. Esta decisión es 100% responsabilidad del colaborador.
             </p>
             <button
-              onClick={() => { setShowConsent(null); setNewEmployeePhoto(showConsent); }}
-              className="w-full py-3 bg-primary-600 hover:bg-primary-700 text-white rounded-xl font-medium transition-all mb-2"
-            >
-              Continuar — Tomar foto
-            </button>
-            <button
               onClick={() => setShowConsent(null)}
-              className="w-full py-2 text-sm text-gray-500 hover:text-gray-700"
+              className="w-full py-3 bg-primary-600 hover:bg-primary-700 text-white rounded-xl font-medium transition-all"
             >
-              Cerrar
+              Entendido
             </button>
           </div>
         </div>
