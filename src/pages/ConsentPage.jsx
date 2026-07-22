@@ -114,10 +114,18 @@ export default function ConsentPage() {
         <div className="bg-white rounded-2xl shadow-lg p-8 max-w-sm w-full text-center">
           <CheckCircle className="w-12 h-12 text-emerald-500 mx-auto mb-4" />
           <h1 className="text-xl font-bold text-gray-900 mb-2">Autorización completada</h1>
-          <p className="text-sm text-gray-500 mb-4">
+          <p className="text-sm text-gray-500 mb-6">
             Gracias {employee?.first_name}. Tu reconocimiento facial ha sido habilitado en <strong>{employee?.tenant_name}</strong>.
           </p>
-          <p className="text-xs text-gray-400">Ya puedes marcar asistencia con tu rostro.</p>
+          <a
+            href="/mi"
+            className="block w-full py-3 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 transition-all text-center"
+          >
+            Marcar asistencia ahora
+          </a>
+          <a href="/mis-horas" className="block mt-3 text-sm text-gray-400 hover:text-gray-600">
+            Ver mis horas
+          </a>
         </div>
       </div>
     );
