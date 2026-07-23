@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { KeyRound, LogIn, LogOut, CheckCircle, Loader } from 'lucide-react';
+import { KeyRound, LogIn, LogOut, CheckCircle, Loader, UserPlus } from 'lucide-react';
 import { attendanceApi } from '../api';
 
 const STEP_PIN = 'pin';
+const STEP_CREATE_PIN = 'create_pin';
 const STEP_ACTION = 'action';
 const STEP_CONFIRMED = 'confirmed';
 
@@ -108,6 +109,68 @@ export default function PinCheckInPage() {
     setConfirmData(null);
   }
 
+  // CREATE PIN flow
+  const [createRut, setCreateRut] = useState('');
+  const [createPin, setCreatePin] = useState('');
+  const [createPinConfirm, setCreatePinConfirm] = useState('');
+  const [createSuccess, setCreateSuccess] = useState('');
+
+  function formatRutCreate(value) {
+    let cleaned = value.replace(/[^0-9kK]/g, '');
+    if (cleaned.length > 9) cleaned = cleaned.slice(0, 9);
+    if (cleaned.length > 1) {
+      const body = cleaned.slice(0, -1);
+      const dv = cleaned.slice(-1);
+      const formatted = body.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+      return `${formatted}-${dv}`;
+    }
+    return cleaned;
+  }
+
+  async function handleCreatePin(e) {
+    e.preventDefault();
+    setError('');
+    setCreateSuccess('');
+
+    if (createPin.length < 4) {
+      setError('El PIN debe tener al menos 4 dígitos');
+      return;
+    }
+    if (createPin !== createPinConfirm) {
+      setError('Los PIN no coinciden');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await fetch('/api/auth/create-pin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(tenant ? { 'x-tenant-slug': tenant } : {}),
+        },
+        body: JSON.stringify({ rut: createRut, pin: createPin }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setCreateSuccess(`PIN creado para ${data.employee.first_name}. Ya puedes usarlo para marcar.`);
+        setTimeout(() => {
+          setStep(STEP_PIN);
+          setCreateRut('');
+          setCreatePin('');
+          setCreatePinConfirm('');
+          setCreateSuccess('');
+        }, 3000);
+      } else {
+        setError(data.error || 'Error al crear PIN');
+      }
+    } catch {
+      setError('Error de conexión');
+    } finally {
+      setLoading(false);
+    }
+  }
+
   // STEP: Ingresar PIN
   if (step === STEP_PIN) {
     return (
@@ -153,6 +216,107 @@ export default function PinCheckInPage() {
                 {loading ? 'Verificando...' : 'Ingresar'}
               </button>
             </form>
+
+            <button
+              onClick={() => { setStep(STEP_CREATE_PIN); setError(''); }}
+              className="mt-6 text-sm text-primary-600 hover:text-primary-700 font-medium"
+            >
+              ¿No tienes PIN? Créalo aquí
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // STEP: Crear PIN
+  if (step === STEP_CREATE_PIN) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-2" style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}>
+          <img src="/logo-flexio.svg" alt="Flexio" className="h-6" />
+          {tenantLogo && (
+            <img src={tenantLogo} alt="Logo empresa" className="h-6 max-w-[80px] object-contain border-l border-gray-200 pl-2 ml-1" />
+          )}
+          <span className="text-xs text-gray-400">Crear PIN</span>
+        </header>
+
+        <div className="flex-1 flex items-center justify-center p-6">
+          <div className="w-full max-w-sm">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <UserPlus className="w-8 h-8 text-emerald-600" />
+              </div>
+              <h1 className="text-2xl font-bold text-gray-900 mb-1">Crear tu PIN</h1>
+              <p className="text-sm text-gray-500">Ingresa tu RUT y elige un PIN de 4-6 dígitos</p>
+            </div>
+
+            {error && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl">
+                <p className="text-red-700 text-sm">{error}</p>
+              </div>
+            )}
+
+            {createSuccess && (
+              <div className="mb-4 p-3 bg-emerald-50 border border-emerald-200 rounded-xl">
+                <p className="text-emerald-700 text-sm font-medium">{createSuccess}</p>
+              </div>
+            )}
+
+            {!createSuccess && (
+              <form onSubmit={handleCreatePin} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Tu RUT</label>
+                  <input
+                    type="text"
+                    value={createRut}
+                    onChange={e => setCreateRut(formatRutCreate(e.target.value))}
+                    placeholder="12.345.678-9"
+                    required
+                    inputMode="numeric"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-center focus:ring-2 focus:ring-primary-500 outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Elige tu PIN (4-6 dígitos)</label>
+                  <input
+                    type="password"
+                    value={createPin}
+                    onChange={e => setCreatePin(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                    placeholder="••••"
+                    required
+                    inputMode="numeric"
+                    className="w-full px-4 py-4 border border-gray-200 rounded-xl text-center text-2xl tracking-[0.3em] focus:ring-2 focus:ring-primary-500 outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Confirma tu PIN</label>
+                  <input
+                    type="password"
+                    value={createPinConfirm}
+                    onChange={e => setCreatePinConfirm(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                    placeholder="••••"
+                    required
+                    inputMode="numeric"
+                    className="w-full px-4 py-4 border border-gray-200 rounded-xl text-center text-2xl tracking-[0.3em] focus:ring-2 focus:ring-primary-500 outline-none"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={loading || createPin.length < 4 || createRut.length < 8}
+                  className="w-full py-4 bg-emerald-600 text-white font-semibold rounded-xl hover:bg-emerald-700 transition-all disabled:opacity-50"
+                >
+                  {loading ? 'Creando...' : 'Crear mi PIN'}
+                </button>
+              </form>
+            )}
+
+            <button
+              onClick={() => { setStep(STEP_PIN); setError(''); setCreateSuccess(''); }}
+              className="block mx-auto mt-4 text-sm text-gray-400 hover:text-gray-600"
+            >
+              ← Volver a ingresar PIN
+            </button>
           </div>
         </div>
       </div>
