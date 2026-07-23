@@ -1,7 +1,38 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="96" fill="#059669"/>
-  <circle cx="256" cy="256" r="130" stroke="white" stroke-width="14" fill="none"/>
-  <line x1="256" y1="256" x2="256" y2="176" stroke="white" stroke-width="12" stroke-linecap="round"/>
-  <line x1="256" y1="256" x2="310" y2="282" stroke="white" stroke-width="10" stroke-linecap="round" opacity="0.8"/>
-  <circle cx="256" cy="256" r="8" fill="white"/>
+  <defs>
+    <linearGradient id="bg512" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2563eb"/>
+      <stop offset="100%" style="stop-color:#1d4ed8"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#bg512)"/>
+  <!-- Clock face -->
+  <circle cx="256" cy="256" r="138" stroke="white" stroke-width="12" fill="none" opacity="0.95"/>
+  <!-- Hour marks -->
+  <line x1="256" y1="126" x2="256" y2="140" stroke="white" stroke-width="7" stroke-linecap="round"/>
+  <line x1="256" y1="372" x2="256" y2="386" stroke="white" stroke-width="7" stroke-linecap="round"/>
+  <line x1="386" y1="256" x2="372" y2="256" stroke="white" stroke-width="7" stroke-linecap="round"/>
+  <line x1="126" y1="256" x2="140" y2="256" stroke="white" stroke-width="7" stroke-linecap="round"/>
+  <!-- Diagonal hour marks -->
+  <line x1="348" y1="164" x2="339" y2="173" stroke="white" stroke-width="5" stroke-linecap="round"/>
+  <line x1="164" y1="348" x2="173" y2="339" stroke="white" stroke-width="5" stroke-linecap="round"/>
+  <line x1="348" y1="348" x2="339" y2="339" stroke="white" stroke-width="5" stroke-linecap="round"/>
+  <line x1="164" y1="164" x2="173" y2="173" stroke="white" stroke-width="5" stroke-linecap="round"/>
+  <!-- Hour hand (pointing to ~10) -->
+  <line x1="256" y1="256" x2="208" y2="186" stroke="white" stroke-width="12" stroke-linecap="round"/>
+  <!-- Minute hand (pointing to ~2) -->
+  <line x1="256" y1="256" x2="314" y2="192" stroke="white" stroke-width="8" stroke-linecap="round"/>
+  <!-- Center dot -->
+  <circle cx="256" cy="256" r="10" fill="white"/>
+  <!-- Face scan indicator - bottom right -->
+  <g transform="translate(370, 370)">
+    <circle cx="0" cy="0" r="44" fill="white" opacity="0.15"/>
+    <circle cx="0" cy="-8" r="14" fill="none" stroke="white" stroke-width="3" opacity="0.6"/>
+    <path d="M-16 18 a16 14 0 0 1 32 0" fill="none" stroke="white" stroke-width="3" opacity="0.6"/>
+    <!-- Scan corners -->
+    <path d="M-26 -26 L-26 -18 M-26 -26 L-18 -26" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" opacity="0.6"/>
+    <path d="M26 -26 L26 -18 M26 -26 L18 -26" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" opacity="0.6"/>
+    <path d="M-26 26 L-26 18 M-26 26 L-18 26" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" opacity="0.6"/>
+    <path d="M26 26 L26 18 M26 26 L18 26" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" opacity="0.6"/>
+  </g>
 </svg>

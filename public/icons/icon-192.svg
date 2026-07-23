@@ -1,7 +1,26 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
-  <rect width="192" height="192" rx="40" fill="#059669"/>
-  <circle cx="96" cy="96" r="50" stroke="white" stroke-width="6" fill="none"/>
-  <line x1="96" y1="96" x2="96" y2="66" stroke="white" stroke-width="5" stroke-linecap="round"/>
-  <line x1="96" y1="96" x2="116" y2="106" stroke="white" stroke-width="4" stroke-linecap="round" opacity="0.8"/>
-  <circle cx="96" cy="96" r="3" fill="white"/>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2563eb"/>
+      <stop offset="100%" style="stop-color:#1d4ed8"/>
+    </linearGradient>
+  </defs>
+  <rect width="192" height="192" rx="40" fill="url(#bg)"/>
+  <!-- Clock face -->
+  <circle cx="96" cy="96" r="52" stroke="white" stroke-width="5" fill="none" opacity="0.95"/>
+  <!-- Hour marks -->
+  <line x1="96" y1="48" x2="96" y2="54" stroke="white" stroke-width="3" stroke-linecap="round"/>
+  <line x1="96" y1="138" x2="96" y2="144" stroke="white" stroke-width="3" stroke-linecap="round"/>
+  <line x1="144" y1="96" x2="138" y2="96" stroke="white" stroke-width="3" stroke-linecap="round"/>
+  <line x1="48" y1="96" x2="54" y2="96" stroke="white" stroke-width="3" stroke-linecap="round"/>
+  <!-- Hour hand (pointing to ~10) -->
+  <line x1="96" y1="96" x2="78" y2="70" stroke="white" stroke-width="5" stroke-linecap="round"/>
+  <!-- Minute hand (pointing to ~2) -->
+  <line x1="96" y1="96" x2="118" y2="72" stroke="white" stroke-width="3.5" stroke-linecap="round"/>
+  <!-- Center dot -->
+  <circle cx="96" cy="96" r="4" fill="white"/>
+  <!-- Small face silhouette at bottom right -->
+  <circle cx="138" cy="138" r="18" fill="white" opacity="0.2"/>
+  <circle cx="138" cy="134" r="7" fill="white" opacity="0.3"/>
+  <path d="M126 150 a12 10 0 0 1 24 0" fill="white" opacity="0.3"/>
 </svg>
