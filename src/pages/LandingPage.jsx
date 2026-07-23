@@ -258,6 +258,7 @@ export default function LandingPage() {
             </div>
 
             <div className="hidden md:flex items-center gap-4">
+              <a href="/mi" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">Marcar asistencia</a>
               <a href="/login" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">Iniciar sesión</a>
               <button onClick={() => setShowQuote(true)} className="px-5 py-2.5 bg-primary-600 text-white text-sm font-semibold rounded-full hover:bg-primary-700 transition-all">
                 Agendar demo

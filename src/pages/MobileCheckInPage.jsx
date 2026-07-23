@@ -251,34 +251,39 @@ export default function MobileCheckInPage() {
             )}
           </div>
 
-          {/* Camera - smaller to keep button visible */}
-          <div className="relative rounded-2xl overflow-hidden bg-black mx-auto" style={{ maxWidth: '240px' }}>
-            <Webcam
-              ref={webcamRef}
-              audio={false}
-              screenshotFormat="image/jpeg"
-              videoConstraints={{ width: 480, height: 480, facingMode: 'user' }}
-              className="w-full aspect-square object-cover"
-              mirrored={true}
-            />
-          </div>
+          {/* Only show camera + buttons if NOT already completed */}
+          {status?.status !== 'exited' && (
+            <>
+              {/* Camera - smaller to keep button visible */}
+              <div className="relative rounded-2xl overflow-hidden bg-black mx-auto" style={{ maxWidth: '240px' }}>
+                <Webcam
+                  ref={webcamRef}
+                  audio={false}
+                  screenshotFormat="image/jpeg"
+                  videoConstraints={{ width: 480, height: 480, facingMode: 'user' }}
+                  className="w-full aspect-square object-cover"
+                  mirrored={true}
+                />
+              </div>
 
-          {error && (
-            <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-xl text-center">
-              <p className="text-red-700 text-sm">{error}</p>
-            </div>
+              {error && (
+                <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-xl text-center">
+                  <p className="text-red-700 text-sm">{error}</p>
+                </div>
+              )}
+
+              {/* Event/location field */}
+              <div className="mt-3 max-w-sm mx-auto">
+                <input
+                  type="text"
+                  value={eventName}
+                  onChange={e => setEventName(e.target.value)}
+                  placeholder="¿En qué evento/lugar estás? (opcional)"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 outline-none"
+                />
+              </div>
+            </>
           )}
-
-          {/* Event/location field */}
-          <div className="mt-3 max-w-sm mx-auto">
-            <input
-              type="text"
-              value={eventName}
-              onChange={e => setEventName(e.target.value)}
-              placeholder="¿En qué evento/lugar estás? (opcional)"
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 outline-none"
-            />
-          </div>
 
           {/* Action buttons - always visible */}
           <div className="mt-3 space-y-3 max-w-sm mx-auto">
