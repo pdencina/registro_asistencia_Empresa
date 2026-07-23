@@ -46,7 +46,7 @@ module.exports = async function handler(req, res) {
     // Get all employees with their schedule info
     const employees = await sql(`
       SELECT e.id, e.first_name, e.last_name, e.department, e.photo_url,
-             ws.shift_type, ws.weekly_hours, ws.name as schedule_name
+             ws.shift_type, ws.weekly_hours, ws.name as schedule_name, ws.lunch_break_minutes
       FROM employees e
       LEFT JOIN employee_schedules es ON es.employee_id = e.id
       LEFT JOIN work_schedules ws ON es.schedule_id = ws.id
@@ -80,6 +80,8 @@ module.exports = async function handler(req, res) {
     // Calculate hours per employee
     const results = employees.map(emp => {
       const weeklyHoursContract = emp.weekly_hours || null;
+      const lunchBreak = emp.lunch_break_minutes || 30;
+      emp.lunch_break_minutes = lunchBreak;
       const empRecords = byEmployee[emp.id] || {};
       let totalMinutes = 0;
       const dailyBreakdown = [];
@@ -102,8 +104,9 @@ module.exports = async function handler(req, res) {
 
         if (lastExit) {
           const workedMinutes = Math.round((lastExit - firstEntry) / 60000);
-          // Subtract 30 min for lunch if worked more than 5 hours
-          const effective = workedMinutes > 300 ? workedMinutes - 30 : workedMinutes;
+          // Subtract lunch break (from schedule or default 30 min) if worked more than 5 hours
+          const lunchBreak = emp.lunch_break_minutes || 30;
+          const effective = workedMinutes > 300 ? workedMinutes - lunchBreak : workedMinutes;
           totalMinutes += Math.max(0, effective);
           dailyBreakdown.push({
             date: dateStr,

@@ -82,6 +82,7 @@ export const attendanceApi = {
   },
   getEmployeeStatus: (id) => request(`/attendance/status/${id}`),
   delete: (id) => request(`/attendance/${id}`, { method: 'DELETE' }),
+  edit: (id, timestamp) => request(`/attendance/${id}`, { method: 'PUT', body: JSON.stringify({ timestamp }) }),
   getOvertime: (params = {}) => {
     const query = new URLSearchParams(params).toString();
     return request(`/attendance/overtime${query ? `?${query}` : ''}`);

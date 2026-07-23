@@ -33,6 +33,7 @@ module.exports = async function handler(req, res) {
   await sql('ALTER TABLE work_schedules ADD COLUMN IF NOT EXISTS rotation_days_off INTEGER');
   await sql('ALTER TABLE work_schedules ADD COLUMN IF NOT EXISTS rotation_start_date DATE');
   await sql('ALTER TABLE work_schedules ADD COLUMN IF NOT EXISTS weekly_hours INTEGER');
+  await sql('ALTER TABLE work_schedules ADD COLUMN IF NOT EXISTS lunch_break_minutes INTEGER DEFAULT 30');
 
   await sql(`
     CREATE TABLE IF NOT EXISTS employee_schedules (
@@ -106,10 +107,10 @@ module.exports = async function handler(req, res) {
       }
 
       const [schedule] = await sql(`
-        INSERT INTO work_schedules (id, name, entry_time, exit_time, tolerance_minutes, is_default, block2_entry_time, block2_exit_time, shift_type, rotation_days_on, rotation_days_off, rotation_start_date, weekly_hours)
-        VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+        INSERT INTO work_schedules (id, name, entry_time, exit_time, tolerance_minutes, is_default, block2_entry_time, block2_exit_time, shift_type, rotation_days_on, rotation_days_off, rotation_start_date, weekly_hours, lunch_break_minutes)
+        VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
         RETURNING *
-      `, [name, entry_time || '00:00', exit_time || '00:00', tolerance_minutes || 10, is_default || false, block2_entry_time || null, block2_exit_time || null, shift_type || 'fixed', rotation_days_on || null, rotation_days_off || null, rotation_start_date || null, req.body.weekly_hours || null]);
+      `, [name, entry_time || '00:00', exit_time || '00:00', tolerance_minutes || 10, is_default || false, block2_entry_time || null, block2_exit_time || null, shift_type || 'fixed', rotation_days_on || null, rotation_days_off || null, rotation_start_date || null, req.body.weekly_hours || null, req.body.lunch_break_minutes !== undefined ? req.body.lunch_break_minutes : 30]);
 
       return res.status(201).json(schedule);
     }

@@ -12,6 +12,7 @@ import UniversalCheckInPage from './pages/UniversalCheckInPage';
 import ConsentPage from './pages/ConsentPage';
 import ContractPage from './pages/ContractPage';
 import MyHoursPage from './pages/MyHoursPage';
+import SimpleCheckInPage from './pages/SimpleCheckInPage';
 import TermsPage from './pages/legal/TermsPage';
 import PrivacyPage from './pages/legal/PrivacyPage';
 import DpaPage from './pages/legal/DpaPage';
@@ -42,6 +43,9 @@ function App() {
 
         {/* Mis horas: flexio.cl/mis-horas */}
         <Route path="/mis-horas" element={<MyHoursPage />} />
+
+        {/* Marcaje simplificado: flexio.cl/simple/slug */}
+        <Route path="/simple/:tenant" element={<SimpleCheckInPage />} />
 
         {/* Contrato digital: flexio.cl/contrato/slug */}
         <Route path="/contrato/:tenant" element={<ContractPage />} />

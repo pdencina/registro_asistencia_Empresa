@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Clock, LogIn, LogOut, Filter, Trash2, AlertTriangle, Camera, X } from 'lucide-react';
+import { Clock, LogIn, LogOut, Filter, Trash2, AlertTriangle, Camera, X, Edit2 } from 'lucide-react';
 import { attendanceApi } from '../api';
 
 export default function AttendancePage() {
@@ -7,7 +7,10 @@ export default function AttendancePage() {
   const [viewPhoto, setViewPhoto] = useState(null);
   const [view, setView] = useState('today');
   const [deleteRecord, setDeleteRecord] = useState(null);
+  const [editRecord, setEditRecord] = useState(null);
+  const [editTimestamp, setEditTimestamp] = useState('');
   const [deleting, setDeleting] = useState(false);
+  const [editing, setEditing] = useState(false);
   const [filters, setFilters] = useState({
     start_date: new Date().toISOString().split('T')[0],
     end_date: new Date().toISOString().split('T')[0],
@@ -43,6 +46,21 @@ export default function AttendancePage() {
       console.error(err);
     } finally {
       setDeleting(false);
+    }
+  }
+
+  async function handleEdit() {
+    if (!editRecord || !editTimestamp) return;
+    setEditing(true);
+    try {
+      await attendanceApi.edit(editRecord.id, editTimestamp);
+      setEditRecord(null);
+      setEditTimestamp('');
+      loadRecords();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setEditing(false);
     }
   }
 
@@ -153,6 +171,13 @@ export default function AttendancePage() {
                         </button>
                       )}
                       <button
+                        onClick={() => { setEditRecord(record); setEditTimestamp(new Date(record.timestamp).toISOString().slice(0, 16)); }}
+                        className="p-2 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all"
+                        title="Editar hora"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </button>
+                      <button
                         onClick={() => setDeleteRecord(record)}
                         className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
                       title="Eliminar registro"
@@ -199,6 +224,37 @@ export default function AttendancePage() {
           </div>
         </div>
       )}
+      {/* Modal Editar registro */}
+      {editRecord && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-sm">
+            <h3 className="text-lg font-bold text-gray-900 mb-2">Editar Registro</h3>
+            <p className="text-sm text-gray-500 mb-4">
+              {editRecord.type === 'entry' ? 'Entrada' : 'Salida'} de <strong>{editRecord.first_name} {editRecord.last_name}</strong>
+            </p>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Fecha y hora</label>
+              <input
+                type="datetime-local"
+                value={editTimestamp}
+                onChange={e => setEditTimestamp(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none"
+              />
+            </div>
+            <div className="flex gap-3">
+              <button onClick={() => { setEditRecord(null); setEditTimestamp(''); }}
+                className="flex-1 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium transition-all">
+                Cancelar
+              </button>
+              <button onClick={handleEdit} disabled={editing || !editTimestamp}
+                className="flex-1 py-3 bg-primary-600 hover:bg-primary-700 text-white rounded-xl font-medium transition-all disabled:opacity-50">
+                {editing ? 'Guardando...' : 'Guardar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Modal Ver foto del marcaje */}
       {viewPhoto && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4" onClick={() => setViewPhoto(null)}>

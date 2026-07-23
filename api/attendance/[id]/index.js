@@ -12,6 +12,30 @@ module.exports = async function handler(req, res) {
   const sql = getDb();
 
   try {
+    if (req.method === 'PUT') {
+      // Edit attendance record timestamp
+      const { timestamp } = req.body;
+      if (!timestamp) {
+        return res.status(400).json({ error: 'timestamp es requerido' });
+      }
+
+      const [record] = await sql('SELECT * FROM attendance_records WHERE id = $1 AND tenant_id = $2', [id, tenant.id]);
+      if (!record) {
+        return res.status(404).json({ error: 'Registro no encontrado' });
+      }
+
+      await sql('UPDATE attendance_records SET timestamp = $1 WHERE id = $2 AND tenant_id = $3', [timestamp, id, tenant.id]);
+
+      const [updated] = await sql(`
+        SELECT ar.*, e.first_name, e.last_name, e.rut, e.department
+        FROM attendance_records ar
+        JOIN employees e ON ar.employee_id = e.id
+        WHERE ar.id = $1
+      `, [id]);
+
+      return res.status(200).json(updated);
+    }
+
     if (req.method === 'DELETE') {
       // Verificar que el registro pertenece a este tenant
       const [record] = await sql('SELECT * FROM attendance_records WHERE id = $1 AND tenant_id = $2', [id, tenant.id]);

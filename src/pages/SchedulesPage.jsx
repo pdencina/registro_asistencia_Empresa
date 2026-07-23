@@ -8,7 +8,7 @@ export default function SchedulesPage() {
   const [authorizers, setAuthorizers] = useState([]);
   const [activeTab, setActiveTab] = useState('schedules'); // schedules | assign | authorizers
   const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState({ name: '', entry_time: '08:30', exit_time: '18:00', tolerance_minutes: 10, is_default: false, block2_entry_time: '', block2_exit_time: '', shift_type: 'fixed', rotation_days_on: '', rotation_days_off: '', rotation_start_date: '', weekly_hours: '' });
+  const [formData, setFormData] = useState({ name: '', entry_time: '08:30', exit_time: '18:00', tolerance_minutes: 10, is_default: false, block2_entry_time: '', block2_exit_time: '', shift_type: 'fixed', rotation_days_on: '', rotation_days_off: '', rotation_start_date: '', weekly_hours: '', lunch_break_minutes: 30 });
   const [showBlock2, setShowBlock2] = useState(false);
   const [newAuthorizer, setNewAuthorizer] = useState({ name: '', position: '' });
   const [assignData, setAssignData] = useState({ employee_id: '', schedule_id: '', custom_entry_time: '', custom_exit_time: '' });
@@ -216,6 +216,13 @@ export default function SchedulesPage() {
                     <input type="number" value={formData.tolerance_minutes} onChange={e => setFormData({...formData, tolerance_minutes: parseInt(e.target.value) || 0})}
                       min="0" max="60"
                       className="w-full px-4 py-3 border border-gray-200 rounded-xl outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Pausa almuerzo (minutos)</label>
+                    <input type="number" value={formData.lunch_break_minutes} onChange={e => setFormData({...formData, lunch_break_minutes: parseInt(e.target.value) || 0})}
+                      min="0" max="120" placeholder="30"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-xl outline-none" />
+                    <p className="text-xs text-gray-400 mt-1">Se descuenta si trabaja más de 5 horas. 0 = sin descuento.</p>
                   </div>
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input type="checkbox" checked={formData.is_default} onChange={e => setFormData({...formData, is_default: e.target.checked})}
