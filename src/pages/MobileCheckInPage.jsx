@@ -303,8 +303,19 @@ export default function MobileCheckInPage() {
               </button>
             )}
             {status?.status === 'exited' && (
-              <div className="text-center py-4 bg-gray-100 rounded-xl">
-                <p className="text-gray-500 text-sm">Ya completaste tu jornada hoy</p>
+              <div className="text-center py-6 bg-emerald-50 border border-emerald-200 rounded-xl">
+                <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <CheckCircle className="w-6 h-6 text-emerald-600" />
+                </div>
+                <p className="text-emerald-800 font-semibold mb-2">Jornada completada</p>
+                <div className="flex items-center justify-center gap-4 text-sm text-emerald-700">
+                  {status.entry_time && <span>Entrada: <strong>{status.entry_time}</strong></span>}
+                  {status.exit_time && <span>Salida: <strong>{status.exit_time}</strong></span>}
+                </div>
+                {status.hours_worked && (
+                  <p className="text-xs text-emerald-600 mt-2">Total: {status.hours_worked} horas</p>
+                )}
+                <p className="text-xs text-gray-400 mt-3">Nos vemos mañana</p>
               </div>
             )}
           </div>

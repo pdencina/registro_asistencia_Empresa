@@ -215,7 +215,17 @@ export default function PinCheckInPage() {
                 </button>
               )}
               {status?.status === 'exited' && (
-                <p className="text-gray-500 text-sm py-4">Ya completaste tu jornada hoy</p>
+                <div className="text-center py-4 bg-emerald-50 border border-emerald-200 rounded-xl">
+                  <CheckCircle className="w-8 h-8 text-emerald-500 mx-auto mb-2" />
+                  <p className="text-emerald-800 font-semibold text-sm">Jornada completada</p>
+                  <div className="flex items-center justify-center gap-3 text-xs text-emerald-700 mt-1">
+                    {status.entry_time && <span>Entrada: <strong>{status.entry_time}</strong></span>}
+                    {status.exit_time && <span>Salida: <strong>{status.exit_time}</strong></span>}
+                  </div>
+                  {status.hours_worked && (
+                    <p className="text-xs text-emerald-600 mt-1">Total: {status.hours_worked}h</p>
+                  )}
+                </div>
               )}
             </div>
 

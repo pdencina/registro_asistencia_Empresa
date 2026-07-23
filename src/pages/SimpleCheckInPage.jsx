@@ -212,8 +212,17 @@ export default function SimpleCheckInPage() {
             </button>
           )}
           {status?.status === 'exited' && (
-            <div className="text-center py-8">
-              <p className="text-xl text-gray-500">Ya completaste tu jornada hoy</p>
+            <div className="text-center py-8 bg-emerald-50 border border-emerald-200 rounded-3xl">
+              <CheckCircle className="w-12 h-12 text-emerald-500 mx-auto mb-3" />
+              <p className="text-xl font-semibold text-emerald-800">Jornada completada</p>
+              <div className="flex items-center justify-center gap-4 text-sm text-emerald-700 mt-2">
+                {status.entry_time && <span>Entrada: <strong>{status.entry_time}</strong></span>}
+                {status.exit_time && <span>Salida: <strong>{status.exit_time}</strong></span>}
+              </div>
+              {status.hours_worked && (
+                <p className="text-sm text-emerald-600 mt-2">Total: {status.hours_worked} horas</p>
+              )}
+              <p className="text-sm text-gray-400 mt-4">Nos vemos mañana</p>
             </div>
           )}
         </div>
