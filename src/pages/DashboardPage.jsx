@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Users, UserCheck, UserX, Clock, TrendingUp, AlertTriangle, Award, Calendar, Download, BarChart3, Timer, Building2 } from 'lucide-react';
 import { attendanceApi, employeesApi } from '../api';
+import SetupWizard from '../components/SetupWizard';
 import * as XLSX from 'xlsx';
 
 const TABS = [
@@ -20,6 +21,10 @@ export default function DashboardPage() {
   const [departments, setDepartments] = useState([]);
   const [drillDown, setDrillDown] = useState(null); // { title, data[] }
   const [customRange, setCustomRange] = useState({ start: '', end: '' });
+  const [showWizard, setShowWizard] = useState(false);
+  const [wizardDismissed, setWizardDismissed] = useState(
+    sessionStorage.getItem('setup_wizard_dismissed') === 'true'
+  );
 
   useEffect(() => {
     if (tab === 'custom' && (!customRange.start || !customRange.end)) return;
@@ -33,6 +38,10 @@ export default function DashboardPage() {
         const emps = await employeesApi.getAll({ active: '1' });
         const depts = [...new Set(emps.map(e => e.department).filter(Boolean))].sort();
         setDepartments(depts);
+        // Show setup wizard if no employees and not dismissed
+        if (emps.length === 0 && !wizardDismissed) {
+          setShowWizard(true);
+        }
       } catch (e) {}
     }
     loadDepts();
@@ -363,8 +372,33 @@ export default function DashboardPage() {
     );
   }
 
+  // Get tenant name from URL for wizard
+  const tenantSlug = window.location.pathname.match(/\/admin\/([^/]+)/)?.[1] || '';
+
+  function handleWizardComplete() {
+    setShowWizard(false);
+    setWizardDismissed(true);
+    sessionStorage.setItem('setup_wizard_dismissed', 'true');
+    loadData(); // Reload data after setup
+  }
+
+  function handleWizardSkip() {
+    setShowWizard(false);
+    setWizardDismissed(true);
+    sessionStorage.setItem('setup_wizard_dismissed', 'true');
+  }
+
   return (
     <div className="p-4 sm:p-6 max-w-6xl mx-auto">
+      {/* Setup Wizard */}
+      {showWizard && (
+        <SetupWizard
+          tenantName={tenantSlug}
+          onComplete={handleWizardComplete}
+          onSkip={handleWizardSkip}
+        />
+      )}
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <h2 className="text-2xl font-bold text-gray-900">Dashboard</h2>
