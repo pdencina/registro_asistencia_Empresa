@@ -520,88 +520,68 @@ export default function LandingPage() {
 
       {/* Pricing */}
       <section id="pricing" className="py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-              Planes transparentes, sin letra chica
-            </h2>
-            <p className="text-lg text-gray-500 mb-8">Todos los planes incluyen 15 días de evaluación sin costo</p>
+        <div className="max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            {/* Left — Message */}
+            <div>
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 leading-tight mb-6">
+                Tu tarifa se define<br />
+                <span className="text-primary-600">en tu propuesta.</span>
+              </h2>
+              <p className="text-lg text-gray-500 leading-relaxed mb-6">
+                Cada organización es distinta. Tu tarifa depende del número de colaboradores, las funcionalidades que necesitas y tu modelo de operación.
+              </p>
+              <p className="text-lg text-gray-500 leading-relaxed mb-8">
+                Después de la demo recibes una <strong className="text-gray-900">propuesta clara con una sola tarifa fija mensual</strong>. Sin sorpresas ni cobros extras.
+              </p>
+              <a
+                href="https://wa.me/56949616038?text=Hola%2C%20me%20interesa%20Flexio%20para%20mi%20empresa.%20Quiero%20una%20propuesta."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-7 py-3.5 bg-primary-600 text-white font-semibold rounded-full hover:bg-primary-700 transition-all"
+              >
+                Quiero una propuesta
+                <ArrowRight className="w-4 h-4" />
+              </a>
+            </div>
 
-            {/* Billing toggle */}
-            <div className="inline-flex items-center gap-3 bg-gray-100 rounded-xl p-1">
-              <button
-                onClick={() => setBillingCycle('monthly')}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${billingCycle === 'monthly' ? 'bg-white shadow text-gray-900' : 'text-gray-500'}`}
-              >
-                Mensual
-              </button>
-              <button
-                onClick={() => setBillingCycle('annual')}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${billingCycle === 'annual' ? 'bg-white shadow text-gray-900' : 'text-gray-500'}`}
-              >
-                Anual <span className="text-primary-600 text-xs">-20%</span>
-              </button>
+            {/* Right — What's included */}
+            <div className="bg-gray-50 rounded-2xl p-8 border border-gray-200">
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-5">Siempre incluido</p>
+              <ul className="space-y-4">
+                <li className="flex items-start gap-3">
+                  <CheckCircle className="w-5 h-5 text-emerald-500 mt-0.5 shrink-0" />
+                  <span className="text-gray-700">Reconocimiento facial, marcaje móvil y PIN — todos los métodos</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle className="w-5 h-5 text-emerald-500 mt-0.5 shrink-0" />
+                  <span className="text-gray-700">Dashboard interactivo con sugerencias automáticas</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle className="w-5 h-5 text-emerald-500 mt-0.5 shrink-0" />
+                  <span className="text-gray-700">Geolocalización, alertas y notificaciones en tiempo real</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle className="w-5 h-5 text-emerald-500 mt-0.5 shrink-0" />
+                  <span className="text-gray-700">Exportación Excel + Libro de Asistencia formato DT</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle className="w-5 h-5 text-emerald-500 mt-0.5 shrink-0" />
+                  <span className="text-gray-700">Sin hardware especial — funciona con cualquier tablet o celular</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle className="w-5 h-5 text-emerald-500 mt-0.5 shrink-0" />
+                  <span className="text-gray-700">Sin cobros por activación ni implementación</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle className="w-5 h-5 text-emerald-500 mt-0.5 shrink-0" />
+                  <span className="text-gray-700">15 días de evaluación sin costo ni compromiso</span>
+                </li>
+              </ul>
             </div>
           </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {plans.map((plan, i) => (
-              <div
-                key={i}
-                className={`rounded-2xl p-8 transition-all duration-300 cursor-default ${
-                  plan.highlighted
-                    ? 'bg-primary-600 text-white ring-4 ring-primary-200 scale-105 hover:scale-[1.07] hover:shadow-2xl'
-                    : 'bg-white border border-gray-200 hover:scale-[1.03] hover:shadow-xl hover:border-primary-200'
-                }`}
-              >
-                <h3 className={`text-lg font-semibold mb-1 ${plan.highlighted ? 'text-white' : 'text-gray-900'}`}>
-                  {plan.name}
-                </h3>
-                <p className={`text-sm mb-4 ${plan.highlighted ? 'text-primary-100' : 'text-gray-500'}`}>
-                  {plan.description}
-                </p>
-                <div className="mb-6">
-                  <span className={`text-4xl font-bold ${plan.highlighted ? 'text-white' : 'text-gray-900'}`}>
-                    {plan.price === 'A medida' ? plan.price : `$${plan.price}`}
-                  </span>
-                  <span className={`text-sm ${plan.highlighted ? 'text-primary-200' : 'text-gray-500'}`}>
-                    {plan.period}
-                  </span>
-                  {billingCycle === 'annual' && plan.name !== 'Enterprise' && (
-                    <p className={`text-xs mt-1 ${plan.highlighted ? 'text-primary-200' : 'text-gray-400'}`}>
-                      Facturado anualmente
-                    </p>
-                  )}
-                </div>
-                <ul className="space-y-3 mb-8">
-                  {plan.features.map((feature, j) => (
-                    <li key={j} className="flex items-start gap-2 text-sm">
-                      <CheckCircle className={`w-4 h-4 mt-0.5 flex-shrink-0 ${plan.highlighted ? 'text-primary-200' : 'text-primary-500'}`} />
-                      <span className={plan.highlighted ? 'text-primary-50' : 'text-gray-600'}>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-                <a
-                  href={`https://wa.me/56949616038?text=Hola%2C%20me%20interesa%20el%20plan%20${encodeURIComponent(plan.name)}%20de%20Flexio`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`w-full py-3 rounded-xl font-semibold text-sm transition-all text-center block ${
-                    plan.highlighted
-                      ? 'bg-white text-primary-600 hover:bg-primary-50'
-                      : 'bg-primary-600 text-white hover:bg-primary-700'
-                  }`}
-                >
-                  {plan.cta}
-                </a>
-              </div>
-            ))}
-          </div>
-          <p className="text-center text-sm text-gray-400 mt-8">
-            Precios en CLP (pesos chilenos). IVA incluido. Sin permanencia mínima.
-          </p>
         </div>
       </section>
-
       {/* Legal / Security */}
       <section id="legal" className="py-20 bg-gray-50 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto text-center">
