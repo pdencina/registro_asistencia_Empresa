@@ -194,6 +194,12 @@ export default function CheckInPage() {
             // AUTO-REGISTER: determine action and register immediately
             const nextAction = status?.next_action || (status?.status === 'present' ? 'exit' : 'entry');
             
+            // If already completed shift, show green confirmation and return
+            if (status?.status === 'exited') {
+              setStep(STEP_RECOGNIZED);
+              return;
+            }
+
             // Register directly (not via state, to avoid closure issues)
             setLoading(true);
             try {
@@ -725,9 +731,18 @@ export default function CheckInPage() {
               </p>
             )}
             {employeeStatus?.status === 'exited' && (
-              <p className="text-xs text-gray-500 mt-4 bg-gray-100 inline-block px-3 py-1.5 rounded-full">
-                Jornada completada — volviendo al inicio...
-              </p>
+              <div className="text-center py-6 bg-emerald-50 border border-emerald-200 rounded-2xl mt-4">
+                <CheckCircle className="w-10 h-10 text-emerald-500 mx-auto mb-2" />
+                <p className="text-emerald-800 font-semibold">Jornada completada</p>
+                <div className="flex items-center justify-center gap-4 text-sm text-emerald-700 mt-2">
+                  {employeeStatus.entry_time && <span>Entrada: <strong>{employeeStatus.entry_time}</strong></span>}
+                  {employeeStatus.exit_time && <span>Salida: <strong>{employeeStatus.exit_time}</strong></span>}
+                </div>
+                {employeeStatus.hours_worked && (
+                  <p className="text-xs text-emerald-600 mt-2">Total: {employeeStatus.hours_worked} horas</p>
+                )}
+                <p className="text-xs text-gray-400 mt-3">Volviendo al inicio...</p>
+              </div>
             )}
             {/* Tardiness alert */}
             {employeeTardiness && employeeTardiness.tardy_count > 0 && (
@@ -1036,7 +1051,19 @@ function KioskPinMode({ onDone }) {
                 {loading ? <Loader className="w-5 h-5 animate-spin" /> : <LogOut className="w-5 h-5" />} Registrar salida
               </button>
             )}
-            {status?.status === 'exited' && <p className="text-gray-500 text-sm py-4">Jornada completada hoy</p>}
+            {status?.status === 'exited' && (
+              <div className="text-center py-4 bg-emerald-50 border border-emerald-200 rounded-xl">
+                <CheckCircle className="w-8 h-8 text-emerald-500 mx-auto mb-2" />
+                <p className="text-emerald-800 font-semibold text-sm">Jornada completada</p>
+                <div className="flex items-center justify-center gap-3 text-xs text-emerald-700 mt-1">
+                  {status.entry_time && <span>Entrada: <strong>{status.entry_time}</strong></span>}
+                  {status.exit_time && <span>Salida: <strong>{status.exit_time}</strong></span>}
+                </div>
+                {status.hours_worked && (
+                  <p className="text-xs text-emerald-600 mt-1">Total: {status.hours_worked}h</p>
+                )}
+              </div>
+            )}
           </div>
           <button onClick={onDone} className="mt-4 text-sm text-gray-400 hover:text-gray-600">← Volver</button>
         </div>
