@@ -1,12 +1,15 @@
 {
   "name": "Flexio - Control de Asistencia",
   "short_name": "Flexio",
-  "description": "Control de asistencia con reconocimiento facial",
-  "start_url": "/",
+  "description": "Control de asistencia con reconocimiento facial. Marca con tu rostro, sin hardware.",
+  "start_url": "/mi",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#2563eb",
+  "theme_color": "#059669",
   "orientation": "portrait",
+  "lang": "es-CL",
+  "categories": ["business", "productivity"],
   "icons": [
     {
       "src": "/icons/icon-192.svg",
@@ -15,10 +18,31 @@
       "purpose": "any"
     },
     {
-      "src": "/icons/icon-192.svg",
+      "src": "/icons/icon-512.svg",
       "sizes": "512x512",
       "type": "image/svg+xml",
       "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Marcar Asistencia",
+      "short_name": "Marcar",
+      "url": "/mi",
+      "icons": [{"src": "/icons/icon-192.svg", "sizes": "192x192"}]
+    },
+    {
+      "name": "Mis Horas",
+      "short_name": "Horas",
+      "url": "/mis-horas",
+      "icons": [{"src": "/icons/icon-192.svg", "sizes": "192x192"}]
     }
   ]
 }

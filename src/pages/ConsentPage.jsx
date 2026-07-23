@@ -100,9 +100,18 @@ export default function ConsentPage() {
         <div className="bg-white rounded-2xl shadow-lg p-8 max-w-sm w-full text-center">
           <CheckCircle className="w-12 h-12 text-emerald-500 mx-auto mb-4" />
           <h1 className="text-xl font-bold text-gray-900 mb-2">Ya autorizado</h1>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500 mb-6">
             {employee?.first_name}, tu consentimiento para el uso de reconocimiento facial en <strong>{employee?.tenant_name}</strong> ya fue registrado anteriormente.
           </p>
+          <a
+            href={employee?.tenant_slug ? `/app/${employee.tenant_slug}` : '/mi'}
+            className="block w-full py-3 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 transition-all text-center"
+          >
+            Ir a marcar asistencia
+          </a>
+          <a href="/mis-horas" className="block mt-3 text-sm text-gray-400 hover:text-gray-600">
+            Ver mis horas
+          </a>
         </div>
       </div>
     );
@@ -110,22 +119,30 @@ export default function ConsentPage() {
 
   if (result === 'approved') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6">
+      <div className="min-h-screen flex items-center justify-center bg-emerald-50 p-6">
         <div className="bg-white rounded-2xl shadow-lg p-8 max-w-sm w-full text-center">
-          <CheckCircle className="w-12 h-12 text-emerald-500 mx-auto mb-4" />
-          <h1 className="text-xl font-bold text-gray-900 mb-2">Autorización completada</h1>
+          <CheckCircle className="w-16 h-16 text-emerald-500 mx-auto mb-4" />
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">¡Listo!</h1>
           <p className="text-sm text-gray-500 mb-6">
             Gracias {employee?.first_name}. Tu reconocimiento facial ha sido habilitado en <strong>{employee?.tenant_name}</strong>.
           </p>
+          <p className="text-xs text-gray-400 mb-6">Ya puedes marcar tu asistencia con tu rostro.</p>
           <a
-            href="/mi"
-            className="block w-full py-3 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 transition-all text-center"
+            href={employee?.tenant_slug ? `/app/${employee.tenant_slug}` : '/mi'}
+            className="block w-full py-4 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-all text-center text-lg"
           >
             Marcar asistencia ahora
           </a>
-          <a href="/mis-horas" className="block mt-3 text-sm text-gray-400 hover:text-gray-600">
-            Ver mis horas
-          </a>
+          <div className="flex gap-3 mt-3">
+            <a href="/mis-horas" className="flex-1 py-2 text-sm text-gray-500 hover:text-gray-700 text-center">
+              Ver mis horas
+            </a>
+            {employee?.tenant_slug && (
+              <a href={`/simple/${employee.tenant_slug}`} className="flex-1 py-2 text-sm text-emerald-600 hover:text-emerald-700 text-center font-medium">
+                Marcaje simple (PIN)
+              </a>
+            )}
+          </div>
         </div>
       </div>
     );
@@ -137,10 +154,18 @@ export default function ConsentPage() {
         <div className="bg-white rounded-2xl shadow-lg p-8 max-w-sm w-full text-center">
           <Fingerprint className="w-12 h-12 text-gray-400 mx-auto mb-4" />
           <h1 className="text-xl font-bold text-gray-900 mb-2">Consentimiento rechazado</h1>
-          <p className="text-sm text-gray-500 mb-4">
+          <p className="text-sm text-gray-500 mb-6">
             No se usará tu rostro para el registro. Podrás marcar asistencia usando tu <strong>PIN personal</strong> como método alternativo.
           </p>
-          <p className="text-xs text-gray-400">Si cambias de opinión, contacta a tu administrador.</p>
+          {employee?.tenant_slug && (
+            <a
+              href={`/pin/${employee.tenant_slug}`}
+              className="block w-full py-3 bg-gray-800 text-white font-semibold rounded-xl hover:bg-gray-900 transition-all text-center"
+            >
+              Ir a marcar con PIN
+            </a>
+          )}
+          <p className="text-xs text-gray-400 mt-4">Si cambias de opinión, contacta a tu administrador.</p>
         </div>
       </div>
     );

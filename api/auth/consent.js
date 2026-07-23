@@ -17,7 +17,7 @@ module.exports = async function handler(req, res) {
     try {
       const [employee] = await sql(`
         SELECT e.id, e.first_name, e.last_name, e.rut, e.department, e.position, e.photo_url, e.consent_status, e.email,
-               t.name as tenant_name, t.logo_url as tenant_logo
+               t.name as tenant_name, t.logo_url as tenant_logo, t.slug as tenant_slug
         FROM employees e
         JOIN tenants t ON e.tenant_id = t.id
         WHERE e.consent_token = $1 AND e.active = true
@@ -34,6 +34,7 @@ module.exports = async function handler(req, res) {
             first_name: employee.first_name,
             last_name: employee.last_name,
             tenant_name: employee.tenant_name,
+            tenant_slug: employee.tenant_slug,
           },
         });
       }
@@ -49,6 +50,7 @@ module.exports = async function handler(req, res) {
           photo_url: employee.photo_url,
           tenant_name: employee.tenant_name,
           tenant_logo: employee.tenant_logo,
+          tenant_slug: employee.tenant_slug,
         },
       });
     } catch (error) {

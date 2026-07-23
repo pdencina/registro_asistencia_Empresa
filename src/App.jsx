@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import { useState } from 'react';
+import InstallPrompt from './components/InstallPrompt';
 import KioskLayout from './layouts/KioskLayout';
 import AdminLayout from './layouts/AdminLayout';
 import AdminLoginPage from './pages/AdminLoginPage';
@@ -23,6 +24,7 @@ import SuperAdminDashboard from './pages/superadmin/SuperAdminDashboard';
 function App() {
   return (
     <Router>
+      <InstallPrompt />
       <Routes>
         {/* Landing page comercial */}
         <Route path="/" element={<LandingPage />} />
