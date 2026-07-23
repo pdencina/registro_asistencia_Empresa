@@ -6,6 +6,8 @@
   body {
     @apply antialiased;
     -webkit-tap-highlight-color: transparent;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
   }
 }
 
@@ -13,11 +15,19 @@
   .animate-fade-in {
     animation: fadeIn 0.3s ease-out;
   }
+  .animate-pulse-subtle {
+    animation: pulseSubtle 2s ease-in-out infinite;
+  }
 }
 
 @keyframes fadeIn {
   from { opacity: 0; transform: scale(0.95); }
   to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes pulseSubtle {
+  0%, 100% { box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3); }
+  50% { box-shadow: 0 10px 25px -3px rgba(37, 99, 235, 0.5); }
 }
 
 @layer components {

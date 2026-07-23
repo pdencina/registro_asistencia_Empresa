@@ -149,7 +149,7 @@ export default function MobileCheckInPage() {
   if (step === STEP_IDENTIFY) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col">
-        <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+        <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between" style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}>
           <div className="flex items-center gap-2">
             <img src="/logo-flexio.svg" alt="Flexio" className="h-6" />
             {tenantLogo && (
@@ -224,7 +224,7 @@ export default function MobileCheckInPage() {
 
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col">
-        <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+        <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between" style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}>
           <div className="flex items-center gap-2">
             <img src="/logo-flexio.svg" alt="Flexio" className="h-6" />
             {tenantLogo && (
@@ -241,7 +241,7 @@ export default function MobileCheckInPage() {
 
         <div className="flex-1 p-4">
           {/* Employee info */}
-          <div className="text-center mb-4">
+          <div className="text-center mb-3">
             <p className="text-lg font-bold text-gray-900">{employee.first_name} {employee.last_name}</p>
             <p className="text-sm text-gray-500">{employee.rut}</p>
             {status?.status === 'present' && status.last_record && (
@@ -251,8 +251,8 @@ export default function MobileCheckInPage() {
             )}
           </div>
 
-          {/* Camera */}
-          <div className="relative rounded-2xl overflow-hidden bg-black mx-auto" style={{ maxWidth: '300px' }}>
+          {/* Camera - smaller to keep button visible */}
+          <div className="relative rounded-2xl overflow-hidden bg-black mx-auto" style={{ maxWidth: '240px' }}>
             <Webcam
               ref={webcamRef}
               audio={false}
@@ -264,13 +264,13 @@ export default function MobileCheckInPage() {
           </div>
 
           {error && (
-            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-xl text-center">
+            <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-xl text-center">
               <p className="text-red-700 text-sm">{error}</p>
             </div>
           )}
 
           {/* Event/location field */}
-          <div className="mt-4 max-w-sm mx-auto">
+          <div className="mt-3 max-w-sm mx-auto">
             <input
               type="text"
               value={eventName}
@@ -280,13 +280,13 @@ export default function MobileCheckInPage() {
             />
           </div>
 
-          {/* Action buttons */}
-          <div className="mt-4 space-y-3 max-w-sm mx-auto">
+          {/* Action buttons - always visible */}
+          <div className="mt-3 space-y-3 max-w-sm mx-auto">
             {canEntry && (
               <button
                 onClick={() => handleRegister('entry')}
                 disabled={loading}
-                className="w-full flex items-center justify-center gap-3 py-4 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 transition-all disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-3 py-5 bg-primary-600 text-white font-bold text-lg rounded-xl hover:bg-primary-700 transition-all disabled:opacity-50 shadow-lg shadow-primary-200/50 animate-pulse-subtle"
               >
                 {loading ? <Loader className="w-5 h-5 animate-spin" /> : <LogIn className="w-5 h-5" />}
                 Registrar ingreso
@@ -296,7 +296,7 @@ export default function MobileCheckInPage() {
               <button
                 onClick={() => handleRegister('exit')}
                 disabled={loading}
-                className="w-full flex items-center justify-center gap-3 py-4 bg-gray-900 text-white font-semibold rounded-xl hover:bg-gray-800 transition-all disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-3 py-5 bg-gray-900 text-white font-bold text-lg rounded-xl hover:bg-gray-800 transition-all disabled:opacity-50 shadow-lg"
               >
                 {loading ? <Loader className="w-5 h-5 animate-spin" /> : <LogOut className="w-5 h-5" />}
                 Registrar salida

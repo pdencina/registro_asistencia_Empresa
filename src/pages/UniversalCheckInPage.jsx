@@ -98,7 +98,7 @@ export default function UniversalCheckInPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-center">
+      <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-center" style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}>
         <img src="/logo-flexio.svg" alt="Flexio" className="h-6" />
       </header>
 
