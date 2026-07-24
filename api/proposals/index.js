@@ -145,24 +145,35 @@ module.exports = async function handler(req, res) {
     return res.status(201).json(formatProposal(rows[0]));
   }
 
-  // PUT: Update proposal (superadmin)
+  // PUT: Update proposal (superadmin) or accept (client)
   if (req.method === 'PUT') {
-    if (!verifySuperAdmin(req)) {
-      return res.status(401).json({ error: 'No autorizado' });
-    }
-
     const { id, ...updates } = req.body;
     if (!id) return res.status(400).json({ error: 'ID requerido' });
 
-    // Accept action from client
+    // Accept action from client (no auth required — it's a public action)
     if (updates.action === 'accept') {
       const ip = req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || 'desconocida';
+      const cleanIp = typeof ip === 'string' ? ip.split(',')[0].trim() : 'desconocida';
+
       await sql(
         `UPDATE proposals SET status = 'accepted', accepted_at = NOW(), accepted_ip = $1, updated_at = NOW() WHERE id = $2`,
-        [typeof ip === 'string' ? ip.split(',')[0].trim() : 'desconocida', id]
+        [cleanIp, id]
       );
+
       const rows = await sql('SELECT * FROM proposals WHERE id = $1', [id]);
-      return res.status(200).json(formatProposal(rows[0]));
+      const proposal = rows[0];
+
+      // Send notification email to Pablo
+      if (proposal) {
+        sendAcceptanceNotification(proposal, cleanIp).catch(err => console.error('Email error:', err));
+      }
+
+      return res.status(200).json(formatProposal(proposal));
+    }
+
+    // All other updates require superadmin
+    if (!verifySuperAdmin(req)) {
+      return res.status(401).json({ error: 'No autorizado' });
     }
 
     // Build update fields
@@ -242,4 +253,123 @@ function formatProposal(p) {
       minimum_applied: rawMonthly < p.minimum_monthly,
     },
   };
+}
+
+async function sendAcceptanceNotification(proposal, ip) {
+  const RESEND_API_KEY = process.env.RESEND_API_KEY;
+  if (!RESEND_API_KEY) return;
+
+  const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'notificaciones@flexio.cl';
+  const OWNER_EMAIL = 'pablo@flexio.cl';
+
+  const rawMonthly = proposal.num_employees * proposal.price_per_user;
+  const monthlyNet = Math.max(rawMonthly, proposal.minimum_monthly);
+  const monthlyIva = Math.round(monthlyNet * 1.19);
+  const fechaStr = new Date().toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+  // Email to Pablo (owner)
+  const ownerHtml = `
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"></head>
+<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0f9ff;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="padding:40px 20px;">
+    <tr><td align="center">
+      <table width="540" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 6px rgba(0,0,0,0.05);">
+        <tr><td style="background:#059669;padding:30px;text-align:center;">
+          <h1 style="color:#ffffff;font-size:22px;margin:0;">Propuesta Aceptada</h1>
+          <p style="color:#d1fae5;font-size:14px;margin:8px 0 0 0;">Nuevo cliente confirmado</p>
+        </td></tr>
+        <tr><td style="padding:35px;">
+          <p style="font-size:16px;color:#374151;margin:0 0 20px 0;">
+            <strong>${proposal.company_name}</strong> aceptó la propuesta comercial.
+          </p>
+          <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:20px;margin:20px 0;">
+            <p style="font-size:13px;color:#166534;margin:0 0 8px 0;font-weight:600;">Detalle</p>
+            <p style="font-size:12px;color:#14532d;margin:0;line-height:2;">
+              <strong>Empresa:</strong> ${proposal.company_name}<br>
+              <strong>RUT:</strong> ${proposal.company_rut || 'No informado'}<br>
+              <strong>Contacto:</strong> ${proposal.contact_name || '-'} · ${proposal.contact_email || '-'} · ${proposal.contact_phone || '-'}<br>
+              <strong>Colaboradores:</strong> ${proposal.num_employees}<br>
+              <strong>Precio mensual:</strong> $${monthlyIva.toLocaleString('es-CL')} IVA incl.<br>
+              <strong>Referencia:</strong> ${proposal.reference}<br>
+              <strong>Fecha:</strong> ${fechaStr}<br>
+              <strong>IP:</strong> ${ip}
+            </p>
+          </div>
+          <p style="font-size:14px;color:#374151;margin:20px 0 0 0;font-weight:600;">
+            Siguiente paso: contactar al cliente para activar el servicio.
+          </p>
+        </td></tr>
+        <tr><td style="padding:20px 30px;border-top:1px solid #e5e7eb;text-align:center;">
+          <p style="font-size:11px;color:#9ca3af;margin:0;">Flexio · flexio.cl</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body></html>`;
+
+  await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      from: `Flexio <${FROM_EMAIL}>`,
+      to: [OWNER_EMAIL],
+      subject: `Propuesta aceptada — ${proposal.company_name}`,
+      html: ownerHtml,
+    }),
+  });
+
+  // Email to client (if has email)
+  if (proposal.contact_email) {
+    const clientHtml = `
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"></head>
+<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f9fafb;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="padding:40px 20px;">
+    <tr><td align="center">
+      <table width="540" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 6px rgba(0,0,0,0.05);">
+        <tr><td style="background:#2563eb;padding:30px;text-align:center;">
+          <h1 style="color:#ffffff;font-size:22px;margin:0;">Propuesta Confirmada</h1>
+          <p style="color:#bfdbfe;font-size:14px;margin:8px 0 0 0;">Flexio · Control de Asistencia</p>
+        </td></tr>
+        <tr><td style="padding:35px;">
+          <p style="font-size:16px;color:#374151;margin:0 0 20px 0;">
+            Hola${proposal.contact_name ? ` ${proposal.contact_name}` : ''},
+          </p>
+          <p style="font-size:14px;color:#6b7280;margin:0 0 16px 0;">
+            Confirmamos la recepción de tu aceptación de la propuesta de servicios Flexio para <strong>${proposal.company_name}</strong>.
+          </p>
+          <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:20px;margin:20px 0;">
+            <p style="font-size:13px;color:#1e40af;margin:0;line-height:1.8;">
+              <strong>Plan:</strong> ${proposal.num_employees} colaboradores<br>
+              <strong>Precio:</strong> $${monthlyIva.toLocaleString('es-CL')}/mes IVA incl.<br>
+              <strong>Trial:</strong> ${proposal.trial_days} días sin costo
+            </p>
+          </div>
+          <p style="font-size:14px;color:#374151;margin:20px 0 0 0;">
+            Pablo Encina de Flexio se pondrá en contacto contigo para activar el servicio y comenzar tu período de prueba.
+          </p>
+          <p style="font-size:13px;color:#6b7280;margin:16px 0 0 0;">
+            Si tienes alguna duda, escríbenos por WhatsApp al +56 9 4961 6038.
+          </p>
+        </td></tr>
+        <tr><td style="padding:20px 30px;border-top:1px solid #e5e7eb;text-align:center;">
+          <p style="font-size:11px;color:#9ca3af;margin:0;">Flexio · flexio.cl · +56 9 4961 6038</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body></html>`;
+
+    await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from: `Flexio <${FROM_EMAIL}>`,
+        to: [proposal.contact_email],
+        subject: `Propuesta confirmada — Flexio para ${proposal.company_name}`,
+        html: clientHtml,
+      }),
+    });
+  }
 }
