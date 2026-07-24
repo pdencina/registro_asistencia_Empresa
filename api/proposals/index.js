@@ -8,10 +8,12 @@ function verifySuperAdmin(req) {
   const GLOBAL_SECRET = process.env.GLOBAL_ADMIN_SECRET;
   if (!GLOBAL_SECRET) return false;
 
-  // Try Authorization header (Bearer token)
-  const auth = req.headers.authorization || '';
-  const bearerToken = auth.replace('Bearer ', '');
+  // Try Authorization header (Bearer token) — check both cases
+  const auth = req.headers.authorization || req.headers.Authorization || '';
+  const bearerToken = auth.replace('Bearer ', '').replace('bearer ', '');
   if (bearerToken) {
+    // Direct secret match
+    if (bearerToken === GLOBAL_SECRET) return true;
     try {
       const decoded = Buffer.from(bearerToken, 'base64').toString('utf8');
       if (decoded.startsWith(GLOBAL_SECRET + ':')) return true;
