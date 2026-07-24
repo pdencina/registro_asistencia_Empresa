@@ -26,6 +26,8 @@ export default function ProposalPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showAnnual, setShowAnnual] = useState(false);
+  const [accepting, setAccepting] = useState(false);
+  const [accepted, setAccepted] = useState(false);
 
   useEffect(() => {
     fetch(`/api/proposals/${slug}`)
@@ -33,33 +35,13 @@ export default function ProposalPage() {
         if (!res.ok) throw new Error('Empresa no encontrada');
         return res.json();
       })
-      .then(setData)
+      .then(d => {
+        setData(d);
+        if (d.status === 'accepted') setAccepted(true);
+      })
       .catch(e => setError(e.message))
       .finally(() => setLoading(false));
   }, [slug]);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <Loader className="w-8 h-8 animate-spin text-primary-600" />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <p className="text-red-600 text-lg">{error}</p>
-          <a href="/" className="text-primary-600 underline mt-4 inline-block">Volver a flexio.cl</a>
-        </div>
-      </div>
-    );
-  }
-
-  const { company, pricing, features, comparison, trial, implementation, contract } = data;
-  const [accepting, setAccepting] = useState(false);
-  const [accepted, setAccepted] = useState(data.status === 'accepted');
 
   async function handleAccept() {
     if (accepted) return;
@@ -81,8 +63,27 @@ export default function ProposalPage() {
     }
   }
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <Loader className="w-8 h-8 animate-spin text-primary-600" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <p className="text-red-600 text-lg">{error}</p>
+          <a href="/" className="text-primary-600 underline mt-4 inline-block">Volver a flexio.cl</a>
+        </div>
+      </div>
+    );
+  }
+
+  const { company, pricing, features, comparison, trial, implementation, contract } = data;
   const ctaLink = contract?.link || null;
-  const isDbProposal = data.source === 'proposal';
 
   return (
     <div className="min-h-screen bg-white">
