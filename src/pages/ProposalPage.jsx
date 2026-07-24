@@ -119,7 +119,13 @@ export default function ProposalPage() {
               </div>
               {pricing.employeeCount > 0 && (
                 <p className="text-sm text-gray-500 mt-1">
-                  ≈ {formatCLP(pricing.perEmployee)}/colaborador al mes
+                  {pricing.pricePerUser ? `${formatCLP(pricing.pricePerUser)}/usuario × ${pricing.employeeCount} colaboradores` : `≈ ${formatCLP(pricing.perEmployee)}/colaborador al mes`}
+                  {pricing.minimumApplied && <span className="text-amber-600 ml-1">(mínimo {formatCLP(pricing.minimum)})</span>}
+                </p>
+              )}
+              {pricing.discount > 0 && (
+                <p className="text-sm text-emerald-600 font-medium mt-1">
+                  Descuento especial: -{pricing.discount}%
                 </p>
               )}
               {showAnnual && (

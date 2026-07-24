@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Building2, Users, Plus, Search, ToggleLeft, ToggleRight, Edit2, Trash2, FileText } from 'lucide-react';
 import CreateTenantModal from './CreateTenantModal';
+import ProposalsManager from './ProposalsManager';
 
 export default function SuperAdminDashboard({ onLogout }) {
   const [tenants, setTenants] = useState([]);
@@ -9,6 +10,7 @@ export default function SuperAdminDashboard({ onLogout }) {
   const [showCreate, setShowCreate] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [stats, setStats] = useState({ total_tenants: 0, total_employees: 0, active_tenants: 0 });
+  const [view, setView] = useState('tenants'); // 'tenants' | 'proposals'
 
   useEffect(() => { loadTenants(); }, []);
 
@@ -82,6 +84,29 @@ export default function SuperAdminDashboard({ onLogout }) {
       </header>
 
       <div className="max-w-6xl mx-auto p-6">
+        {/* View Toggle */}
+        <div className="flex items-center gap-2 mb-6">
+          <button
+            onClick={() => setView('tenants')}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition ${view === 'tenants' ? 'bg-primary-600 text-white' : 'bg-gray-800 text-gray-400 hover:text-white'}`}
+          >
+            <Building2 className="w-4 h-4 inline mr-1.5" />Empresas
+          </button>
+          <button
+            onClick={() => setView('proposals')}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition ${view === 'proposals' ? 'bg-primary-600 text-white' : 'bg-gray-800 text-gray-400 hover:text-white'}`}
+          >
+            <FileText className="w-4 h-4 inline mr-1.5" />Propuestas
+          </button>
+        </div>
+
+        {/* Proposals View */}
+        {view === 'proposals' && (
+          <ProposalsManager onBack={() => setView('tenants')} />
+        )}
+
+        {/* Tenants View */}
+        {view === 'tenants' && (<>
         {/* Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
           <div className="bg-gray-800 rounded-xl p-5 border border-gray-700">
@@ -244,6 +269,7 @@ export default function SuperAdminDashboard({ onLogout }) {
             </table>
           </div>
         )}
+        </>)}
       </div>
 
       {/* Modal crear empresa */}
