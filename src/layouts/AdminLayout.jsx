@@ -24,10 +24,17 @@ export default function AdminLayout() {
   const [tenantLogo, setTenantLogo] = useState(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(localStorage.getItem('sidebar_collapsed') === 'true');
   const navigate = useNavigate();
   const { tenant } = useParams();
   const basePath = tenant ? `/admin/${tenant}` : '/admin';
   const role = sessionStorage.getItem('admin_role') || 'admin';
+
+  function toggleCollapse() {
+    const next = !collapsed;
+    setCollapsed(next);
+    localStorage.setItem('sidebar_collapsed', String(next));
+  }
 
   useEffect(() => {
     const interval = setInterval(() => setTime(new Date()), 1000);
@@ -123,29 +130,37 @@ export default function AdminLayout() {
       )}
 
       {/* Sidebar */}
-      <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 flex flex-col transition-transform duration-200 lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      <aside className={`fixed lg:static inset-y-0 left-0 z-50 bg-white border-r border-gray-200 flex flex-col transition-all duration-200 lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} ${collapsed ? 'lg:w-[68px]' : 'lg:w-64'} w-64`}>
         {/* Logo */}
-        <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
+        <div className={`px-4 py-4 border-b border-gray-100 flex items-center ${collapsed ? 'lg:justify-center' : 'justify-between'}`}>
+          <div className={`flex items-center gap-2.5 ${collapsed ? 'lg:hidden' : ''}`}>
             {tenantLogo ? (
               <img src={tenantLogo} alt="" className="h-8 max-w-[120px] object-contain" />
             ) : (
               <img src="/logo-flexio.svg" alt="Flexio" className="h-7" />
             )}
           </div>
+          {collapsed && (
+            <div className="hidden lg:block">
+              <img src="/favicon.svg" alt="F" className="w-8 h-8" />
+            </div>
+          )}
           <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-gray-400 hover:text-gray-600">
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-6">
+        {/* Navigation - scrollable */}
+        <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-5 scrollbar-thin">
           {navSections.map(section => {
             const visibleItems = section.items.filter(item => !item.hide);
             if (visibleItems.length === 0) return null;
             return (
               <div key={section.title}>
-                <p className="px-3 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">{section.title}</p>
+                {!collapsed && (
+                  <p className="px-3 mb-2 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">{section.title}</p>
+                )}
+                {collapsed && <div className="hidden lg:block border-t border-gray-100 my-2" />}
                 <div className="space-y-0.5">
                   {visibleItems.map(item => (
                     <NavLink
@@ -153,16 +168,17 @@ export default function AdminLayout() {
                       to={item.to}
                       end={item.end}
                       onClick={() => setSidebarOpen(false)}
+                      title={collapsed ? item.label : undefined}
                       className={({ isActive }) =>
-                        `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                        `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${collapsed ? 'lg:justify-center lg:px-2' : ''} ${
                           isActive
-                            ? 'bg-primary-50 text-primary-700 border-l-[3px] border-primary-600 ml-[-1px]'
+                            ? 'bg-primary-50 text-primary-700'
                             : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                         }`
                       }
                     >
                       <item.icon className="w-[18px] h-[18px] shrink-0" />
-                      <span>{item.label}</span>
+                      <span className={collapsed ? 'lg:hidden' : ''}>{item.label}</span>
                     </NavLink>
                   ))}
                 </div>
@@ -171,14 +187,23 @@ export default function AdminLayout() {
           })}
         </nav>
 
-        {/* Footer */}
-        <div className="px-4 py-3 border-t border-gray-100">
+        {/* Collapse toggle + logout */}
+        <div className="px-3 py-3 border-t border-gray-100 space-y-1">
+          <button
+            onClick={toggleCollapse}
+            className={`hidden lg:flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm font-medium text-gray-400 hover:bg-gray-50 hover:text-gray-600 transition-all ${collapsed ? 'justify-center px-2' : ''}`}
+            title={collapsed ? 'Expandir menú' : 'Minimizar menú'}
+          >
+            <ChevronDown className={`w-[18px] h-[18px] transition-transform ${collapsed ? 'rotate-[-90deg]' : 'rotate-90'}`} />
+            {!collapsed && <span>Minimizar</span>}
+          </button>
           <button
             onClick={handleLogout}
-            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-gray-500 hover:bg-red-50 hover:text-red-600 transition-all"
+            className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-gray-500 hover:bg-red-50 hover:text-red-600 transition-all ${collapsed ? 'lg:justify-center lg:px-2' : ''}`}
+            title="Cerrar sesión"
           >
-            <LogOut className="w-[18px] h-[18px]" />
-            <span>Cerrar sesión</span>
+            <LogOut className="w-[18px] h-[18px] shrink-0" />
+            <span className={collapsed ? 'lg:hidden' : ''}>Cerrar sesión</span>
           </button>
         </div>
       </aside>
