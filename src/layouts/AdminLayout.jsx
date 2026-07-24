@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Routes, Route, NavLink, Navigate, useNavigate, useParams } from 'react-router-dom';
-import { Users, ClipboardList, BarChart3, LogOut, Camera, Settings, Clock, FileText, Palmtree, Calendar, AlertTriangle } from 'lucide-react';
+import { Users, ClipboardList, BarChart3, LogOut, Camera, Settings, Clock, FileText, FileCheck, Palmtree, Calendar, AlertTriangle } from 'lucide-react';
 import EmployeesPage from '../pages/EmployeesPage';
 import AttendancePage from '../pages/AttendancePage';
 import DashboardPage from '../pages/DashboardPage';
@@ -13,6 +13,7 @@ import LeaveRequestsPage from '../pages/LeaveRequestsPage';
 import CalendarPage from '../pages/CalendarPage';
 import WeeklyHoursPage from '../pages/WeeklyHoursPage';
 import WarningsPage from '../pages/WarningsPage';
+import JustificationsPage from '../pages/JustificationsPage';
 import OnboardingWizard from '../components/OnboardingWizard';
 
 export default function AdminLayout() {
@@ -112,6 +113,7 @@ export default function AdminLayout() {
           <Route path="/calendar" element={<CalendarPage />} />
           <Route path="/weekly-hours" element={<WeeklyHoursPage />} />
           <Route path="/warnings" element={<WarningsPage />} />
+          <Route path="/justifications" element={<JustificationsPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="*" element={<Navigate to={basePath} replace />} />
         </Routes>
@@ -131,6 +133,7 @@ export default function AdminLayout() {
           <NavItem to={`${basePath}/calendar`} icon={<Calendar className="w-5 h-5" />} label="Calendario" />
           <NavItem to={`${basePath}/weekly-hours`} icon={<Clock className="w-5 h-5" />} label="Jornada" />
           {role !== 'supervisor' && <NavItem to={`${basePath}/warnings`} icon={<AlertTriangle className="w-5 h-5" />} label="Cartas" />}
+          {role !== 'supervisor' && <NavItem to={`${basePath}/justifications`} icon={<FileCheck className="w-5 h-5" />} label="Justif." />}
           {role === 'admin' && <NavItem to={`${basePath}/settings`} icon={<Settings className="w-5 h-5" />} label="Config" />}
         </div>
       </nav>

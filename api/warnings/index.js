@@ -61,7 +61,7 @@ module.exports = async function handler(req, res) {
       endDate = now.toISOString().split('T')[0];
     }
 
-    // Get tardiness data for the period
+    // Get tardiness data for the period (excluding justified days)
     const tardyQuery = `
       SELECT 
         ar.employee_id,
@@ -77,6 +77,12 @@ module.exports = async function handler(req, res) {
         AND e.active = true
         AND EXTRACT(HOUR FROM (ar.timestamp AT TIME ZONE $2)) * 60 + EXTRACT(MINUTE FROM (ar.timestamp AT TIME ZONE $2))
             > EXTRACT(HOUR FROM ws.entry_time::time) * 60 + EXTRACT(MINUTE FROM ws.entry_time::time) + COALESCE(ws.tolerance_minutes, 10)
+        AND NOT EXISTS (
+          SELECT 1 FROM justifications j 
+          WHERE j.employee_id = ar.employee_id 
+            AND j.tenant_id = ar.tenant_id
+            AND j.date = date(ar.timestamp AT TIME ZONE $2)
+        )
       GROUP BY ar.employee_id, e.first_name, e.last_name, e.rut, e.department, e.position
       HAVING COUNT(*) >= $5
       ORDER BY COUNT(*) DESC

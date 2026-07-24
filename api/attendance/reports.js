@@ -214,6 +214,18 @@ module.exports = async function handler(req, res) {
       `, [tenant.id, startDate, endDate]);
     } catch (e) {}
 
+    // Get justifications (retroactive) in this period
+    let retroJustifications = [];
+    try {
+      retroJustifications = await sql(`
+        SELECT employee_id, date, type, covers
+        FROM justifications
+        WHERE tenant_id = $1
+          AND date >= $2
+          AND date <= $3
+      `, [tenant.id, startDate, endDate]);
+    } catch (e) {}
+
     // Get unique days each employee had at least one entry
     const presenceDays = {};
     for (const entry of allEntries) {
@@ -241,6 +253,12 @@ module.exports = async function handler(req, res) {
           }
           cur.setDate(cur.getDate() + 1);
         }
+      }
+      // Add retroactive justifications
+      const empJustifications = retroJustifications.filter(j => j.employee_id === emp.id);
+      for (const j of empJustifications) {
+        const jDate = typeof j.date === 'string' ? j.date.split('T')[0] : new Date(j.date).toISOString().split('T')[0];
+        justifiedDates.add(jDate);
       }
 
       const absentDates = getAbsentDates(startDate, endDate, presenceDays[emp.id] || new Set());
