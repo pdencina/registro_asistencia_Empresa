@@ -27,9 +27,9 @@ export default function ProposalsManager({ onBack }) {
 
   async function loadProposals() {
     try {
-      const secret = sessionStorage.getItem('superadmin_token');
+      const token = sessionStorage.getItem('superadmin_token');
       const res = await fetch('/api/proposals', {
-        headers: { 'x-admin-secret': secret },
+        headers: { 'Authorization': `Bearer ${token}` },
       });
       if (res.ok) {
         const data = await res.json();
@@ -48,7 +48,7 @@ export default function ProposalsManager({ onBack }) {
 
     const res = await fetch('/api/proposals', {
       method,
-      headers: { 'Content-Type': 'application/json', 'x-admin-secret': secret },
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${secret}` },
       body: JSON.stringify(body),
     });
 
@@ -68,7 +68,7 @@ export default function ProposalsManager({ onBack }) {
     const secret = sessionStorage.getItem('superadmin_token');
     await fetch('/api/proposals', {
       method: 'DELETE',
-      headers: { 'Content-Type': 'application/json', 'x-admin-secret': secret },
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${secret}` },
       body: JSON.stringify({ id }),
     });
     loadProposals();

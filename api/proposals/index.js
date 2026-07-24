@@ -2,6 +2,36 @@ const { getDb } = require('../lib/db');
 const { handleCors } = require('../lib/cors');
 
 /**
+ * Verify superadmin token (same as tenants.js)
+ */
+function verifySuperAdmin(req) {
+  const GLOBAL_SECRET = process.env.GLOBAL_ADMIN_SECRET;
+  if (!GLOBAL_SECRET) return false;
+
+  // Try Authorization header (Bearer token)
+  const auth = req.headers.authorization || '';
+  const bearerToken = auth.replace('Bearer ', '');
+  if (bearerToken) {
+    try {
+      const decoded = Buffer.from(bearerToken, 'base64').toString('utf8');
+      if (decoded.startsWith(GLOBAL_SECRET + ':')) return true;
+    } catch {}
+  }
+
+  // Try x-admin-secret header (direct or base64)
+  const adminSecret = req.headers['x-admin-secret'];
+  if (adminSecret) {
+    if (adminSecret === GLOBAL_SECRET) return true;
+    try {
+      const decoded = Buffer.from(adminSecret, 'base64').toString('utf8');
+      if (decoded.startsWith(GLOBAL_SECRET + ':')) return true;
+    } catch {}
+  }
+
+  return false;
+}
+
+/**
  * /api/proposals
  * 
  * GET ?ref=xxx — Public: get proposal by reference code (for client view)
@@ -65,9 +95,8 @@ module.exports = async function handler(req, res) {
       return res.status(200).json(formatProposal(p));
     }
 
-    // Admin: list all (requires superadmin secret)
-    const secret = req.headers['x-admin-secret'];
-    if (secret !== process.env.GLOBAL_ADMIN_SECRET) {
+    // Admin: list all (requires superadmin)
+    if (!verifySuperAdmin(req)) {
       return res.status(401).json({ error: 'No autorizado' });
     }
 
@@ -77,8 +106,7 @@ module.exports = async function handler(req, res) {
 
   // POST: Create proposal (superadmin)
   if (req.method === 'POST') {
-    const secret = req.headers['x-admin-secret'];
-    if (secret !== process.env.GLOBAL_ADMIN_SECRET) {
+    if (!verifySuperAdmin(req)) {
       return res.status(401).json({ error: 'No autorizado' });
     }
 
@@ -117,8 +145,7 @@ module.exports = async function handler(req, res) {
 
   // PUT: Update proposal (superadmin)
   if (req.method === 'PUT') {
-    const secret = req.headers['x-admin-secret'];
-    if (secret !== process.env.GLOBAL_ADMIN_SECRET) {
+    if (!verifySuperAdmin(req)) {
       return res.status(401).json({ error: 'No autorizado' });
     }
 
@@ -174,8 +201,7 @@ module.exports = async function handler(req, res) {
 
   // DELETE
   if (req.method === 'DELETE') {
-    const secret = req.headers['x-admin-secret'];
-    if (secret !== process.env.GLOBAL_ADMIN_SECRET) {
+    if (!verifySuperAdmin(req)) {
       return res.status(401).json({ error: 'No autorizado' });
     }
     const { id } = req.body;
