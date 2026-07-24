@@ -163,9 +163,13 @@ module.exports = async function handler(req, res) {
       const rows = await sql('SELECT * FROM proposals WHERE id = $1', [id]);
       const proposal = rows[0];
 
-      // Send notification email to Pablo
+      // Send notification email to Pablo (MUST await before returning)
       if (proposal) {
-        sendAcceptanceNotification(proposal, cleanIp).catch(err => console.error('Email error:', err));
+        try {
+          await sendAcceptanceNotification(proposal, cleanIp);
+        } catch (err) {
+          console.error('Email error:', err);
+        }
       }
 
       return res.status(200).json(formatProposal(proposal));
