@@ -38,6 +38,11 @@ module.exports = async function handler(req, res) {
       const sunday = new Date(monday);
       sunday.setDate(monday.getDate() + 6);
       endDate = sunday.toISOString().split('T')[0];
+    } else if (period === 'trimester') {
+      const currentMonth = now.getMonth();
+      const trimesterStart = currentMonth - (currentMonth % 3);
+      startDate = new Date(now.getFullYear(), trimesterStart, 1).toISOString().split('T')[0];
+      endDate = now.toISOString().split('T')[0];
     } else {
       // today
       startDate = new Date().toLocaleDateString('en-CA', { timeZone: TZ });
@@ -115,7 +120,7 @@ module.exports = async function handler(req, res) {
     // Get ALL records (entry + exit) for detailed export
     const allRecords = await sql(`
       SELECT 
-        ar.employee_id, ar.type, ar.notes,
+        ar.employee_id, ar.type, ar.notes, ar.method, ar.photo_snapshot_url,
         e.first_name, e.last_name, e.department, e.rut,
         to_char(ar.timestamp AT TIME ZONE $1, 'YYYY-MM-DD') as record_date,
         to_char(ar.timestamp AT TIME ZONE $1, 'HH24:MI:SS') as record_time,

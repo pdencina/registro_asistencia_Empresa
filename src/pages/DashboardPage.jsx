@@ -8,6 +8,7 @@ const TABS = [
   { id: 'today', label: 'Hoy' },
   { id: 'week', label: 'Semana' },
   { id: 'month', label: 'Mes' },
+  { id: 'trimester', label: 'Trimestre' },
   { id: 'custom', label: 'Personalizado' },
 ];
 
@@ -181,10 +182,17 @@ export default function DashboardPage() {
       XLSX.utils.book_append_sheet(wb, wsDept, 'Por Departamento');
     }
 
-    // Sheet 8: Registros Detallados (cada entrada/salida individual)
+    // Sheet 8: Reporte de Eventos (hora + dispositivo + ubicación)
     if (report.all_records && report.all_records.length > 0) {
-      const regRows = [['Fecha', 'Día', 'Hora', 'Tipo', 'Nombre', 'Apellido', 'RUT', 'Departamento', 'Notas/Ubicación']];
+      const regRows = [['Fecha', 'Día', 'Hora', 'Tipo', 'Nombre', 'Apellido', 'RUT', 'Departamento', 'Método', 'Ubicación/Notas']];
       for (const r of report.all_records) {
+        // Extract GPS from notes if available
+        let location = r.notes || '';
+        if (location.includes('GPS:')) {
+          const gpsMatch = location.match(/GPS:\s*([-\d.]+),\s*([-\d.]+)/);
+          if (gpsMatch) location = `Lat: ${gpsMatch[1]}, Lng: ${gpsMatch[2]}`;
+        }
+        const methodLabel = r.method === 'pin' ? 'PIN' : r.method === 'visual' ? 'Facial/Cámara' : r.method || 'Manual';
         regRows.push([
           r.record_date,
           r.day_name,
@@ -194,11 +202,44 @@ export default function DashboardPage() {
           r.last_name,
           r.rut || '',
           r.department || '',
-          r.notes || '',
+          methodLabel,
+          location,
         ]);
       }
       const wsReg = XLSX.utils.aoa_to_sheet(regRows);
-      XLSX.utils.book_append_sheet(wb, wsReg, 'Registros Detallados');
+      XLSX.utils.book_append_sheet(wb, wsReg, 'Eventos Detallados');
+    }
+
+    // Sheet 9: Consolidado por Departamento (mejorado)
+    if (report.department_breakdown || report.absence_list) {
+      const deptData = {};
+      for (const emp of report.absence_list || []) {
+        const dept = emp.department || 'Sin departamento';
+        if (!deptData[dept]) deptData[dept] = { employees: 0, present: 0, absent: 0, justified: 0, late: 0, rate_sum: 0 };
+        deptData[dept].employees++;
+        deptData[dept].present += emp.days_present || 0;
+        deptData[dept].absent += emp.unjustified_absences || emp.days_absent || 0;
+        deptData[dept].justified += emp.justified_absences || 0;
+        deptData[dept].rate_sum += emp.attendance_rate || 0;
+        const tardyEmp = (report.tardiness_ranking || []).find(t => t.employee_id === emp.id);
+        deptData[dept].late += tardyEmp?.late_count || 0;
+      }
+      const consolRows = [['Departamento', 'Colaboradores', 'Días Presentes (total)', 'Ausencias Injust.', 'Ausencias Just.', 'Atrasos', 'Tasa Asist. Promedio %']];
+      for (const [dept, d] of Object.entries(deptData).sort((a, b) => b[1].employees - a[1].employees)) {
+        consolRows.push([
+          dept, d.employees, d.present, d.absent, d.justified, d.late,
+          d.employees > 0 ? Math.round(d.rate_sum / d.employees) : 0,
+        ]);
+      }
+      consolRows.push([]);
+      consolRows.push(['TOTAL', Object.values(deptData).reduce((s, d) => s + d.employees, 0),
+        Object.values(deptData).reduce((s, d) => s + d.present, 0),
+        Object.values(deptData).reduce((s, d) => s + d.absent, 0),
+        Object.values(deptData).reduce((s, d) => s + d.justified, 0),
+        Object.values(deptData).reduce((s, d) => s + d.late, 0),
+        '']);
+      const wsConsol = XLSX.utils.aoa_to_sheet(consolRows);
+      XLSX.utils.book_append_sheet(wb, wsConsol, 'Consolidado Deptos');
     }
 
     XLSX.writeFile(wb, `Flexio-Reporte-${report.period}-${report.start_date}.xlsx`);
