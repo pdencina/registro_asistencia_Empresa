@@ -160,3 +160,16 @@ export const leaveRequestsApi = {
   reject: (id, rejection_reason) => request('/leave-requests', { method: 'PUT', body: JSON.stringify({ id, action: 'reject', rejection_reason }) }),
   delete: (id) => request('/leave-requests', { method: 'DELETE', body: JSON.stringify({ id }) }),
 };
+
+// Punctuality Bonus API
+export const punctualityApi = {
+  get: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return request(`/attendance/punctuality-bonus${query ? `?${query}` : ''}`);
+  },
+};
+
+// Schedules Bulk API
+export const schedulesBulkApi = {
+  import: (data) => request('/schedules/bulk', { method: 'POST', body: JSON.stringify(data) }),
+};
