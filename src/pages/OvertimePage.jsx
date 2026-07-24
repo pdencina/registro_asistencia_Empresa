@@ -37,7 +37,7 @@ export default function OvertimePage() {
     const wb = XLSX.utils.book_new();
 
     // Sheet 1: Horas Extra
-    const otRows = [['RUT', 'Nombre', 'Apellido', 'Departamento', 'Días Trabajados', 'Horas Trabajadas', 'Horas Extra', 'Días con HE']];
+    const otRows = [['RUT', 'Nombre', 'Apellido', 'Departamento', 'Días Trabajados', 'Horas Trabajadas', 'Horas Extra', 'Días con HE', 'Costo HE ($)']];
     for (const emp of data.employees) {
       otRows.push([
         emp.rut, emp.first_name, emp.last_name, emp.department || '',
@@ -45,15 +45,23 @@ export default function OvertimePage() {
         `${emp.total_worked_hours}:${String(emp.total_worked_minutes).padStart(2, '0')}`,
         `${emp.total_overtime_hours}:${String(emp.total_overtime_minutes).padStart(2, '0')}`,
         emp.overtime_days.length,
+        emp.overtime_cost || 0,
       ]);
     }
+    otRows.push([]);
+    otRows.push(['', '', '', '', '', '', '', 'TOTAL:', data.summary.total_overtime_cost || 0]);
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(otRows), 'Horas Extra');
 
     // Sheet 2: Detalle Diario HE
-    const detRows = [['Nombre', 'Fecha', 'Entrada', 'Salida', 'Min. Trabajados', 'Min. Extra']];
+    const detRows = [['Nombre', 'Fecha', 'Entrada', 'Salida', 'Min. Trabajados', 'Min. Extra', 'Recargo', 'Tipo Día']];
     for (const emp of data.employees) {
       for (const d of emp.overtime_days) {
-        detRows.push([`${emp.first_name} ${emp.last_name}`, d.date, d.entry, d.exit, d.worked_minutes, d.overtime_minutes]);
+        detRows.push([
+          `${emp.first_name} ${emp.last_name}`, d.date, d.entry, d.exit,
+          d.worked_minutes, d.overtime_minutes,
+          d.surcharge_label || (d.surcharge_rate >= 2 ? '100% (dom/feriado)' : '50% (día hábil)'),
+          d.is_holiday ? 'Feriado' : d.is_sunday ? 'Domingo' : 'Día hábil',
+        ]);
       }
     }
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(detRows), 'Detalle HE');
@@ -127,7 +135,7 @@ export default function OvertimePage() {
       {data && (
         <>
           {/* Summary cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
             <div className="bg-white rounded-xl border border-gray-200 p-4">
               <p className="text-xs text-gray-500">Período</p>
               <p className="text-sm font-semibold text-gray-900 mt-1">{startDate} al {endDate}</p>
@@ -135,6 +143,13 @@ export default function OvertimePage() {
             <div className="bg-white rounded-xl border border-gray-200 p-4">
               <p className="text-xs text-gray-500">Con horas extra</p>
               <p className="text-2xl font-bold text-orange-600 mt-1">{data.summary.employees_with_overtime}</p>
+            </div>
+            <div className="bg-white rounded-xl border border-orange-200 border-2 p-4">
+              <p className="text-xs text-gray-500">Costo total HE</p>
+              <p className="text-2xl font-bold text-orange-600 mt-1">
+                ${(data.summary.total_overtime_cost || 0).toLocaleString('es-CL')}
+              </p>
+              <p className="text-xs text-gray-400 mt-0.5">Recargo incluido</p>
             </div>
             <div className="bg-white rounded-xl border border-gray-200 p-4">
               <p className="text-xs text-gray-500">Llegadas temprano</p>
@@ -162,6 +177,7 @@ export default function OvertimePage() {
                     <th className="px-4 py-3">Días</th>
                     <th className="px-4 py-3">Horas trabajadas</th>
                     <th className="px-4 py-3">Horas extra</th>
+                    <th className="px-4 py-3">Costo HE</th>
                     <th className="px-4 py-3">Llegadas temprano</th>
                   </tr>
                 </thead>
@@ -178,11 +194,37 @@ export default function OvertimePage() {
                       </td>
                       <td className="px-4 py-3">
                         {emp.total_overtime_hours > 0 || emp.total_overtime_minutes > 0 ? (
-                          <span className="text-sm font-semibold text-orange-600 bg-orange-50 px-2 py-1 rounded-lg">
-                            {emp.total_overtime_hours}h {emp.total_overtime_minutes}m
-                          </span>
+                          <div>
+                            <span className="text-sm font-semibold text-orange-600 bg-orange-50 px-2 py-1 rounded-lg">
+                              {emp.total_overtime_hours}h {emp.total_overtime_minutes}m
+                            </span>
+                            {emp.overtime_days.length > 0 && (
+                              <details className="mt-2">
+                                <summary className="text-xs text-gray-400 cursor-pointer hover:text-gray-600">Ver detalle ({emp.overtime_days.length} días)</summary>
+                                <div className="mt-1 space-y-1">
+                                  {emp.overtime_days.map((d, i) => (
+                                    <p key={i} className="text-xs text-gray-500">
+                                      {d.date}: {d.overtime_minutes}min
+                                      <span className={`ml-1 px-1.5 py-0.5 rounded text-xs font-medium ${d.surcharge_rate >= 2 ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>
+                                        {d.surcharge_label || (d.surcharge_rate >= 2 ? '100%' : '50%')}
+                                      </span>
+                                    </p>
+                                  ))}
+                                </div>
+                              </details>
+                            )}
+                          </div>
                         ) : (
                           <span className="text-sm text-gray-400">0</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        {emp.overtime_cost > 0 ? (
+                          <span className="text-sm font-semibold text-orange-700">
+                            ${emp.overtime_cost.toLocaleString('es-CL')}
+                          </span>
+                        ) : (
+                          <span className="text-sm text-gray-400">$0</span>
                         )}
                       </td>
                       <td className="px-4 py-3">
@@ -204,6 +246,7 @@ export default function OvertimePage() {
             <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-xl">
               <p className="text-xs text-blue-700">
                 <strong>Nota:</strong> Las horas extra solo se calculan cuando el colaborador permanece <strong>después</strong> de la hora de salida programada ({data.schedule.exit_time}). Llegar temprano NO genera horas extra.
+                Recargo: <strong>50% día hábil</strong> (L-S) · <strong>100% domingo/feriado</strong> (Art. 32 Código del Trabajo).
               </p>
             </div>
 

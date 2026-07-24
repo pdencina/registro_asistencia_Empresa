@@ -111,6 +111,14 @@ module.exports = async function handler(req, res) {
     // Calcular horas extra por empleado
     const results = [];
 
+    // Chilean holidays 2026 (simplified - major ones)
+    const holidays2026 = [
+      '2026-01-01', '2026-04-03', '2026-04-04', '2026-05-01', '2026-05-21',
+      '2026-06-20', '2026-06-29', '2026-07-16', '2026-08-15', '2026-09-18',
+      '2026-09-19', '2026-10-12', '2026-10-31', '2026-11-01', '2026-12-08',
+      '2026-12-25',
+    ];
+
     for (const empId of Object.keys(byEmployee)) {
       const emp = byEmployee[empId];
       let totalOvertimeMinutes = 0;
@@ -132,18 +140,26 @@ module.exports = async function handler(req, res) {
         const effectiveWorked = workedMinutes > 300 ? workedMinutes - 30 : workedMinutes;
 
         // HORAS EXTRA: solo cuenta tiempo DESPUÉS de la hora de salida programada
-        // Llegar temprano NO genera horas extra
         const exitTimeParts = defaultSchedule.exit_time.split(':');
         const scheduledExitMinutes = parseInt(exitTimeParts[0]) * 60 + parseInt(exitTimeParts[1]);
 
-        // Convertir la hora de salida real a minutos desde medianoche (timezone local)
         const exitLocal = new Date(lastExit.toLocaleString('en-US', { timeZone: TZ }));
         const actualExitMinutes = exitLocal.getHours() * 60 + exitLocal.getMinutes();
 
-        // Solo hay hora extra si salió DESPUÉS de la hora programada
         const overtime = Math.max(0, actualExitMinutes - scheduledExitMinutes);
 
-        // Hora de entrada real para detectar puntualidad/llegada temprana
+        // Determine surcharge rate
+        const dateObj = new Date(dateKey + 'T12:00:00');
+        const dayOfWeek = dateObj.getDay(); // 0=Sunday, 6=Saturday
+        const isHoliday = holidays2026.includes(dateKey);
+        const isSundayOrHoliday = dayOfWeek === 0 || isHoliday;
+        const isSaturday = dayOfWeek === 6;
+
+        let surchargeRate = 1.5; // 50% recargo día normal (Art. 32 CT)
+        if (isSundayOrHoliday) surchargeRate = 2.0; // 100% recargo domingo/feriado
+        else if (isSaturday) surchargeRate = 1.5; // 50% sábado
+
+        // Hora de entrada real
         const entryTimeParts = defaultSchedule.entry_time.split(':');
         const scheduledEntryMinutes = parseInt(entryTimeParts[0]) * 60 + parseInt(entryTimeParts[1]);
         const entryLocal = new Date(firstEntry.toLocaleString('en-US', { timeZone: TZ }));
@@ -162,11 +178,14 @@ module.exports = async function handler(req, res) {
             exit: lastExit.toLocaleTimeString('es-CL', { timeZone: TZ, hour: '2-digit', minute: '2-digit' }),
             worked_minutes: effectiveWorked,
             overtime_minutes: overtime,
-            reason: 'post_exit', // Solo por quedarse después
+            surcharge_rate: surchargeRate,
+            surcharge_label: isSundayOrHoliday ? '100% (dom/feriado)' : '50% (día hábil)',
+            is_holiday: isHoliday,
+            is_sunday: dayOfWeek === 0,
+            reason: 'post_exit',
           });
         }
 
-        // Registrar llegada temprana (para bono puntualidad)
         if (arrivedEarly) {
           if (!emp.early_days) emp.early_days = [];
           emp.early_days.push({
@@ -176,6 +195,12 @@ module.exports = async function handler(req, res) {
           });
         }
       }
+
+      // Calculate cost (assuming hourly_rate from query or default)
+      const hourlyRate = emp.hourly_rate || 5000; // Default ~$5.000/hr if not set
+      const overtimeCost = dailyDetail.reduce((sum, d) => {
+        return sum + Math.round((d.overtime_minutes / 60) * hourlyRate * d.surcharge_rate);
+      }, 0);
 
       results.push({
         employee_id: emp.employee_id,
@@ -189,6 +214,7 @@ module.exports = async function handler(req, res) {
         total_overtime_hours: Math.floor(totalOvertimeMinutes / 60),
         total_overtime_minutes: totalOvertimeMinutes % 60,
         overtime_days: dailyDetail,
+        overtime_cost: overtimeCost,
         early_arrival_days: emp.early_days || [],
         early_arrival_count: (emp.early_days || []).length,
       });
@@ -210,8 +236,9 @@ module.exports = async function handler(req, res) {
         employees_with_overtime: results.filter(r => r.total_overtime_hours > 0 || r.total_overtime_minutes > 0).length,
         employees_always_punctual: results.filter(r => r.early_arrival_count > 0 && r.total_overtime_hours === 0 && r.total_overtime_minutes === 0).length,
         total_early_arrivals: results.reduce((sum, r) => sum + r.early_arrival_count, 0),
+        total_overtime_cost: results.reduce((sum, r) => sum + (r.overtime_cost || 0), 0),
       },
-      note: 'Las horas extra solo se calculan cuando el colaborador permanece DESPUÉS de la hora de salida programada. Llegar temprano NO genera horas extra.',
+      note: 'Las horas extra solo se calculan cuando el colaborador permanece DESPUÉS de la hora de salida programada. Llegar temprano NO genera horas extra. Recargo: 50% día hábil, 100% domingo/feriado (Art. 32 Código del Trabajo).',
       employees: results,
       punctuality_ranking: punctualityRanking,
     });
