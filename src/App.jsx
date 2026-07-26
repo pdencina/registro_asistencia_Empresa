@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import { useState, lazy, Suspense } from 'react';
 import ErrorBoundary from './components/ErrorBoundary';
+import { ToastProvider } from './components/Toast';
 import InstallPrompt from './components/InstallPrompt';
 import AdminLayout from './layouts/AdminLayout';
 import AdminLoginPage from './pages/AdminLoginPage';
@@ -38,6 +39,7 @@ function LoadingPage() {
 function App() {
   return (
     <ErrorBoundary>
+    <ToastProvider>
     <Router>
       <InstallPrompt />
       <Routes>
@@ -96,6 +98,7 @@ function App() {
         <Route path="/legal/dpa" element={<DpaPage />} />
       </Routes>
     </Router>
+    </ToastProvider>
     </ErrorBoundary>
   );
 }

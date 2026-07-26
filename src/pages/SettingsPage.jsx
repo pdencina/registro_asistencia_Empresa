@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { MapPin, Shield, Loader, ToggleLeft, ToggleRight, Building2, Upload, Trash2, FileText, ExternalLink, Printer, Bell } from 'lucide-react';
+import { useToast } from '../components/Toast';
 
 const API_BASE = '/api';
 
@@ -18,17 +19,15 @@ export default function SettingsPage() {
   const [settings, setSettings] = useState({ geolocation_enabled: true });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState('');
-  const [messageType, setMessageType] = useState('success'); // 'success' | 'error'
   const [logoUrl, setLogoUrl] = useState(null);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [contractData, setContractData] = useState(null);
   const logoInputRef = useRef(null);
+  const toast = useToast();
 
-  function showMessage(text, type = 'success', duration = 3000) {
-    setMessage(text);
-    setMessageType(type);
-    if (duration) setTimeout(() => setMessage(''), duration);
+  function showMessage(text, type = 'success') {
+    if (type === 'error') toast.error(text);
+    else toast.success(text);
   }
 
   useEffect(() => {
@@ -184,14 +183,6 @@ export default function SettingsPage() {
   return (
     <div className="p-6 max-w-3xl mx-auto">
       <h2 className="text-2xl font-bold text-gray-900 mb-6">Configuración</h2>
-
-      {message && (
-        <div className={`mb-6 p-3 rounded-xl text-sm font-medium ${
-          messageType === 'error' ? 'bg-red-50 text-red-700' : 'bg-emerald-50 text-emerald-700'
-        }`}>
-          {message}
-        </div>
-      )}
 
       {/* Logo de empresa */}
       <div className="card mb-6">
