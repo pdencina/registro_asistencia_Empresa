@@ -58,10 +58,16 @@ export default function UniversalCheckInPage() {
 
   function redirectToCheckin(data) {
     const cleanRut = rut.replace(/[.\-]/g, '');
+    // Store identified employee in sessionStorage to avoid re-asking RUT
+    sessionStorage.setItem('flexio_checkin_rut', cleanRut);
+    sessionStorage.setItem('flexio_checkin_tenant', data.slug);
+    if (data.employee) {
+      sessionStorage.setItem('flexio_checkin_employee', JSON.stringify(data.employee));
+    }
     if (data.method === 'pin') {
       navigate(`/pin/${data.slug}`);
     } else {
-      navigate(`/marcar/${data.slug}?rut=${encodeURIComponent(cleanRut)}`);
+      navigate(`/marcar/${data.slug}`);
     }
   }
 

@@ -136,14 +136,61 @@ export default function MobileCheckInPage() {
     };
   }, [step, modelsLoaded, employee?.photo_url]);
 
-  // Auto-identify if RUT passed from /mi
+  // Auto-identify if RUT passed from /mi (via sessionStorage or URL param)
   useEffect(() => {
+    if (autoIdentifyDone.current) return;
+    const storedRut = sessionStorage.getItem('flexio_checkin_rut');
+    const storedEmployee = sessionStorage.getItem('flexio_checkin_employee');
+    const storedTenant = sessionStorage.getItem('flexio_checkin_tenant');
     const rutFromUrl = searchParams.get('rut');
-    if (rutFromUrl && !autoIdentifyDone.current) {
+    const rutToUse = storedRut || rutFromUrl;
+
+    if (rutToUse && storedTenant === tenant) {
       autoIdentifyDone.current = true;
-      autoIdentify(rutFromUrl);
+      // Clear storage immediately to prevent stale data on refresh
+      sessionStorage.removeItem('flexio_checkin_rut');
+      sessionStorage.removeItem('flexio_checkin_employee');
+      sessionStorage.removeItem('flexio_checkin_tenant');
+
+      if (storedEmployee) {
+        // We already have the employee object — skip API call
+        const emp = JSON.parse(storedEmployee);
+        autoIdentifyWithEmployee(emp, rutToUse);
+      } else {
+        autoIdentify(rutToUse);
+      }
     }
-  }, [searchParams]);
+  }, []);
+
+  async function autoIdentifyWithEmployee(empData, rutValue) {
+    setLoading(true);
+    try {
+      // Fetch full employee list to get consent_status, photo_url, personal_pin
+      const employees = await employeesApi.getAll({ search: rutValue });
+      const found = employees.find(emp =>
+        emp.rut.replace(/[.\-\s]/g, '').toLowerCase() === rutValue.toLowerCase()
+      ) || empData;
+
+      setEmployee(found);
+      setRut(rutValue);
+      const st = await attendanceApi.getEmployeeStatus(found.id);
+      setStatus(st);
+
+      // Smart routing
+      if (found.consent_status === 'approved' && found.photo_url && modelsLoaded) {
+        setStep(STEP_FACE_VERIFY);
+      } else if (found.personal_pin) {
+        setStep(STEP_PIN_INPUT);
+      } else {
+        setStep(STEP_CAPTURE);
+      }
+    } catch (e) {
+      console.warn('Auto-identify with employee failed:', e);
+      // Fallback: show RUT form
+    } finally {
+      setLoading(false);
+    }
+  }
 
   async function autoIdentify(rutValue) {
     setLoading(true);
