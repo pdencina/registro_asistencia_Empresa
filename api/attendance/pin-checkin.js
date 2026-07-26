@@ -23,7 +23,7 @@ module.exports = async function handler(req, res) {
   const sql = getDb();
 
   try {
-    const { pin, action } = req.body;
+    const { pin, action, notes } = req.body;
 
     if (!pin || !action) {
       return res.status(400).json({ error: 'PIN y acción son obligatorios' });
@@ -95,8 +95,8 @@ module.exports = async function handler(req, res) {
 
       await sql(
         `INSERT INTO attendance_records (id, tenant_id, employee_id, type, timestamp, method, notes)
-         VALUES ($1, $2, $3, $4, $5, 'pin', 'Marcaje por PIN personal')`,
-        [id, tenant.id, employee.id, action, now]
+         VALUES ($1, $2, $3, $4, $5, 'pin', $6)`,
+        [id, tenant.id, employee.id, action, now, notes || 'Marcaje por PIN personal']
       );
 
       // Enviar email si tiene

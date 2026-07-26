@@ -5,6 +5,7 @@ import { LogIn, LogOut, XCircle, Loader, Scan, Fingerprint, AlertTriangle, Eye, 
 import { employeesApi, attendanceApi, tardinessApi, earlyExitApi, authorizersApi, schedulesApi } from '../api';
 import { playSuccess, playError, playRecognized } from '../utils/sounds';
 import { LivenessDetector } from '../utils/livenessDetection';
+import { getAuthorizedLocation } from '../utils/geolocation';
 
 // Estados del flujo
 const STEP_SELECT = 'select';
@@ -212,6 +213,7 @@ export default function CheckInPage() {
                 employee_id: employee.id,
                 type: nextAction,
                 photo_snapshot,
+                notes: (() => { const loc = getAuthorizedLocation(); return loc ? `GPS: ${loc.lat.toFixed(6)}, ${loc.lng.toFixed(6)} (dispositivo fijo)` : 'Totem/Kiosk'; })(),
               });
 
               // Build confirm data
@@ -316,6 +318,7 @@ export default function CheckInPage() {
         employee_id: recognizedEmployee.id,
         type,
         photo_snapshot,
+        notes: (() => { const loc = getAuthorizedLocation(); return loc ? `GPS: ${loc.lat.toFixed(6)}, ${loc.lng.toFixed(6)} (dispositivo fijo)` : 'Totem/Kiosk'; })(),
       });
 
       // Email notification is now sent automatically by the register endpoint

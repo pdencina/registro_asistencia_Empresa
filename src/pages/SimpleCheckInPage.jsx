@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { CheckCircle, Loader, WifiOff } from 'lucide-react';
 import { attendanceApi, employeesApi } from '../api';
 import { addToQueue, getQueue, syncQueue } from '../utils/offlineQueue';
+import { useGeolocation } from '../utils/useGeolocation';
 
 /**
  * Simplified check-in page for workers with low digital literacy.
@@ -13,6 +14,7 @@ import { addToQueue, getQueue, syncQueue } from '../utils/offlineQueue';
  */
 export default function SimpleCheckInPage() {
   const { tenant } = useParams();
+  const { gpsNotes } = useGeolocation();
   const [rut, setRut] = useState('');
   const [employee, setEmployee] = useState(null);
   const [status, setStatus] = useState(null);
@@ -104,6 +106,7 @@ export default function SimpleCheckInPage() {
         await attendanceApi.register({
           employee_id: employee.id,
           type,
+          notes: gpsNotes,
         });
       }
 

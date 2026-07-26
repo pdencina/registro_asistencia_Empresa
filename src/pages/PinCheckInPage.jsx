@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { KeyRound, LogIn, LogOut, CheckCircle, Loader, UserPlus } from 'lucide-react';
 import { attendanceApi } from '../api';
+import { useGeolocation } from '../utils/useGeolocation';
 
 const STEP_PIN = 'pin';
 const STEP_CREATE_PIN = 'create_pin';
@@ -10,6 +11,7 @@ const STEP_CONFIRMED = 'confirmed';
 
 export default function PinCheckInPage() {
   const { tenant } = useParams();
+  const { gpsNotes } = useGeolocation();
   const [step, setStep] = useState(STEP_PIN);
   const [pin, setPin] = useState('');
   const [employee, setEmployee] = useState(null);
@@ -78,7 +80,7 @@ export default function PinCheckInPage() {
           'Content-Type': 'application/json',
           ...(tenant ? { 'x-tenant-slug': tenant } : {}),
         },
-        body: JSON.stringify({ pin, action: type }),
+        body: JSON.stringify({ pin, action: type, notes: gpsNotes }),
       });
 
       const data = await res.json();
