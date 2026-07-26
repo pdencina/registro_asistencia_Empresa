@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { KeyRound, LogIn, LogOut, CheckCircle, Loader, UserPlus } from 'lucide-react';
 import { attendanceApi } from '../api';
 import { useGeolocation } from '../utils/useGeolocation';
+import FullScreenConfirmation from '../components/FullScreenConfirmation';
 
 const STEP_PIN = 'pin';
 const STEP_CREATE_PIN = 'create_pin';
@@ -407,19 +408,12 @@ export default function PinCheckInPage() {
   // STEP: Confirmado
   if (step === STEP_CONFIRMED && confirmData) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
-        <div className="w-full max-w-sm text-center">
-          <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-5">
-            <CheckCircle className="w-10 h-10 text-emerald-600" />
-          </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            {confirmData.type === 'entry' ? 'Ingreso' : 'Salida'} registrado
-          </h2>
-          <p className="text-lg text-gray-700 font-medium">{confirmData.time} hrs</p>
-          <p className="text-sm text-gray-400 mt-3">Método: PIN personal</p>
-          <p className="text-xs text-gray-400 mt-4">Volviendo al inicio...</p>
-        </div>
-      </div>
+      <FullScreenConfirmation
+        type={confirmData.type}
+        employeeName={employee ? `${employee.first_name} ${employee.last_name}` : ''}
+        time={confirmData.time}
+        tenantLogo={tenantLogo}
+      />
     );
   }
 

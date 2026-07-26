@@ -4,6 +4,7 @@ import Webcam from 'react-webcam';
 import * as faceapi from 'face-api.js';
 import { MapPin, Camera, LogIn, LogOut, CheckCircle, XCircle, Loader, Navigation, KeyRound } from 'lucide-react';
 import { attendanceApi, employeesApi } from '../api';
+import FullScreenConfirmation from '../components/FullScreenConfirmation';
 
 const STEP_IDENTIFY = 'identify';
 const STEP_FACE_VERIFY = 'face_verify';
@@ -693,24 +694,12 @@ export default function MobileCheckInPage() {
   // ========================
   if (step === STEP_CONFIRMED && confirmData) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
-        <div className="w-full max-w-sm text-center">
-          <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-5">
-            <CheckCircle className="w-10 h-10 text-emerald-600" />
-          </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            {confirmData.type === 'entry' ? 'Ingreso' : 'Salida'} registrado
-          </h2>
-          <p className="text-lg text-gray-700 font-medium">{confirmData.time} hrs</p>
-          {confirmData.location && (
-            <div className="mt-4 flex items-center justify-center gap-1 text-sm text-gray-400">
-              <MapPin className="w-4 h-4" />
-              GPS: {confirmData.location.lat.toFixed(4)}, {confirmData.location.lng.toFixed(4)}
-            </div>
-          )}
-          <p className="text-sm text-gray-400 mt-4">Volviendo al inicio...</p>
-        </div>
-      </div>
+      <FullScreenConfirmation
+        type={confirmData.type}
+        employeeName={employee ? `${employee.first_name} ${employee.last_name}` : ''}
+        time={confirmData.time}
+        tenantLogo={tenantLogo}
+      />
     );
   }
 

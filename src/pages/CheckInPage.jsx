@@ -6,6 +6,7 @@ import { employeesApi, attendanceApi, tardinessApi, earlyExitApi, authorizersApi
 import { playSuccess, playError, playRecognized } from '../utils/sounds';
 import { LivenessDetector } from '../utils/livenessDetection';
 import { getAuthorizedLocation } from '../utils/geolocation';
+import FullScreenConfirmation from '../components/FullScreenConfirmation';
 
 // Estados del flujo
 const STEP_SELECT = 'select';
@@ -909,48 +910,13 @@ export default function CheckInPage() {
   // STEP: CONFIRMED — Registro exitoso
   // ═══════════════════════════════════════════════════════════
   if (step === STEP_CONFIRMED && confirmData) {
-    const isEntry = confirmData.actionType === 'entry';
     return (
-      <div className={`fixed inset-0 z-50 flex flex-col items-center justify-center p-6 ${
-        isEntry ? 'bg-gradient-to-b from-emerald-500 to-emerald-600' : 'bg-gradient-to-b from-orange-500 to-orange-600'
-      }`}>
-        {/* Check animation */}
-        <div className="w-28 h-28 rounded-full bg-white/20 flex items-center justify-center mb-6 animate-bounce">
-          <div className="w-20 h-20 rounded-full bg-white flex items-center justify-center">
-            {isEntry ? (
-              <CheckCircle className="w-12 h-12 text-emerald-600" />
-            ) : (
-              <CheckCircle className="w-12 h-12 text-orange-600" />
-            )}
-          </div>
-        </div>
-
-        {/* Title */}
-        <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">
-          {isEntry ? 'Marca recibida' : 'Salida registrada'}
-        </h1>
-
-        {/* Time */}
-        <p className="text-white/90 text-lg mb-6">
-          Registramos tu hora de <strong>{isEntry ? 'entrada' : 'salida'}</strong> a las <strong>{confirmData.time}</strong>
-        </p>
-
-        {/* Employee name */}
-        <div className="bg-white/10 backdrop-blur-sm rounded-2xl px-6 py-4 text-center mb-6">
-          <p className="text-white font-semibold text-lg">{confirmData.employee}</p>
-          {confirmData.todayEntry && !isEntry && (
-            <p className="text-white/70 text-sm mt-1">Ingreso hoy: {confirmData.todayEntry} hrs</p>
-          )}
-        </div>
-
-        {/* Comprobante notice */}
-        <p className="text-white/70 text-sm">
-          Si la marca está correcta, te llegará el comprobante a tu correo.
-        </p>
-
-        {/* Auto-close indicator */}
-        <p className="text-white/40 text-xs mt-8">Volviendo al inicio...</p>
-      </div>
+      <FullScreenConfirmation
+        type={confirmData.actionType}
+        employeeName={confirmData.employee}
+        time={confirmData.time}
+        tenantLogo={tenantLogo}
+      />
     );
   }
 
