@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { MapPin, Shield, Loader, ToggleLeft, ToggleRight, Building2, Upload, Trash2, FileText, ExternalLink, Printer } from 'lucide-react';
+import { MapPin, Shield, Loader, ToggleLeft, ToggleRight, Building2, Upload, Trash2, FileText, ExternalLink, Printer, Bell } from 'lucide-react';
 
 const API_BASE = '/api';
 
@@ -278,6 +278,76 @@ export default function SettingsPage() {
               <ToggleLeft className="w-10 h-10 text-gray-400" />
             )}
           </button>
+        </div>
+      </div>
+
+      {/* Notificaciones y Alertas */}
+      <div className="card mt-6">
+        <div className="flex items-center gap-3 mb-6">
+          <Bell className="w-5 h-5 text-primary-600" />
+          <h3 className="font-bold text-gray-900">Notificaciones y Alertas</h3>
+        </div>
+
+        <div className="space-y-5">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Email de alertas</label>
+            <p className="text-xs text-gray-500 mb-2">Recibirás alertas diarias de ausentes y atrasos en este correo</p>
+            <div className="flex gap-2">
+              <input
+                type="email"
+                value={settings.notification_email || ''}
+                onChange={e => setSettings({ ...settings, notification_email: e.target.value })}
+                placeholder="admin@empresa.cl"
+                className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 outline-none"
+              />
+              <button
+                onClick={async () => {
+                  const slug = getTenantSlug();
+                  const res = await fetch('/api/settings', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', ...(slug ? { 'x-tenant-slug': slug } : {}) },
+                    body: JSON.stringify({ notification_email: settings.notification_email }),
+                  });
+                  if (res.ok) showMessage('Email de alertas guardado');
+                  else showMessage('Error al guardar');
+                }}
+                className="px-4 py-2.5 bg-primary-600 text-white rounded-xl text-sm font-medium hover:bg-primary-700 transition"
+              >
+                Guardar
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Tolerancia de alerta (minutos)</label>
+            <p className="text-xs text-gray-500 mb-2">Minutos después de la hora de entrada para considerar un atraso en las alertas</p>
+            <div className="flex gap-2 items-center">
+              <input
+                type="number"
+                min="5"
+                max="60"
+                value={settings.alert_tolerance_minutes || 15}
+                onChange={e => setSettings({ ...settings, alert_tolerance_minutes: parseInt(e.target.value) || 15 })}
+                className="w-24 px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 outline-none"
+              />
+              <span className="text-sm text-gray-500">minutos</span>
+              <button
+                onClick={async () => {
+                  const slug = getTenantSlug();
+                  const res = await fetch('/api/settings', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', ...(slug ? { 'x-tenant-slug': slug } : {}) },
+                    body: JSON.stringify({ alert_tolerance_minutes: settings.alert_tolerance_minutes }),
+                  });
+                  if (res.ok) showMessage('Tolerancia actualizada');
+                  else showMessage('Error al guardar');
+                }}
+                className="px-4 py-2.5 bg-primary-600 text-white rounded-xl text-sm font-medium hover:bg-primary-700 transition"
+              >
+                Guardar
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
