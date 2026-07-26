@@ -319,9 +319,33 @@ async function sendAttendanceEmail(apiKey, employee, type, timestamp, notes) {
 }
 
 async function reverseGeocode(lat, lng) {
+  // Try Google Maps Geocoding API first (more accurate for Chile)
+  const GOOGLE_MAPS_KEY = process.env.GOOGLE_MAPS_API_KEY;
+  if (GOOGLE_MAPS_KEY) {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 4000);
+      const res = await fetch(
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&language=es&key=${GOOGLE_MAPS_KEY}`,
+        { signal: controller.signal }
+      );
+      clearTimeout(timeout);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.results && data.results.length > 0) {
+          // Get the most specific address (first result)
+          return data.results[0].formatted_address;
+        }
+      }
+    } catch (e) {
+      // Fall through to Nominatim
+    }
+  }
+
+  // Fallback: OpenStreetMap Nominatim (free, less precise)
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 3000); // 3s max
+    const timeout = setTimeout(() => controller.abort(), 3000);
     const res = await fetch(
       `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`,
       { headers: { 'User-Agent': 'Flexio/1.0 (flexio.cl)' }, signal: controller.signal }

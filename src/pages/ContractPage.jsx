@@ -197,52 +197,57 @@ export default function ContractPage() {
 
               <section>
                 <h3 className="text-base font-bold text-gray-900">5. Vigencia y renovación</h3>
-                <p>El Contrato entra en vigencia en la fecha de firma y se renueva automáticamente por períodos sucesivos iguales, salvo aviso con 15 días de anticipación.</p>
+                <p>El Contrato entra en vigencia en la fecha de firma. El servicio se contrata en modalidad mensual con facturación anticipada, renovándose automáticamente por períodos mensuales sucesivos. No existe contrato mínimo de permanencia.</p>
               </section>
 
               <section>
                 <h3 className="text-base font-bold text-gray-900">6. Período de prueba</h3>
-                <p>15 días corridos sin costo desde la activación del Servicio.</p>
+                <p>El Cliente dispondrá de 15 días corridos sin costo desde la activación del Servicio. Durante este período podrá usar todas las funcionalidades sin limitación. Si no desea continuar, basta con comunicarlo sin costo alguno.</p>
               </section>
 
               <section>
-                <h3 className="text-base font-bold text-gray-900">7. Protección de datos</h3>
-                <p>Sujeto a Ley N° 19.628 y Ley N° 21.719. Encriptación TLS 1.3 en tránsito y AES-256 en reposo. El Cliente es responsable del consentimiento de sus colaboradores.</p>
+                <h3 className="text-base font-bold text-gray-900">7. Facturación y pago</h3>
+                <p>La facturación es mensual anticipada, emitida el primer día hábil de cada mes. El pago debe realizarse dentro de los 15 días siguientes a la emisión. En caso de mora superior a 15 días, el Prestador podrá suspender el acceso al servicio hasta la regularización del pago, sin que ello constituya término del contrato.</p>
               </section>
 
               <section>
-                <h3 className="text-base font-bold text-gray-900">8. Propiedad intelectual</h3>
-                <p>El software es propiedad exclusiva del Prestador. Se otorga licencia de uso no exclusiva vigente durante el Contrato.</p>
+                <h3 className="text-base font-bold text-gray-900">8. Protección de datos</h3>
+                <p>Sujeto a Ley N° 19.628 y Ley N° 21.719 sobre Protección de Datos Personales. Encriptación TLS 1.3 en tránsito y AES-256 en reposo. El Cliente es responsable de obtener el consentimiento informado de sus colaboradores para el uso de datos biométricos.</p>
               </section>
 
               <section>
-                <h3 className="text-base font-bold text-gray-900">9. Terminación</h3>
-                <p>El Cliente puede cancelar con 15 días de aviso. En modalidad mensual, surte efecto al término del mes facturado.</p>
+                <h3 className="text-base font-bold text-gray-900">9. Propiedad intelectual</h3>
+                <p>El software, marca y tecnología son propiedad exclusiva del Prestador. Se otorga al Cliente una licencia de uso no exclusiva, intransferible, vigente durante la duración del Contrato.</p>
               </section>
 
               <section>
-                <h3 className="text-base font-bold text-gray-900">10. Obligaciones del Prestador</h3>
-                <p>Disponibilidad del servicio, soporte técnico, confidencialidad, y disponibilidad mínima del 99% mensual.</p>
+                <h3 className="text-base font-bold text-gray-900">10. Terminación</h3>
+                <p>Cualquiera de las partes puede dar término al presente Contrato comunicando su decisión con al menos 15 días de anticipación, por escrito o mediante correo electrónico. En modalidad mensual, el término surte efecto al finalizar el mes facturado. No se requiere carta certificada ni se aplican multas o penalidades por término anticipado.</p>
               </section>
 
               <section>
-                <h3 className="text-base font-bold text-gray-900">11. Obligaciones del Cliente</h3>
-                <p>Pago oportuno, obtener consentimiento de colaboradores, uso conforme a normativa, designar administrador interno.</p>
+                <h3 className="text-base font-bold text-gray-900">11. Obligaciones del Prestador</h3>
+                <p>Disponibilidad del servicio con un SLA mínimo del 99% mensual, soporte técnico vía WhatsApp y correo electrónico en horario hábil, confidencialidad de los datos, actualizaciones del sistema sin costo adicional, y respaldo periódico de la información.</p>
               </section>
 
               <section>
-                <h3 className="text-base font-bold text-gray-900">12. Confidencialidad</h3>
-                <p>Ambas partes mantienen reserva sobre información confidencial. Subsiste 2 años post-término.</p>
+                <h3 className="text-base font-bold text-gray-900">12. Obligaciones del Cliente</h3>
+                <p>Pago oportuno del servicio, obtener consentimiento de sus colaboradores para el uso de biometría, uso conforme a la normativa vigente, designar un administrador interno responsable, y mantener actualizados los datos de contacto.</p>
               </section>
 
               <section>
-                <h3 className="text-base font-bold text-gray-900">13. Limitación de responsabilidad</h3>
-                <p>Responsabilidad máxima limitada a los últimos 3 meses de servicio pagados.</p>
+                <h3 className="text-base font-bold text-gray-900">13. Confidencialidad</h3>
+                <p>Ambas partes se obligan a mantener reserva sobre toda información confidencial a la que tengan acceso con motivo del presente Contrato. Esta obligación subsiste por 2 años después del término.</p>
               </section>
 
               <section>
-                <h3 className="text-base font-bold text-gray-900">14. Legislación aplicable</h3>
-                <p>Leyes de Chile. Domicilio en Santiago, tribunales ordinarios de justicia.</p>
+                <h3 className="text-base font-bold text-gray-900">14. Limitación de responsabilidad</h3>
+                <p>La responsabilidad máxima del Prestador se limita al monto equivalente a los últimos 3 meses de servicio efectivamente pagados por el Cliente.</p>
+              </section>
+
+              <section>
+                <h3 className="text-base font-bold text-gray-900">15. Legislación aplicable</h3>
+                <p>El presente contrato se rige por las leyes de la República de Chile. Para la resolución de cualquier controversia, las partes fijan domicilio en la ciudad de Santiago y se someten a la jurisdicción de sus tribunales ordinarios de justicia.</p>
               </section>
             </div>
 

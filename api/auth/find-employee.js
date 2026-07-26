@@ -18,7 +18,7 @@ module.exports = async function handler(req, res) {
   const sql = getDb();
 
   try {
-    const { rut } = req.body;
+    const { rut, tenant_slug } = req.body;
 
     if (!rut) {
       return res.status(400).json({ error: 'RUT es obligatorio' });
@@ -27,16 +27,24 @@ module.exports = async function handler(req, res) {
     // Limpiar RUT (quitar puntos, guiones, espacios)
     const cleanRut = rut.replace(/[.\-\s]/g, '').toUpperCase();
 
-    // Buscar empleado en cualquier tenant activo
-    const results = await sql(`
-      SELECT e.id, e.rut, e.first_name, e.last_name, e.photo_url, e.personal_pin,
+    // Build query - optionally filter by tenant
+    let query = `
+      SELECT e.id, e.rut, e.first_name, e.last_name, e.photo_url, e.personal_pin, e.department, e.position,
              t.slug, t.name as tenant_name
       FROM employees e
       JOIN tenants t ON e.tenant_id = t.id
       WHERE REPLACE(REPLACE(e.rut, '.', ''), '-', '') = $1
         AND e.active = true
         AND t.active = true
-    `, [cleanRut]);
+    `;
+    const params = [cleanRut];
+
+    if (tenant_slug) {
+      query += ' AND t.slug = $2';
+      params.push(tenant_slug);
+    }
+
+    const results = await sql(query, params);
 
     if (results.length === 0) {
       return res.status(404).json({ error: 'RUT no encontrado. Verifica con tu administrador.' });
@@ -63,6 +71,15 @@ module.exports = async function handler(req, res) {
       tenant_name: employee.tenant_name,
       method,
       employee_name: `${employee.first_name} ${employee.last_name}`,
+      employee: {
+        id: employee.id,
+        first_name: employee.first_name,
+        last_name: employee.last_name,
+        rut: employee.rut,
+        photo_url: employee.photo_url,
+        department: employee.department,
+        position: employee.position,
+      },
     });
   } catch (error) {
     return res.status(500).json({ error: error.message });

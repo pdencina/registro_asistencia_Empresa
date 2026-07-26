@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import Webcam from 'react-webcam';
 import { MapPin, Camera, LogIn, LogOut, CheckCircle, XCircle, Loader, Navigation } from 'lucide-react';
 import { attendanceApi, employeesApi } from '../api';
@@ -11,6 +11,7 @@ const STEP_ERROR = 'error';
 
 export default function MobileCheckInPage() {
   const { tenant } = useParams();
+  const [searchParams] = useSearchParams();
   const [step, setStep] = useState(STEP_IDENTIFY);
   const [rut, setRut] = useState('');
   const [employee, setEmployee] = useState(null);
@@ -23,6 +24,39 @@ export default function MobileCheckInPage() {
   const [tenantLogo, setTenantLogo] = useState(null);
   const [eventName, setEventName] = useState('');
   const webcamRef = useRef(null);
+  const autoIdentifyDone = useRef(false);
+
+  // Auto-identify if RUT passed from /mi
+  useEffect(() => {
+    const rutFromUrl = searchParams.get('rut');
+    if (rutFromUrl && !autoIdentifyDone.current) {
+      autoIdentifyDone.current = true;
+      autoIdentify(rutFromUrl);
+    }
+  }, [searchParams]);
+
+  async function autoIdentify(rutValue) {
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/auth/find-employee`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-tenant-slug': tenant },
+        body: JSON.stringify({ rut: rutValue, tenant_slug: tenant }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.employee) {
+          setEmployee(data.employee);
+          setRut(rutValue);
+          const st = await attendanceApi.getEmployeeStatus(data.employee.id);
+          setStatus(st);
+          setStep(STEP_CAPTURE);
+          return;
+        }
+      }
+    } catch (e) { console.warn('Auto-identify failed:', e); }
+    finally { setLoading(false); }
+  }
 
   // Obtener GPS al montar
   useEffect(() => {

@@ -57,10 +57,11 @@ export default function UniversalCheckInPage() {
   }
 
   function redirectToCheckin(data) {
+    const cleanRut = rut.replace(/[.\-]/g, '');
     if (data.method === 'pin') {
       navigate(`/pin/${data.slug}`);
     } else {
-      navigate(`/marcar/${data.slug}`);
+      navigate(`/marcar/${data.slug}?rut=${encodeURIComponent(cleanRut)}`);
     }
   }
 
