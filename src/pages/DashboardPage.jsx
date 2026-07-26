@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Users, UserCheck, UserX, Clock, TrendingUp, AlertTriangle, Award, Calendar, Download, BarChart3, Timer, Building2 } from 'lucide-react';
 import { attendanceApi, employeesApi } from '../api';
 import SetupWizard from '../components/SetupWizard';
+import { DashboardSkeleton } from '../components/Skeleton';
 import * as XLSX from 'xlsx';
 
 const TABS = [
@@ -406,11 +407,7 @@ export default function DashboardPage() {
   }
 
   if (loading && !report) {
-    return (
-      <div className="p-6 flex items-center justify-center h-96">
-        <div className="animate-spin w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full" />
-      </div>
-    );
+    return <DashboardSkeleton />;
   }
 
   // Get tenant name from URL for wizard

@@ -1,16 +1,19 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, useParams } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
+import ErrorBoundary from './components/ErrorBoundary';
 import InstallPrompt from './components/InstallPrompt';
-import KioskLayout from './layouts/KioskLayout';
 import AdminLayout from './layouts/AdminLayout';
 import AdminLoginPage from './pages/AdminLoginPage';
 import LandingPage from './pages/LandingPage';
 import LoginRedirectPage from './pages/LoginRedirectPage';
 import NoTenantPage from './pages/NoTenantPage';
-import MobileCheckInPage from './pages/MobileCheckInPage';
 import PinCheckInPage from './pages/PinCheckInPage';
 import UniversalCheckInPage from './pages/UniversalCheckInPage';
 import ConsentPage from './pages/ConsentPage';
+
+// Lazy-loaded heavy pages (face-api.js only loads when needed)
+const KioskLayout = lazy(() => import('./layouts/KioskLayout'));
+const MobileCheckInPage = lazy(() => import('./pages/MobileCheckInPage'));
 import ContractPage from './pages/ContractPage';
 import MyHoursPage from './pages/MyHoursPage';
 import SimpleCheckInPage from './pages/SimpleCheckInPage';
@@ -21,8 +24,20 @@ import DpaPage from './pages/legal/DpaPage';
 import SuperAdminLoginPage from './pages/superadmin/SuperAdminLoginPage';
 import SuperAdminDashboard from './pages/superadmin/SuperAdminDashboard';
 
+function LoadingPage() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="text-center">
+        <div className="w-10 h-10 border-3 border-primary-200 border-t-primary-600 rounded-full animate-spin mx-auto mb-3"></div>
+        <p className="text-sm text-gray-400">Cargando...</p>
+      </div>
+    </div>
+  );
+}
+
 function App() {
   return (
+    <ErrorBoundary>
     <Router>
       <InstallPrompt />
       <Routes>
@@ -33,10 +48,10 @@ function App() {
         <Route path="/login" element={<LoginRedirectPage />} />
 
         {/* App por tenant: flexio.cl/app/slug */}
-        <Route path="/app/:tenant" element={<KioskLayout />} />
+        <Route path="/app/:tenant" element={<Suspense fallback={<LoadingPage />}><KioskLayout /></Suspense>} />
 
         {/* Marcaje móvil: flexio.cl/marcar/slug */}
-        <Route path="/marcar/:tenant" element={<MobileCheckInPage />} />
+        <Route path="/marcar/:tenant" element={<Suspense fallback={<LoadingPage />}><MobileCheckInPage /></Suspense>} />
 
         {/* Marcaje por PIN: flexio.cl/pin/slug */}
         <Route path="/pin/:tenant" element={<PinCheckInPage />} />
@@ -81,6 +96,7 @@ function App() {
         <Route path="/legal/dpa" element={<DpaPage />} />
       </Routes>
     </Router>
+    </ErrorBoundary>
   );
 }
 

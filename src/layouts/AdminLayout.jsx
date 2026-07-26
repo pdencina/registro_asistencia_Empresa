@@ -1,13 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { Routes, Route, NavLink, Navigate, useNavigate, useParams } from 'react-router-dom';
 import {
   Users, ClipboardList, BarChart3, LogOut, Camera, Settings, Clock, FileText,
-  FileCheck, Palmtree, Calendar, AlertTriangle, Menu, X, Timer, ChevronDown
+  FileCheck, Palmtree, Calendar, AlertTriangle, Menu, X, Timer, ChevronDown, Loader
 } from 'lucide-react';
 import EmployeesPage from '../pages/EmployeesPage';
 import AttendancePage from '../pages/AttendancePage';
 import DashboardPage from '../pages/DashboardPage';
-import CheckInPage from '../pages/CheckInPage';
 import SettingsPage from '../pages/SettingsPage';
 import SchedulesPage from '../pages/SchedulesPage';
 import OvertimePage from '../pages/OvertimePage';
@@ -18,6 +17,20 @@ import WeeklyHoursPage from '../pages/WeeklyHoursPage';
 import WarningsPage from '../pages/WarningsPage';
 import JustificationsPage from '../pages/JustificationsPage';
 import OnboardingWizard from '../components/OnboardingWizard';
+
+// Lazy load heavy pages (face-api.js = 641KB, only needed for check-in)
+const CheckInPage = lazy(() => import('../pages/CheckInPage'));
+
+function PageLoader() {
+  return (
+    <div className="flex items-center justify-center min-h-[60vh]">
+      <div className="text-center">
+        <Loader className="w-8 h-8 text-primary-500 animate-spin mx-auto mb-3" />
+        <p className="text-sm text-gray-400">Cargando módulo...</p>
+      </div>
+    </div>
+  );
+}
 
 export default function AdminLayout() {
   const [time, setTime] = useState(new Date());
@@ -235,7 +248,7 @@ export default function AdminLayout() {
             <Route path="/" element={<DashboardPage />} />
             <Route path="/employees" element={<EmployeesPage />} />
             <Route path="/attendance" element={<AttendancePage />} />
-            <Route path="/register" element={<CheckInPage />} />
+            <Route path="/register" element={<Suspense fallback={<PageLoader />}><CheckInPage /></Suspense>} />
             <Route path="/schedules" element={<SchedulesPage />} />
             <Route path="/overtime" element={<OvertimePage />} />
             <Route path="/medical-leaves" element={<MedicalLeavesPage />} />

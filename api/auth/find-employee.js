@@ -1,12 +1,9 @@
 const { getDb } = require('../lib/db');
 const { corsHeaders, handleCors } = require('../lib/cors');
+const { rateLimit } = require('../lib/rateLimit');
 
 /**
  * POST /api/auth/find-employee
- * Busca un empleado por RUT en todas las empresas activas.
- * Retorna el slug del tenant y el método de marcaje recomendado.
- * 
- * Body: { rut: "17339278" } (sin puntos ni guión)
  */
 module.exports = async function handler(req, res) {
   if (handleCors(req, res)) return;
@@ -14,6 +11,9 @@ module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
+
+  // Rate limit: 15 attempts per minute per IP
+  if (rateLimit(req, res, { maxAttempts: 15, windowMs: 60000, keyPrefix: 'find-emp' })) return;
 
   const sql = getDb();
 
