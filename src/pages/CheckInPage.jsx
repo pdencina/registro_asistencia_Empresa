@@ -6,6 +6,7 @@ import { employeesApi, attendanceApi, tardinessApi, earlyExitApi, authorizersApi
 import { playSuccess, playError, playRecognized } from '../utils/sounds';
 import { LivenessDetector } from '../utils/livenessDetection';
 import { getAuthorizedLocation } from '../utils/geolocation';
+import { getCachedDescriptor, cacheDescriptor } from '../utils/descriptorCache';
 import FullScreenConfirmation from '../components/FullScreenConfirmation';
 
 // Estados del flujo
@@ -98,11 +99,24 @@ export default function CheckInPage() {
       setEmployees(data);
 
       const labeledDescriptors = [];
+      let cacheHits = 0;
+
       for (const emp of data) {
         if (!emp.photo_url) continue;
-        // Solo usar empleados que hayan autorizado el uso biométrico
         if (emp.consent_status && emp.consent_status !== 'approved') continue;
+
         try {
+          // Try cache first (IndexedDB)
+          const cached = await getCachedDescriptor(emp.id, emp.photo_url);
+          if (cached) {
+            labeledDescriptors.push(
+              new faceapi.LabeledFaceDescriptors(emp.id, [cached])
+            );
+            cacheHits++;
+            continue;
+          }
+
+          // Not cached — compute from image
           const img = await faceapi.fetchImage(emp.photo_url);
           const detection = await faceapi
             .detectSingleFace(img)
@@ -112,6 +126,8 @@ export default function CheckInPage() {
             labeledDescriptors.push(
               new faceapi.LabeledFaceDescriptors(emp.id, [detection.descriptor])
             );
+            // Save to cache for next time
+            await cacheDescriptor(emp.id, emp.photo_url, detection.descriptor);
           }
         } catch (err) {
           console.warn(`No se pudo procesar foto de ${emp.first_name}:`, err.message);
@@ -121,6 +137,7 @@ export default function CheckInPage() {
       if (labeledDescriptors.length > 0) {
         setFaceMatcher(new faceapi.FaceMatcher(labeledDescriptors, 0.5));
       }
+      console.log(`[Flexio] Descriptores: ${labeledDescriptors.length} total, ${cacheHits} from cache`);
     } catch (err) {
       console.error(err);
     } finally {

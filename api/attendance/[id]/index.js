@@ -1,6 +1,7 @@
 const { getDb } = require('../../lib/db');
 const { corsHeaders, handleCors } = require('../../lib/cors');
 const { requireTenant } = require('../../lib/tenant');
+const { logAudit } = require('../../lib/auditLog');
 
 module.exports = async function handler(req, res) {
   if (handleCors(req, res)) return;
@@ -25,6 +26,18 @@ module.exports = async function handler(req, res) {
       }
 
       await sql('UPDATE attendance_records SET timestamp = $1 WHERE id = $2 AND tenant_id = $3', [timestamp, id, tenant.id]);
+
+      // Audit log
+      const ip = req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || 'unknown';
+      await logAudit({
+        tenant_id: tenant.id,
+        action: 'attendance.edit',
+        actor: sessionStorage?.getItem?.('admin_email') || 'admin',
+        target_type: 'attendance_record',
+        target_id: id,
+        details: { old_timestamp: record.timestamp, new_timestamp: timestamp, employee_id: record.employee_id, type: record.type },
+        ip: typeof ip === 'string' ? ip.split(',')[0].trim() : null,
+      });
 
       const [updated] = await sql(`
         SELECT ar.*, e.first_name, e.last_name, e.rut, e.department, e.email
