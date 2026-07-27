@@ -391,6 +391,36 @@ export default function SettingsPage() {
           </div>
         )}
       </div>
+      {/* Export & Backup */}
+      <div className="card mt-6">
+        <div className="flex items-center gap-3 mb-4">
+          <Shield className="w-5 h-5 text-primary-600" />
+          <h3 className="font-bold text-gray-900">Datos y Portabilidad</h3>
+        </div>
+        <p className="text-sm text-gray-500 mb-4">Descarga toda la información de tu empresa (empleados, registros, horarios, justificativos). Conforme a la Ley 21.719 de Protección de Datos Personales.</p>
+        <button
+          onClick={async () => {
+            const slug = getTenantSlug();
+            const res = await fetch('/api/export', { headers: slug ? { 'x-tenant-slug': slug } : {} });
+            if (res.ok) {
+              const blob = await res.blob();
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = `flexio-export-${slug}-${new Date().toISOString().split('T')[0]}.json`;
+              a.click();
+              URL.revokeObjectURL(url);
+              toast.success('Backup descargado');
+            } else {
+              toast.error('Error al exportar');
+            }
+          }}
+          className="flex items-center gap-2 px-4 py-2.5 bg-gray-800 text-white rounded-xl text-sm font-medium hover:bg-gray-900 transition"
+        >
+          <FileText className="w-4 h-4" /> Descargar backup completo (JSON)
+        </button>
+      </div>
+
     </div>
   );
 }

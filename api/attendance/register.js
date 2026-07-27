@@ -1,6 +1,7 @@
 const { getDb } = require('../lib/db');
 const { corsHeaders, handleCors } = require('../lib/cors');
 const { requireTenant } = require('../lib/tenant');
+const { validateRequest } = require('../lib/validate');
 const { put } = require('@vercel/blob');
 
 module.exports = async function handler(req, res) {
@@ -18,12 +19,14 @@ module.exports = async function handler(req, res) {
   try {
     const { employee_id, type, photo_snapshot, notes } = req.body;
 
+    // Validate input
+    if (validateRequest(req, res, {
+      employee_id: { required: true, type: 'uuid' },
+      type: { required: true, enum: ['entry', 'exit'] },
+    })) return;
+
     if (!employee_id || !type) {
       return res.status(400).json({ error: 'employee_id y type son obligatorios' });
-    }
-
-    if (!['entry', 'exit'].includes(type)) {
-      return res.status(400).json({ error: 'type debe ser "entry" o "exit"' });
     }
 
     // Verificar que el empleado pertenece a ESTE tenant
