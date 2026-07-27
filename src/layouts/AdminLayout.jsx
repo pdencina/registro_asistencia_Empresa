@@ -2,7 +2,7 @@ import { useState, useEffect, lazy, Suspense } from 'react';
 import { Routes, Route, NavLink, Navigate, useNavigate, useParams } from 'react-router-dom';
 import {
   Users, ClipboardList, BarChart3, LogOut, Camera, Settings, Clock, FileText,
-  FileCheck, Palmtree, Calendar, AlertTriangle, Menu, X, Timer, ChevronDown, Loader
+  FileCheck, Palmtree, Calendar, AlertTriangle, Menu, X, Timer, ChevronDown, Loader, DollarSign
 } from 'lucide-react';
 import EmployeesPage from '../pages/EmployeesPage';
 import AttendancePage from '../pages/AttendancePage';
@@ -16,6 +16,7 @@ import CalendarPage from '../pages/CalendarPage';
 import WeeklyHoursPage from '../pages/WeeklyHoursPage';
 import WarningsPage from '../pages/WarningsPage';
 import JustificationsPage from '../pages/JustificationsPage';
+import PayrollReportPage from '../pages/PayrollReportPage';
 import OnboardingWizard from '../components/OnboardingWizard';
 
 // Lazy load heavy pages (face-api.js = 641KB, only needed for check-in)
@@ -102,6 +103,7 @@ export default function AdminLayout() {
         { to: `${basePath}/schedules`, icon: Clock, label: 'Horarios', hide: role === 'supervisor' },
         { to: `${basePath}/overtime`, icon: Timer, label: 'Horas Extra', hide: role === 'supervisor' },
         { to: `${basePath}/weekly-hours`, icon: Clock, label: 'Control Jornada' },
+        { to: `${basePath}/payroll`, icon: DollarSign, label: 'Remuneraciones', hide: role === 'supervisor' },
         { to: `${basePath}/calendar`, icon: Calendar, label: 'Calendario' },
       ],
     },
@@ -257,6 +259,7 @@ export default function AdminLayout() {
             <Route path="/weekly-hours" element={<WeeklyHoursPage />} />
             <Route path="/warnings" element={<WarningsPage />} />
             <Route path="/justifications" element={<JustificationsPage />} />
+            <Route path="/payroll" element={<PayrollReportPage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="*" element={<Navigate to={basePath} replace />} />
           </Routes>

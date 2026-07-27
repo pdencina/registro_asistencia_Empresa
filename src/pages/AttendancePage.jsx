@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Clock, LogIn, LogOut, Filter, Trash2, AlertTriangle, Camera, X, Edit2 } from 'lucide-react';
-import { attendanceApi } from '../api';
+import { Clock, LogIn, LogOut, Filter, Trash2, AlertTriangle, Camera, X, Edit2, Upload, FileSpreadsheet } from 'lucide-react';
+import { attendanceApi, bulkMarksApi } from '../api';
+import { useToast } from '../components/Toast';
 
 export default function AttendancePage() {
   const [records, setRecords] = useState([]);
@@ -9,6 +10,10 @@ export default function AttendancePage() {
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [editRecord, setEditRecord] = useState(null);
   const [editTimestamp, setEditTimestamp] = useState('');
+  const [showBulkMarks, setShowBulkMarks] = useState(false);
+  const [bulkData, setBulkData] = useState(null);
+  const [bulkImporting, setBulkImporting] = useState(false);
+  const toast = useToast();
   const [deleting, setDeleting] = useState(false);
   const [editing, setEditing] = useState(false);
   const [filters, setFilters] = useState({
@@ -69,6 +74,10 @@ export default function AttendancePage() {
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-gray-900">Registros de Asistencia</h2>
         <div className="flex gap-2">
+          <button onClick={() => setShowBulkMarks(true)}
+            className="flex items-center gap-2 px-3 py-2 bg-gray-100 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-200 transition">
+            <Upload className="w-4 h-4" /> Carga masiva
+          </button>
           <button onClick={() => setView('today')}
             className={`px-4 py-2 rounded-xl font-medium transition-all ${view === 'today' ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
             Hoy
@@ -269,6 +278,106 @@ export default function AttendancePage() {
                 <p className="text-white/80 text-sm">{viewPhoto.type === 'entry' ? 'Entrada' : 'Salida'} · {viewPhoto.time}</p>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+      {/* Bulk Marks Modal */}
+      {showBulkMarks && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+              <div>
+                <h3 className="text-xl font-bold text-gray-900">Carga Masiva de Marcas</h3>
+                <p className="text-sm text-gray-500 mt-1">Importa registros históricos o correcciones</p>
+              </div>
+              <button onClick={() => { setShowBulkMarks(false); setBulkData(null); }} className="p-2 hover:bg-gray-100 rounded-full">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-6">
+              {!bulkData ? (
+                <div>
+                  <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
+                    <p className="text-sm font-medium text-blue-800 mb-2">Formato del archivo CSV:</p>
+                    <code className="text-xs text-blue-700 block bg-blue-100 p-3 rounded-lg overflow-x-auto">
+                      RUT,Fecha,Entrada,Salida,Notas<br/>
+                      17.339.278-8,2026-07-01,08:30,17:30,Normal<br/>
+                      12.345.678-9,2026-07-01,08:45,18:00,Llegó tarde
+                    </code>
+                    <p className="text-xs text-blue-600 mt-2">Fecha en formato YYYY-MM-DD. Hora en HH:MM.</p>
+                  </div>
+                  <label className="block w-full border-2 border-dashed border-gray-300 rounded-xl p-10 text-center cursor-pointer hover:border-primary-400 hover:bg-primary-50/30 transition">
+                    <FileSpreadsheet className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                    <p className="text-sm font-medium text-gray-700">Click para seleccionar archivo CSV</p>
+                    <input type="file" accept=".csv,.txt" className="hidden" onChange={(e) => {
+                      const file = e.target.files[0];
+                      if (!file) return;
+                      const reader = new FileReader();
+                      reader.onload = (ev) => {
+                        const lines = ev.target.result.trim().split(/\r?\n/);
+                        if (lines.length < 2) return;
+                        const sep = lines[0].includes(';') ? ';' : ',';
+                        const parsed = [];
+                        for (let i = 1; i < lines.length; i++) {
+                          const cols = lines[i].split(sep).map(c => c.trim().replace(/"/g, ''));
+                          if (cols.length >= 3) {
+                            parsed.push({ rut: cols[0], date: cols[1], entry_time: cols[2], exit_time: cols[3] || '', notes: cols[4] || '' });
+                          }
+                        }
+                        setBulkData(parsed);
+                      };
+                      reader.readAsText(file, 'UTF-8');
+                    }} />
+                  </label>
+                </div>
+              ) : (
+                <div>
+                  <p className="text-sm font-medium text-gray-700 mb-3">{bulkData.length} registros detectados</p>
+                  <div className="overflow-x-auto border border-gray-200 rounded-xl max-h-60">
+                    <table className="w-full text-xs">
+                      <thead className="bg-gray-50 sticky top-0">
+                        <tr><th className="px-2 py-2">RUT</th><th className="px-2 py-2">Fecha</th><th className="px-2 py-2">Entrada</th><th className="px-2 py-2">Salida</th></tr>
+                      </thead>
+                      <tbody>
+                        {bulkData.slice(0, 20).map((r, i) => (
+                          <tr key={i} className="border-t border-gray-100">
+                            <td className="px-2 py-1.5">{r.rut}</td>
+                            <td className="px-2 py-1.5">{r.date}</td>
+                            <td className="px-2 py-1.5">{r.entry_time}</td>
+                            <td className="px-2 py-1.5">{r.exit_time || '—'}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  {bulkData.length > 20 && <p className="text-xs text-gray-400 mt-2">... y {bulkData.length - 20} más</p>}
+                </div>
+              )}
+            </div>
+            {bulkData && (
+              <div className="p-6 border-t border-gray-100 flex gap-3">
+                <button
+                  onClick={async () => {
+                    setBulkImporting(true);
+                    try {
+                      const result = await bulkMarksApi.import({ marks: bulkData });
+                      toast.success(result.message);
+                      setShowBulkMarks(false);
+                      setBulkData(null);
+                      loadRecords();
+                    } catch (e) { toast.error(e.message); }
+                    finally { setBulkImporting(false); }
+                  }}
+                  disabled={bulkImporting}
+                  className="flex-1 py-3 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 transition disabled:opacity-50"
+                >
+                  {bulkImporting ? 'Importando...' : `Importar ${bulkData.length} registros`}
+                </button>
+                <button onClick={() => setBulkData(null)} className="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition">
+                  Cambiar archivo
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}

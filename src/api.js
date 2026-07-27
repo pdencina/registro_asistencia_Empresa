@@ -173,3 +173,37 @@ export const punctualityApi = {
 export const schedulesBulkApi = {
   import: (data) => request('/schedules/bulk', { method: 'POST', body: JSON.stringify(data) }),
 };
+
+// Payroll Report API
+export const payrollApi = {
+  getReport: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return request(`/attendance/payroll-report${query ? `?${query}` : ''}`);
+  },
+};
+
+// Bulk Marks API
+export const bulkMarksApi = {
+  import: (data) => request('/attendance/bulk-marks', { method: 'POST', body: JSON.stringify(data) }),
+};
+
+// Users/Roles API
+export const usersApi = {
+  getAll: () => request('/users'),
+  create: (data) => request('/users', { method: 'POST', body: JSON.stringify(data) }),
+  update: (data) => request('/users', { method: 'PUT', body: JSON.stringify(data) }),
+  delete: (id) => request('/users', { method: 'DELETE', body: JSON.stringify({ id }) }),
+};
+
+// Audit Log API
+export const auditApi = {
+  getAll: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return request(`/audit${query ? `?${query}` : ''}`);
+  },
+};
+
+// Export/Backup API
+export const exportApi = {
+  download: () => request('/export'),
+};

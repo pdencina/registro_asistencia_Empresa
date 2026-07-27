@@ -77,10 +77,26 @@ module.exports = async function handler(req, res) {
     let defaultEntryTime = '08:30';
     let defaultTolerance = 10;
     try {
-      const [sch] = await sql('SELECT entry_time, tolerance_minutes FROM schedules WHERE tenant_id = $1 AND active = true LIMIT 1', [tenant.id]);
+      const [sch] = await sql('SELECT entry_time, tolerance_minutes FROM work_schedules WHERE tenant_id = $1 OR tenant_id IS NULL LIMIT 1', [tenant.id]);
       if (sch) {
         defaultEntryTime = (sch.entry_time || '08:30').slice(0, 5);
         defaultTolerance = sch.tolerance_minutes || 10;
+      }
+    } catch (e) {}
+
+    // Get per-employee schedule assignments for differentiated tolerance
+    let employeeScheduleMap = {}; // employeeId → { entry_time, tolerance_minutes }
+    try {
+      const assignments = await sql(`
+        SELECT es.employee_id, ws.entry_time, ws.tolerance_minutes
+        FROM employee_schedules es
+        JOIN work_schedules ws ON es.schedule_id = ws.id
+      `, []);
+      for (const a of assignments) {
+        employeeScheduleMap[a.employee_id] = {
+          entry_time: (a.entry_time || '08:30').slice(0, 5),
+          tolerance: a.tolerance_minutes || 10,
+        };
       }
     } catch (e) {}
 
@@ -155,14 +171,25 @@ module.exports = async function handler(req, res) {
 
       const [h, m] = entry.entry_time.split(':').map(Number);
       const entryMinutes = h * 60 + m;
-      const expectedMinutes = entryH * 60 + entryM;
+
+      // Use per-employee schedule if assigned, otherwise default
+      const empSchedule = employeeScheduleMap[entry.employee_id];
+      let expectedMinutes, empMaxEntry;
+      if (empSchedule) {
+        const [eH, eM] = empSchedule.entry_time.split(':').map(Number);
+        expectedMinutes = eH * 60 + eM;
+        empMaxEntry = expectedMinutes + empSchedule.tolerance;
+      } else {
+        expectedMinutes = entryH * 60 + entryM;
+        empMaxEntry = maxEntryMinutes;
+      }
 
       // Skip unreasonable entries (after noon)
       if (entryMinutes > 14 * 60) continue;
 
       employeeStats[entry.employee_id].total_entries++;
 
-      if (entryMinutes > maxEntryMinutes) {
+      if (entryMinutes > empMaxEntry) {
         employeeStats[entry.employee_id].late_count++;
         employeeStats[entry.employee_id].total_late_minutes += (entryMinutes - expectedMinutes);
         employeeStats[entry.employee_id].dates_late.push({
