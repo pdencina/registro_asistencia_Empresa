@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
-import { UserPlus, Edit2, Trash2, Camera, X, Search, Power, PowerOff, Shield, KeyRound } from 'lucide-react';
+import { UserPlus, Edit2, Trash2, Camera, X, Search, Power, PowerOff, Shield, KeyRound, Upload, FileSpreadsheet } from 'lucide-react';
 import Webcam from 'react-webcam';
 import { employeesApi } from '../api';
+import { useToast } from '../components/Toast';
 
 // Tipos de documento soportados
 const DOC_TYPES = [
@@ -181,6 +182,10 @@ function formatPhone(value) {
 export default function EmployeesPage() {
   const [employees, setEmployees] = useState([]);
   const [showForm, setShowForm] = useState(false);
+  const [showBulkImport, setShowBulkImport] = useState(false);
+  const [bulkData, setBulkData] = useState(null);
+  const [bulkImporting, setBulkImporting] = useState(false);
+  const toast = useToast();
   const [editingEmployee, setEditingEmployee] = useState(null);
   const [search, setSearch] = useState('');
   const [showPhotoCapture, setShowPhotoCapture] = useState(null);
@@ -354,9 +359,14 @@ export default function EmployeesPage() {
     <div className="p-6 max-w-6xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-gray-900">Gestión de Colaboradores</h2>
-        <button onClick={() => openForm()} className="btn-primary flex items-center gap-2">
-          <UserPlus className="w-5 h-5" /> Nuevo Colaborador
-        </button>
+        <div className="flex gap-2">
+          <button onClick={() => setShowBulkImport(true)} className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-200 transition">
+            <Upload className="w-4 h-4" /> Importar CSV
+          </button>
+          <button onClick={() => openForm()} className="btn-primary flex items-center gap-2">
+            <UserPlus className="w-5 h-5" /> Nuevo Colaborador
+          </button>
+        </div>
       </div>
 
       <div className="relative mb-6">
@@ -697,6 +707,195 @@ export default function EmployeesPage() {
           </div>
         </div>
       )}
+
+      {/* Modal Importación CSV Masiva */}
+      {showBulkImport && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+              <div>
+                <h3 className="text-xl font-bold text-gray-900">Importar Colaboradores</h3>
+                <p className="text-sm text-gray-500 mt-1">Sube un archivo CSV o Excel con los datos</p>
+              </div>
+              <button onClick={() => { setShowBulkImport(false); setBulkData(null); }} className="p-2 hover:bg-gray-100 rounded-full">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-6">
+              {!bulkData ? (
+                <div>
+                  {/* Format guide */}
+                  <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
+                    <p className="text-sm font-medium text-blue-800 mb-2">Formato del archivo CSV:</p>
+                    <code className="text-xs text-blue-700 block bg-blue-100 p-3 rounded-lg overflow-x-auto">
+                      Nombre,Apellido,RUT,Email,Departamento,Cargo<br/>
+                      Pablo,Encina,17.339.278-8,pablo@email.cl,Tecnología,Desarrollador<br/>
+                      María,González,12.345.678-9,maria@email.cl,RRHH,Analista
+                    </code>
+                    <p className="text-xs text-blue-600 mt-2">Columnas obligatorias: Nombre y Apellido. Las demás son opcionales.</p>
+                  </div>
+
+                  {/* File input */}
+                  <label className="block w-full border-2 border-dashed border-gray-300 rounded-xl p-10 text-center cursor-pointer hover:border-primary-400 hover:bg-primary-50/30 transition">
+                    <FileSpreadsheet className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                    <p className="text-sm font-medium text-gray-700">Click para seleccionar archivo</p>
+                    <p className="text-xs text-gray-400 mt-1">CSV, separado por comas o punto y coma</p>
+                    <input
+                      type="file"
+                      accept=".csv,.txt"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (!file) return;
+                        const reader = new FileReader();
+                        reader.onload = (ev) => {
+                          const text = ev.target.result;
+                          const parsed = parseCSV(text);
+                          setBulkData(parsed);
+                        };
+                        reader.readAsText(file, 'UTF-8');
+                      }}
+                    />
+                  </label>
+                </div>
+              ) : (
+                <div>
+                  {/* Preview */}
+                  <div className="flex items-center justify-between mb-4">
+                    <p className="text-sm font-medium text-gray-700">
+                      {bulkData.length} colaboradores detectados
+                    </p>
+                    <button onClick={() => setBulkData(null)} className="text-sm text-primary-600 hover:text-primary-700">
+                      Cambiar archivo
+                    </button>
+                  </div>
+
+                  <div className="overflow-x-auto border border-gray-200 rounded-xl">
+                    <table className="w-full text-sm">
+                      <thead className="bg-gray-50">
+                        <tr className="text-left text-xs text-gray-500 uppercase">
+                          <th className="px-3 py-2">#</th>
+                          <th className="px-3 py-2">Nombre</th>
+                          <th className="px-3 py-2">Apellido</th>
+                          <th className="px-3 py-2">RUT</th>
+                          <th className="px-3 py-2">Email</th>
+                          <th className="px-3 py-2">Depto</th>
+                          <th className="px-3 py-2">Cargo</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {bulkData.slice(0, 15).map((row, i) => (
+                          <tr key={i} className="border-t border-gray-100">
+                            <td className="px-3 py-2 text-gray-400">{i + 1}</td>
+                            <td className="px-3 py-2 font-medium">{row.first_name}</td>
+                            <td className="px-3 py-2">{row.last_name}</td>
+                            <td className="px-3 py-2 text-gray-500">{row.rut || '—'}</td>
+                            <td className="px-3 py-2 text-gray-500">{row.email || '—'}</td>
+                            <td className="px-3 py-2 text-gray-500">{row.department || '—'}</td>
+                            <td className="px-3 py-2 text-gray-500">{row.position || '—'}</td>
+                          </tr>
+                        ))}
+                        {bulkData.length > 15 && (
+                          <tr className="border-t border-gray-100">
+                            <td colSpan="7" className="px-3 py-2 text-center text-gray-400 text-xs">
+                              ... y {bulkData.length - 15} más
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            {bulkData && (
+              <div className="p-6 border-t border-gray-100 flex gap-3">
+                <button
+                  onClick={async () => {
+                    setBulkImporting(true);
+                    try {
+                      const slug = window.location.pathname.match(/\/admin\/([^/]+)/)?.[1];
+                      const res = await fetch('/api/employees/bulk', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', ...(slug ? { 'x-tenant-slug': slug } : {}) },
+                        body: JSON.stringify({ employees: bulkData }),
+                      });
+                      const result = await res.json();
+                      if (res.ok) {
+                        toast.success(result.message);
+                        setShowBulkImport(false);
+                        setBulkData(null);
+                        loadEmployees();
+                      } else {
+                        toast.error(result.error || 'Error en la importación');
+                      }
+                    } catch (e) {
+                      toast.error('Error de conexión');
+                    } finally {
+                      setBulkImporting(false);
+                    }
+                  }}
+                  disabled={bulkImporting}
+                  className="flex-1 py-3 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 transition disabled:opacity-50"
+                >
+                  {bulkImporting ? 'Importando...' : `Importar ${bulkData.length} colaboradores`}
+                </button>
+                <button
+                  onClick={() => { setShowBulkImport(false); setBulkData(null); }}
+                  className="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition"
+                >
+                  Cancelar
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
+}
+
+function parseCSV(text) {
+  const lines = text.trim().split(/\r?\n/);
+  if (lines.length < 2) return [];
+
+  // Detect separator
+  const separator = lines[0].includes(';') ? ';' : ',';
+
+  // Parse header
+  const headers = lines[0].split(separator).map(h => h.trim().toLowerCase().replace(/"/g, ''));
+
+  // Map common header names
+  const headerMap = {
+    'nombre': 'first_name', 'first_name': 'first_name', 'nombres': 'first_name', 'name': 'first_name',
+    'apellido': 'last_name', 'last_name': 'last_name', 'apellidos': 'last_name', 'surname': 'last_name',
+    'rut': 'rut', 'documento': 'rut', 'dni': 'rut', 'cedula': 'rut',
+    'email': 'email', 'correo': 'email', 'mail': 'email',
+    'departamento': 'department', 'department': 'department', 'area': 'department', 'depto': 'department',
+    'cargo': 'position', 'position': 'position', 'puesto': 'position', 'rol': 'position',
+  };
+
+  const mappedHeaders = headers.map(h => headerMap[h] || h);
+
+  // Parse rows
+  const data = [];
+  for (let i = 1; i < lines.length; i++) {
+    const values = lines[i].split(separator).map(v => v.trim().replace(/^"|"$/g, ''));
+    if (values.every(v => !v)) continue; // skip empty rows
+
+    const row = {};
+    mappedHeaders.forEach((key, idx) => {
+      if (values[idx]) row[key] = values[idx];
+    });
+
+    // Skip if no name
+    if (!row.first_name && !row.last_name) continue;
+
+    data.push(row);
+  }
+
+  return data;
 }
