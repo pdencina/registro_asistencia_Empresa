@@ -25,7 +25,7 @@ module.exports = async function handler(req, res) {
   try {
     // Employees
     const employees = await sql(
-      `SELECT id, first_name, last_name, rut, email, phone, department, position, 
+      `SELECT id, first_name, last_name, rut, email, department, position, 
               consent_status, active, created_at, updated_at
        FROM employees WHERE tenant_id = $1 ORDER BY last_name, first_name`,
       [tenant.id]
@@ -33,16 +33,13 @@ module.exports = async function handler(req, res) {
 
     // Attendance records
     const records = await sql(
-      `SELECT id, employee_id, type, timestamp, method, notes, photo_snapshot_url, created_at
-       FROM attendance_records WHERE tenant_id = $1 ORDER BY timestamp DESC`,
+      `SELECT id, employee_id, type, timestamp, method, notes
+       FROM attendance_records WHERE tenant_id = $1 ORDER BY timestamp DESC LIMIT 5000`,
       [tenant.id]
     );
 
     // Schedules
-    const schedules = await sql(
-      'SELECT * FROM work_schedules WHERE tenant_id = $1 OR tenant_id IS NULL ORDER BY name',
-      [tenant.id]
-    ).catch(() => []);
+    const schedules = await sql('SELECT * FROM work_schedules ORDER BY name').catch(() => []);
 
     // Employee schedule assignments
     const assignments = await sql(
