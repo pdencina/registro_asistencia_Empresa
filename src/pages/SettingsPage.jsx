@@ -280,6 +280,43 @@ export default function SettingsPage() {
         </div>
 
         <div className="space-y-5">
+          {/* Toggle alertas */}
+          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+            <div className="flex items-center gap-3">
+              <Bell className={`w-5 h-5 ${settings.alerts_enabled !== false ? 'text-primary-600' : 'text-gray-400'}`} />
+              <div>
+                <p className="font-medium text-gray-900">Alertas diarias de ausentes</p>
+                <p className="text-sm text-gray-500">
+                  {settings.alerts_enabled !== false
+                    ? 'Recibirás un correo cuando haya ausencias sin justificar'
+                    : 'Las alertas de ausencia están desactivadas'}
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={async () => {
+                const newValue = !(settings.alerts_enabled !== false);
+                const slug = getTenantSlug();
+                const res = await fetch('/api/settings', {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'application/json', ...(slug ? { 'x-tenant-slug': slug } : {}) },
+                  body: JSON.stringify({ alerts_enabled: newValue }),
+                });
+                if (res.ok) {
+                  setSettings({ ...settings, alerts_enabled: newValue });
+                  toast.success(newValue ? 'Alertas activadas' : 'Alertas desactivadas');
+                }
+              }}
+              className="relative"
+            >
+              {settings.alerts_enabled !== false ? (
+                <ToggleRight className="w-10 h-10 text-primary-600" />
+              ) : (
+                <ToggleLeft className="w-10 h-10 text-gray-400" />
+              )}
+            </button>
+          </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Email de alertas</label>
             <p className="text-xs text-gray-500 mb-2">Recibirás alertas diarias de ausentes y atrasos en este correo</p>

@@ -29,6 +29,16 @@ module.exports = async function handler(req, res) {
     const results = [];
 
     for (const t of tenants) {
+      // Check if alerts are enabled for this tenant
+      let alertsEnabled = true;
+      try {
+        const [settings] = await sql('SELECT alerts_enabled, notification_email FROM tenant_settings WHERE tenant_id = $1', [t.id]);
+        if (settings && settings.alerts_enabled === false) alertsEnabled = false;
+        if (settings && settings.notification_email) t.admin_email = settings.notification_email;
+      } catch (e) {}
+
+      if (!alertsEnabled) continue;
+
       // Get all active employees for this tenant
       const allEmployees = await sql(
         'SELECT id, first_name, last_name, department, email FROM employees WHERE tenant_id = $1 AND active = true',

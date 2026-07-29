@@ -32,6 +32,7 @@ module.exports = async function handler(req, res) {
         biometric_consent_required: settings.biometric_consent_required,
         notification_email: settings.notification_email,
         alert_tolerance_minutes: settings.alert_tolerance_minutes || 15,
+        alerts_enabled: settings.alerts_enabled !== false,
         webhook_url: settings.webhook_url,
         timezone: settings.timezone,
       });
@@ -39,13 +40,14 @@ module.exports = async function handler(req, res) {
 
     // PUT: Update settings for this tenant
     if (req.method === 'PUT') {
-      const { geolocation_enabled, geolocation_radius_meters, biometric_consent_required, notification_email, webhook_url, alert_tolerance_minutes } = req.body;
+      const { geolocation_enabled, geolocation_radius_meters, biometric_consent_required, notification_email, webhook_url, alert_tolerance_minutes, alerts_enabled } = req.body;
 
       await sql('ALTER TABLE tenant_settings ADD COLUMN IF NOT EXISTS alert_tolerance_minutes INTEGER DEFAULT 15');
+      await sql('ALTER TABLE tenant_settings ADD COLUMN IF NOT EXISTS alerts_enabled BOOLEAN DEFAULT true');
 
       await sql(`
-        INSERT INTO tenant_settings (tenant_id, geolocation_enabled, geolocation_radius_meters, biometric_consent_required, notification_email, webhook_url, alert_tolerance_minutes, updated_at)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
+        INSERT INTO tenant_settings (tenant_id, geolocation_enabled, geolocation_radius_meters, biometric_consent_required, notification_email, webhook_url, alert_tolerance_minutes, alerts_enabled, updated_at)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())
         ON CONFLICT (tenant_id) DO UPDATE SET
           geolocation_enabled = COALESCE($2, tenant_settings.geolocation_enabled),
           geolocation_radius_meters = COALESCE($3, tenant_settings.geolocation_radius_meters),
@@ -53,6 +55,7 @@ module.exports = async function handler(req, res) {
           notification_email = COALESCE($5, tenant_settings.notification_email),
           webhook_url = COALESCE($6, tenant_settings.webhook_url),
           alert_tolerance_minutes = COALESCE($7, tenant_settings.alert_tolerance_minutes),
+          alerts_enabled = COALESCE($8, tenant_settings.alerts_enabled),
           updated_at = NOW()
       `, [
         tenant.id,
@@ -61,7 +64,8 @@ module.exports = async function handler(req, res) {
         biometric_consent_required !== undefined ? biometric_consent_required : true,
         notification_email || null,
         webhook_url || null,
-        alert_tolerance_minutes || 15
+        alert_tolerance_minutes || 15,
+        alerts_enabled !== undefined ? alerts_enabled : true
       ]);
 
       return res.status(200).json({ message: 'Configuración guardada' });
