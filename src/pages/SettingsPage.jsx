@@ -181,197 +181,151 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">Configuración</h2>
+    <div className="p-4 sm:p-6 max-w-4xl mx-auto">
+      <h2 className="text-2xl font-bold text-gray-900 mb-8">Configuración</h2>
 
-      {/* Logo de empresa */}
-      <div className="card mb-6">
-        <div className="flex items-center gap-3 mb-6">
-          <Building2 className="w-5 h-5 text-primary-600" />
-          <h3 className="font-bold text-gray-900">Logo de la Empresa</h3>
-        </div>
+      {/* Grid layout for settings cards */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-        <div className="flex items-center gap-6">
-          {/* Preview */}
-          <div className="w-24 h-24 rounded-xl border-2 border-dashed border-gray-200 flex items-center justify-center overflow-hidden bg-gray-50 shrink-0">
-            {logoUrl ? (
-              <img src={logoUrl} alt="Logo empresa" className="w-full h-full object-contain p-2" />
-            ) : (
-              <Building2 className="w-10 h-10 text-gray-300" />
-            )}
+        {/* Logo de empresa */}
+        <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-9 h-9 bg-primary-50 rounded-lg flex items-center justify-center">
+              <Building2 className="w-5 h-5 text-primary-600" />
+            </div>
+            <h3 className="font-bold text-gray-900">Logo de la Empresa</h3>
           </div>
 
-          {/* Actions */}
-          <div className="flex-1">
-            <p className="text-sm text-gray-500 mb-3">
-              Este logo se mostrará a tus colaboradores cuando registren su asistencia.
-            </p>
-            <div className="flex items-center gap-2">
-              <input
-                ref={logoInputRef}
-                type="file"
-                accept="image/png,image/jpeg,image/svg+xml,image/webp"
-                onChange={handleLogoUpload}
-                className="hidden"
-              />
-              <button
-                onClick={() => logoInputRef.current?.click()}
-                disabled={uploadingLogo}
-                className="flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-xl text-sm font-medium transition-all disabled:opacity-50"
-              >
-                <Upload className="w-4 h-4" />
-                {uploadingLogo ? 'Subiendo...' : logoUrl ? 'Cambiar Logo' : 'Subir Logo'}
-              </button>
-              {logoUrl && (
-                <button
-                  onClick={handleLogoDelete}
-                  disabled={uploadingLogo}
-                  className="flex items-center gap-2 px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl text-sm font-medium transition-all disabled:opacity-50"
-                >
-                  <Trash2 className="w-4 h-4" />
-                  Eliminar
-                </button>
+          <div className="flex items-center gap-5">
+            <div className="w-20 h-20 rounded-xl border-2 border-dashed border-gray-200 flex items-center justify-center overflow-hidden bg-gray-50 shrink-0">
+              {logoUrl ? (
+                <img src={logoUrl} alt="Logo" className="w-full h-full object-contain p-2" />
+              ) : (
+                <Building2 className="w-8 h-8 text-gray-300" />
               )}
             </div>
-            <p className="text-xs text-gray-400 mt-2">PNG, JPG, SVG o WebP. Máximo 2 MB.</p>
+            <div className="flex-1">
+              <p className="text-sm text-gray-500 mb-3">Se muestra al registrar asistencia.</p>
+              <div className="flex items-center gap-2">
+                <input ref={logoInputRef} type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp" onChange={handleLogoUpload} className="hidden" />
+                <button onClick={() => logoInputRef.current?.click()} disabled={uploadingLogo}
+                  className="flex items-center gap-2 px-3 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-xs font-medium transition disabled:opacity-50">
+                  <Upload className="w-3.5 h-3.5" />
+                  {uploadingLogo ? 'Subiendo...' : logoUrl ? 'Cambiar' : 'Subir Logo'}
+                </button>
+                {logoUrl && (
+                  <button onClick={handleLogoDelete} disabled={uploadingLogo}
+                    className="flex items-center gap-1 px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg text-xs font-medium transition">
+                    <Trash2 className="w-3.5 h-3.5" /> Eliminar
+                  </button>
+                )}
+              </div>
+              <p className="text-[11px] text-gray-400 mt-2">PNG, JPG, SVG, WebP · Máx 2 MB</p>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="card">
-        <div className="flex items-center gap-3 mb-6">
-          <Shield className="w-5 h-5 text-primary-600" />
-          <h3 className="font-bold text-gray-900">Seguridad del Punto de Registro</h3>
+        {/* Seguridad */}
+        <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-9 h-9 bg-emerald-50 rounded-lg flex items-center justify-center">
+              <Shield className="w-5 h-5 text-emerald-600" />
+            </div>
+            <h3 className="font-bold text-gray-900">Seguridad</h3>
+          </div>
+
+          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+            <div className="flex items-center gap-3">
+              <MapPin className={`w-5 h-5 ${settings.geolocation_enabled ? 'text-emerald-600' : 'text-gray-400'}`} />
+              <div>
+                <p className="font-medium text-gray-900 text-sm">Geolocalización</p>
+                <p className="text-xs text-gray-500">
+                  {settings.geolocation_enabled ? 'Solo desde ubicación autorizada (200m)' : 'Marcaje desde cualquier lugar'}
+                </p>
+              </div>
+            </div>
+            <button onClick={toggleGeolocation} disabled={saving} className="shrink-0">
+              {settings.geolocation_enabled ? <ToggleRight className="w-9 h-9 text-emerald-600" /> : <ToggleLeft className="w-9 h-9 text-gray-400" />}
+            </button>
+          </div>
         </div>
 
-        {/* Geolocation toggle */}
-        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl mb-3">
+      </div>
+
+      {/* Notificaciones — Full width */}
+      <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm mt-6">
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-9 h-9 bg-amber-50 rounded-lg flex items-center justify-center">
+            <Bell className="w-5 h-5 text-amber-600" />
+          </div>
+          <h3 className="font-bold text-gray-900">Notificaciones y Alertas</h3>
+        </div>
+
+        {/* Toggle */}
+        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl mb-5">
           <div className="flex items-center gap-3">
-            <MapPin className={`w-5 h-5 ${settings.geolocation_enabled ? 'text-emerald-600' : 'text-gray-400'}`} />
+            <Bell className={`w-5 h-5 ${settings.alerts_enabled !== false ? 'text-amber-600' : 'text-gray-400'}`} />
             <div>
-              <p className="font-medium text-gray-900">Verificación por Geolocalización</p>
-              <p className="text-sm text-gray-500">
-                {settings.geolocation_enabled
-                  ? 'El punto de registro solo funciona desde la ubicación autorizada (200m)'
-                  : 'El punto de registro funciona desde cualquier ubicación'
-                }
+              <p className="font-medium text-gray-900 text-sm">Alertas diarias de ausentes</p>
+              <p className="text-xs text-gray-500">
+                {settings.alerts_enabled !== false ? 'Correo cuando haya ausencias sin justificar' : 'Desactivadas'}
               </p>
             </div>
           </div>
           <button
-            onClick={toggleGeolocation}
-            disabled={saving}
+            onClick={async () => {
+              const newValue = !(settings.alerts_enabled !== false);
+              const slug = getTenantSlug();
+              const res = await fetch('/api/settings', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', ...(slug ? { 'x-tenant-slug': slug } : {}) },
+                body: JSON.stringify({ alerts_enabled: newValue }),
+              });
+              if (res.ok) {
+                setSettings({ ...settings, alerts_enabled: newValue });
+                toast.success(newValue ? 'Alertas activadas' : 'Alertas desactivadas');
+              }
+            }}
             className="shrink-0"
           >
-            {settings.geolocation_enabled ? (
-              <ToggleRight className="w-10 h-10 text-emerald-600" />
-            ) : (
-              <ToggleLeft className="w-10 h-10 text-gray-400" />
-            )}
+            {settings.alerts_enabled !== false ? <ToggleRight className="w-9 h-9 text-amber-600" /> : <ToggleLeft className="w-9 h-9 text-gray-400" />}
           </button>
         </div>
-      </div>
 
-      {/* Notificaciones y Alertas */}
-      <div className="card mt-6">
-        <div className="flex items-center gap-3 mb-6">
-          <Bell className="w-5 h-5 text-primary-600" />
-          <h3 className="font-bold text-gray-900">Notificaciones y Alertas</h3>
-        </div>
-
-        <div className="space-y-5">
-          {/* Toggle alertas */}
-          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-            <div className="flex items-center gap-3">
-              <Bell className={`w-5 h-5 ${settings.alerts_enabled !== false ? 'text-primary-600' : 'text-gray-400'}`} />
-              <div>
-                <p className="font-medium text-gray-900">Alertas diarias de ausentes</p>
-                <p className="text-sm text-gray-500">
-                  {settings.alerts_enabled !== false
-                    ? 'Recibirás un correo cuando haya ausencias sin justificar'
-                    : 'Las alertas de ausencia están desactivadas'}
-                </p>
-              </div>
-            </div>
-            <button
-              onClick={async () => {
-                const newValue = !(settings.alerts_enabled !== false);
-                const slug = getTenantSlug();
-                const res = await fetch('/api/settings', {
-                  method: 'PUT',
-                  headers: { 'Content-Type': 'application/json', ...(slug ? { 'x-tenant-slug': slug } : {}) },
-                  body: JSON.stringify({ alerts_enabled: newValue }),
-                });
-                if (res.ok) {
-                  setSettings({ ...settings, alerts_enabled: newValue });
-                  toast.success(newValue ? 'Alertas activadas' : 'Alertas desactivadas');
-                }
-              }}
-              className="relative"
-            >
-              {settings.alerts_enabled !== false ? (
-                <ToggleRight className="w-10 h-10 text-primary-600" />
-              ) : (
-                <ToggleLeft className="w-10 h-10 text-gray-400" />
-              )}
-            </button>
-          </div>
-
+        {/* Email + Tolerance in grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email de alertas</label>
-            <p className="text-xs text-gray-500 mb-2">Recibirás alertas diarias de ausentes y atrasos en este correo</p>
+            <label className="block text-xs font-semibold text-gray-600 mb-1.5">Email de alertas</label>
             <div className="flex gap-2">
-              <input
-                type="email"
-                value={settings.notification_email || ''}
+              <input type="email" value={settings.notification_email || ''}
                 onChange={e => setSettings({ ...settings, notification_email: e.target.value })}
                 placeholder="admin@empresa.cl"
-                className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 outline-none"
-              />
-              <button
-                onClick={async () => {
-                  const slug = getTenantSlug();
-                  const res = await fetch('/api/settings', {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json', ...(slug ? { 'x-tenant-slug': slug } : {}) },
-                    body: JSON.stringify({ notification_email: settings.notification_email }),
-                  });
-                  if (res.ok) showMessage('Email de alertas guardado');
-                  else showMessage('Error al guardar');
-                }}
-                className="px-4 py-2.5 bg-primary-600 text-white rounded-xl text-sm font-medium hover:bg-primary-700 transition"
-              >
+                className="flex-1 px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none" />
+              <button onClick={async () => {
+                const slug = getTenantSlug();
+                const res = await fetch('/api/settings', { method: 'PUT',
+                  headers: { 'Content-Type': 'application/json', ...(slug ? { 'x-tenant-slug': slug } : {}) },
+                  body: JSON.stringify({ notification_email: settings.notification_email }) });
+                if (res.ok) toast.success('Email guardado');
+              }} className="px-3 py-2.5 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 transition">
                 Guardar
               </button>
             </div>
           </div>
-
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Tolerancia de alerta (minutos)</label>
-            <p className="text-xs text-gray-500 mb-2">Minutos después de la hora de entrada para considerar un atraso en las alertas</p>
+            <label className="block text-xs font-semibold text-gray-600 mb-1.5">Tolerancia de atraso</label>
             <div className="flex gap-2 items-center">
-              <input
-                type="number"
-                min="5"
-                max="60"
-                value={settings.alert_tolerance_minutes || 15}
+              <input type="number" min="5" max="60" value={settings.alert_tolerance_minutes || 15}
                 onChange={e => setSettings({ ...settings, alert_tolerance_minutes: parseInt(e.target.value) || 15 })}
-                className="w-24 px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 outline-none"
-              />
-              <span className="text-sm text-gray-500">minutos</span>
-              <button
-                onClick={async () => {
-                  const slug = getTenantSlug();
-                  const res = await fetch('/api/settings', {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json', ...(slug ? { 'x-tenant-slug': slug } : {}) },
-                    body: JSON.stringify({ alert_tolerance_minutes: settings.alert_tolerance_minutes }),
-                  });
-                  if (res.ok) showMessage('Tolerancia actualizada');
-                  else showMessage('Error al guardar');
-                }}
-                className="px-4 py-2.5 bg-primary-600 text-white rounded-xl text-sm font-medium hover:bg-primary-700 transition"
-              >
+                className="w-20 px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none" />
+              <span className="text-xs text-gray-500">min</span>
+              <button onClick={async () => {
+                const slug = getTenantSlug();
+                const res = await fetch('/api/settings', { method: 'PUT',
+                  headers: { 'Content-Type': 'application/json', ...(slug ? { 'x-tenant-slug': slug } : {}) },
+                  body: JSON.stringify({ alert_tolerance_minutes: settings.alert_tolerance_minutes }) });
+                if (res.ok) toast.success('Tolerancia actualizada');
+              }} className="px-3 py-2.5 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 transition">
                 Guardar
               </button>
             </div>
