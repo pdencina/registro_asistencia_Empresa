@@ -180,63 +180,63 @@ export default function LandingPage() {
   const features = [
     {
       icon: <Camera className="w-6 h-6" />,
-      title: 'Reconocimiento Facial',
-      description: 'Registro de asistencia mediante IA facial. Sin contacto, sin tarjetas, sin fraudes.',
+      title: 'Reconocimiento Facial sin Hardware',
+      description: 'Registro con IA facial en 2 segundos. Funciona con cualquier tablet o celular. Sin comprar relojes.',
     },
     {
       icon: <Smartphone className="w-6 h-6" />,
       title: 'Marcaje Móvil con GPS',
-      description: 'Tu equipo en terreno marca desde su celular con selfie y geolocalización verificada.',
+      description: 'Tu equipo en terreno marca desde su celular con selfie, geolocalización exacta (Google Maps) y validación facial.',
     },
     {
       icon: <BarChart3 className="w-6 h-6" />,
-      title: 'Dashboard Interactivo',
-      description: 'KPIs en tiempo real, gráficos de tendencia, ranking de atrasos y sugerencias automáticas del sistema.',
+      title: 'Dashboard en Tiempo Real',
+      description: 'KPIs al instante: presentes, ausentes, atrasos. Drill-down por departamento, sugerencias automáticas.',
     },
     {
       icon: <MapPin className="w-6 h-6" />,
-      title: 'Geolocalización Verificada',
-      description: 'Dirección real en cada marcaje. Restricción por radio de proximidad configurable.',
+      title: 'Geolocalización con Dirección',
+      description: 'Cada marcaje registra la dirección exacta (ej: "Asturias 271, Las Condes"). Restricción por radio configurable.',
     },
     {
       icon: <Clock className="w-6 h-6" />,
-      title: 'Horas Extra Inteligentes',
-      description: 'Solo cuenta tiempo post-horario (llegar temprano no suma HE). Bono de puntualidad automático.',
+      title: 'Horas Extra con Tarificación',
+      description: 'Cálculo automático con recargo 50% día hábil y 100% domingo/feriado. Reporte de costo listo para el contador.',
     },
     {
       icon: <Users className="w-6 h-6" />,
-      title: 'Turnos Rotativos',
-      description: 'Jornada partida, turnos 4x4, 7x7 y custom. Se adapta a cualquier industria.',
+      title: 'Multi-turnos y Horarios Flexibles',
+      description: 'Turnos rotativos, jornada partida, tolerancias diferenciadas por grupo. Soporte para 130+ horarios distintos.',
     },
     {
       icon: <Shield className="w-6 h-6" />,
-      title: 'Consentimiento Biométrico',
-      description: 'Cumple Ley 21.719. Cada trabajador autoriza el uso de su dato facial desde su email.',
+      title: 'Cartas de Amonestación',
+      description: 'Generación automática al acumular atrasos. Formato legal válido ante la DT. 3 cartas = causal de despido.',
     },
     {
       icon: <CheckCircle className="w-6 h-6" />,
-      title: 'Alertas Automáticas',
-      description: 'Email al administrador a las 9:15 AM si alguien no ha marcado. Sin intervención manual.',
+      title: 'Alertas y Notificaciones',
+      description: 'Email al admin cuando hay ausentes. Notificación al trabajador en cada marca y si corrigen su registro.',
     },
     {
       icon: <Clock className="w-6 h-6" />,
-      title: 'Vacaciones y Permisos',
-      description: 'Solicitudes online, aprobación con un click, saldo de días por ley (15 días/año).',
+      title: 'Reporte de Remuneraciones',
+      description: 'Días remunerados, no remunerados, HE desglosadas, licencias. Excel listo para el contador en 1 click.',
     },
     {
       icon: <Smartphone className="w-6 h-6" />,
-      title: 'Calendario Visual',
-      description: 'Vista mensual color-coded por colaborador. Verde presente, rojo ausente, amarillo tarde.',
+      title: 'Justificativos Retroactivos',
+      description: 'El admin justifica ausencias o atrasos sin alterar la hora de fichada. 10 tipos de justificativo.',
     },
     {
       icon: <BarChart3 className="w-6 h-6" />,
-      title: 'Libro de Asistencia DT',
-      description: 'Exporta en un click el formato que la Dirección del Trabajo exige en fiscalizaciones.',
+      title: 'Libro DT + 9 Reportes Excel',
+      description: 'Libro de asistencia para fiscalizaciones, consolidado por departamento, eventos con GPS, bono de puntualidad.',
     },
     {
       icon: <Shield className="w-6 h-6" />,
-      title: 'Roles y Permisos',
-      description: 'Admin, Supervisor, RRHH. Cada perfil ve lo que corresponde. Control de acceso granular.',
+      title: 'Compliance y Seguridad',
+      description: 'Ley 21.719, firma electrónica (Ley 19.799), encriptación AES-256, audit log, roles granulares, backup exportable.',
     },
   ];
 
@@ -670,7 +670,7 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="border-t border-gray-800 pt-8 text-center text-sm">
-            <p>&copy; {new Date().getFullYear()} Flexio SpA. Todos los derechos reservados.</p>
+            <p>&copy; {new Date().getFullYear()} Flexio Technologies SpA. Todos los derechos reservados.</p>
           </div>
         </div>
       </footer>
