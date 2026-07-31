@@ -5,8 +5,10 @@ import { ToastProvider } from './components/Toast';
 import InstallPrompt from './components/InstallPrompt';
 import AdminLayout from './layouts/AdminLayout';
 import AdminLoginPage from './pages/AdminLoginPage';
-import LandingPage from './pages/LandingPage';
 import LoginRedirectPage from './pages/LoginRedirectPage';
+
+// Lazy-loaded pages with motion library (heavy)
+const LandingPage = lazy(() => import('./pages/LandingPage'));
 import NoTenantPage from './pages/NoTenantPage';
 import PinCheckInPage from './pages/PinCheckInPage';
 import UniversalCheckInPage from './pages/UniversalCheckInPage';
@@ -44,7 +46,7 @@ function App() {
       <InstallPrompt />
       <Routes>
         {/* Landing page comercial */}
-        <Route path="/" element={<LandingPage />} />
+        <Route path="/" element={<Suspense fallback={<LoadingPage />}><LandingPage /></Suspense>} />
 
         {/* Login: buscar empresa por email */}
         <Route path="/login" element={<LoginRedirectPage />} />

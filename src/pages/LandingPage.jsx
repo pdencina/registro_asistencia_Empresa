@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import { motion, useInView } from 'motion/react';
 import { Shield, Users, Clock, MapPin, Camera, BarChart3, Smartphone, CheckCircle, ArrowRight, Menu, X } from 'lucide-react';
 
 export default function LandingPage() {
@@ -289,7 +290,11 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             {/* Left — Text */}
-            <div>
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, ease: 'easeOut' }}
+            >
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-gray-900 leading-[1.1] tracking-tight">
                 Tu equipo{' '}
                 <span className="text-primary-600">marca</span>,{' '}
@@ -314,10 +319,15 @@ export default function LandingPage() {
                 </a>
               </div>
               <p className="mt-4 text-sm text-gray-400">15 días gratis · Sin tarjeta de crédito</p>
-            </div>
+            </motion.div>
 
             {/* Right — Dashboard Mockup */}
-            <div className="relative">
+            <motion.div
+              className="relative"
+              initial={{ opacity: 0, x: 40 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.3, ease: 'easeOut' }}
+            >
               <div className="bg-primary-50 rounded-3xl p-4 lg:p-5">
                 <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
                   {/* Browser dots */}
@@ -430,7 +440,7 @@ export default function LandingPage() {
                 <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
                 <span className="text-xs text-gray-700 font-medium">En vivo · 69 colaboradores</span>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
@@ -448,13 +458,21 @@ export default function LandingPage() {
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {features.map((feature, i) => (
-              <div key={i} className="p-6 rounded-2xl border border-gray-100 hover:border-primary-200 hover:shadow-lg transition-all">
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-50px' }}
+                transition={{ duration: 0.5, delay: i * 0.08 }}
+                whileHover={{ y: -4, boxShadow: '0 12px 40px -12px rgba(37, 99, 235, 0.15)' }}
+                className="p-6 rounded-2xl border border-gray-100 transition-all"
+              >
                 <div className="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center text-primary-600 mb-4">
                   {feature.icon}
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">{feature.title}</h3>
                 <p className="text-gray-500 text-sm leading-relaxed">{feature.description}</p>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -464,9 +482,15 @@ export default function LandingPage() {
       <section className="py-20 bg-gray-50 px-4 sm:px-6 lg:px-8">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4"
+            >
               Implementación en minutos
-            </h2>
+            </motion.h2>
             <p className="text-lg text-gray-500">3 pasos para tener tu sistema funcionando</p>
           </div>
           <div className="grid md:grid-cols-3 gap-8">
@@ -475,13 +499,20 @@ export default function LandingPage() {
               { step: '2', title: 'Registra colaboradores', desc: 'Sube la foto de cada colaborador para el reconocimiento facial.' },
               { step: '3', title: 'Configura el dispositivo', desc: 'Autoriza una tablet o celular con cámara. Listo para marcar.' },
             ].map((item, i) => (
-              <div key={i} className="text-center">
+              <motion.div
+                key={i}
+                className="text-center"
+                initial={{ opacity: 0, scale: 0.8 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: i * 0.15 }}
+              >
                 <div className="w-14 h-14 bg-primary-600 text-white rounded-2xl flex items-center justify-center mx-auto mb-4 text-xl font-bold">
                   {item.step}
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">{item.title}</h3>
                 <p className="text-gray-500 text-sm">{item.desc}</p>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>

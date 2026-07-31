@@ -16,6 +16,7 @@
     "@vercel/blob": "^0.27.0",
     "face-api.js": "^0.22.2",
     "lucide-react": "^0.460.0",
+    "motion": "^12.43.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.28.0",
