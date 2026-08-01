@@ -182,62 +182,62 @@ export default function LandingPage() {
     {
       icon: <Camera className="w-6 h-6" />,
       title: 'Reconocimiento Facial sin Hardware',
-      description: 'Registro con IA facial en 2 segundos. Funciona con cualquier tablet o celular. Sin comprar relojes.',
+      description: <>Registro con IA facial en 2 segundos. Funciona con cualquier tablet o celular. <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-50 text-emerald-700 text-xs font-semibold rounded-full border border-emerald-200">Sin comprar relojes</span></>,
     },
     {
       icon: <Smartphone className="w-6 h-6" />,
       title: 'Marcaje Móvil con GPS',
-      description: 'Tu equipo en terreno marca desde su celular con selfie, geolocalización exacta (Google Maps) y validación facial.',
+      description: <>Tu equipo en terreno marca desde su celular con selfie y validación facial. <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 text-blue-700 text-xs font-semibold rounded-full border border-blue-200"><img src="https://www.gstatic.com/images/branding/product/1x/maps_2020q4_48dp.png" alt="" className="w-3.5 h-3.5" />Google Maps</span></>,
     },
     {
       icon: <BarChart3 className="w-6 h-6" />,
       title: 'Dashboard en Tiempo Real',
-      description: 'KPIs al instante: presentes, ausentes, atrasos. Drill-down por departamento, sugerencias automáticas.',
+      description: <>KPIs al instante: presentes, ausentes, atrasos. Drill-down por departamento. <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-purple-50 text-purple-700 text-xs font-semibold rounded-full border border-purple-200">Sugerencias IA</span></>,
     },
     {
       icon: <MapPin className="w-6 h-6" />,
       title: 'Geolocalización con Dirección',
-      description: 'Cada marcaje registra la dirección exacta (ej: "Asturias 271, Las Condes"). Restricción por radio configurable.',
+      description: <>Cada marcaje registra la dirección exacta (ej: "Asturias 271, Las Condes"). <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 text-blue-700 text-xs font-semibold rounded-full border border-blue-200"><img src="https://www.gstatic.com/images/branding/product/1x/maps_2020q4_48dp.png" alt="" className="w-3.5 h-3.5" />Google Maps API</span></>,
     },
     {
       icon: <Clock className="w-6 h-6" />,
       title: 'Horas Extra con Tarificación',
-      description: 'Cálculo automático con recargo 50% día hábil y 100% domingo/feriado. Reporte de costo listo para el contador.',
+      description: <>Cálculo automático con recargo legal. Reporte de costo listo para el contador. <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-orange-50 text-orange-700 text-xs font-semibold rounded-full border border-orange-200">50% hábil · 100% feriado</span></>,
     },
     {
       icon: <Users className="w-6 h-6" />,
       title: 'Multi-turnos y Horarios Flexibles',
-      description: 'Turnos rotativos, jornada partida, tolerancias diferenciadas por grupo. Soporte para 130+ horarios distintos.',
+      description: <>Turnos rotativos, jornada partida, tolerancias diferenciadas por grupo. <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-indigo-50 text-indigo-700 text-xs font-semibold rounded-full border border-indigo-200">130+ horarios</span></>,
     },
     {
       icon: <Shield className="w-6 h-6" />,
       title: 'Cartas de Amonestación',
-      description: 'Generación automática al acumular atrasos. Formato legal válido ante la DT. 3 cartas = causal de despido.',
+      description: <>Generación automática al acumular atrasos. Formato legal válido. <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-red-50 text-red-700 text-xs font-semibold rounded-full border border-red-200">Art. 160 N°7 · Causal despido</span></>,
     },
     {
       icon: <CheckCircle className="w-6 h-6" />,
       title: 'Alertas y Notificaciones',
-      description: 'Email al admin cuando hay ausentes. Notificación al trabajador en cada marca y si corrigen su registro.',
+      description: <>Email al admin cuando hay ausentes. Notificación al trabajador en cada marca. <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-50 text-amber-700 text-xs font-semibold rounded-full border border-amber-200">Configurable on/off</span></>,
     },
     {
       icon: <Clock className="w-6 h-6" />,
       title: 'Reporte de Remuneraciones',
-      description: 'Días remunerados, no remunerados, HE desglosadas, licencias. Excel listo para el contador en 1 click.',
+      description: <>Días remunerados, no remunerados, HE desglosadas, licencias. <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-50 text-emerald-700 text-xs font-semibold rounded-full border border-emerald-200">Excel en 1 click</span></>,
     },
     {
       icon: <Smartphone className="w-6 h-6" />,
       title: 'Justificativos Retroactivos',
-      description: 'El admin justifica ausencias o atrasos sin alterar la hora de fichada. 10 tipos de justificativo.',
+      description: <>El admin justifica ausencias o atrasos sin alterar la hora de fichada. <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-cyan-50 text-cyan-700 text-xs font-semibold rounded-full border border-cyan-200">10 tipos</span></>,
     },
     {
       icon: <BarChart3 className="w-6 h-6" />,
       title: 'Libro DT + 9 Reportes Excel',
-      description: 'Libro de asistencia para fiscalizaciones, consolidado por departamento, eventos con GPS, bono de puntualidad.',
+      description: <>Libro de asistencia para fiscalizaciones, consolidado por departamento, eventos con GPS. <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 text-gray-700 text-xs font-semibold rounded-full border border-gray-200">Dirección del Trabajo</span></>,
     },
     {
       icon: <Shield className="w-6 h-6" />,
       title: 'Compliance y Seguridad',
-      description: 'Ley 21.719, firma electrónica (Ley 19.799), encriptación AES-256, audit log, roles granulares, backup exportable.',
+      description: <>Firma electrónica, encriptación AES-256, audit log, roles granulares, backup exportable. <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-violet-50 text-violet-700 text-xs font-semibold rounded-full border border-violet-200">Ley 21.719 · Ley 19.799</span></>,
     },
   ];
 
