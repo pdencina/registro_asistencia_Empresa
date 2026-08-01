@@ -421,11 +421,17 @@ export default function LandingPage() {
                         {[62, 68, 72, 78, 74, 82, 85, 80, 88, 85, 92, 96].map((v, i) => (
                           <motion.div
                             key={i}
-                            className={`flex-1 rounded-t-sm ${v >= 85 ? 'bg-emerald-400' : v >= 70 ? 'bg-amber-300' : 'bg-red-300'}`}
-                            initial={{ height: 0 }}
-                            animate={{ height: `${v}%` }}
-                            transition={{ duration: 0.8, delay: 1.8 + i * 0.08, ease: 'easeOut' }}
-                            whileHover={{ scaleY: 1.1 }}
+                            className={`flex-1 rounded-t-sm origin-bottom ${v >= 85 ? 'bg-emerald-400' : v >= 70 ? 'bg-amber-300' : 'bg-red-300'}`}
+                            style={{ height: `${v}%` }}
+                            animate={{
+                              scaleY: [1, 0.85 + Math.random() * 0.3, 1, 0.9 + Math.random() * 0.2, 1],
+                            }}
+                            transition={{
+                              duration: 3 + Math.random() * 2,
+                              repeat: Infinity,
+                              delay: i * 0.3,
+                              ease: 'easeInOut',
+                            }}
                           />
                         ))}
                       </div>
