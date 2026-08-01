@@ -249,7 +249,13 @@ export default function LandingPage() {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-8">
               <div className="flex items-center gap-2">
-                <img src="/logo-flexio.svg" alt="Flexio" className="h-7" />
+                <motion.img
+                  src="/logo-flexio.svg"
+                  alt="Flexio"
+                  className="h-7"
+                  animate={{ rotate: [0, 0, 360] }}
+                  transition={{ duration: 3, repeat: Infinity, repeatDelay: 8, ease: 'easeInOut' }}
+                />
                 <span className="font-bold text-gray-900 text-lg">Flexio</span>
               </div>
               <div className="hidden md:flex items-center gap-6">
@@ -296,16 +302,54 @@ export default function LandingPage() {
               transition={{ duration: 0.7, ease: 'easeOut' }}
             >
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-gray-900 leading-[1.1] tracking-tight">
-                Tu equipo{' '}
-                <span className="text-primary-600">marca</span>,{' '}
+                <motion.span
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.1 }}
+                >Tu equipo </motion.span>
+                <motion.span
+                  className="text-primary-600 inline-block"
+                  initial={{ opacity: 0, scale: 0.8, rotateX: 40 }}
+                  animate={{ opacity: 1, scale: 1, rotateX: 0 }}
+                  transition={{ duration: 0.6, delay: 0.4, type: 'spring', stiffness: 100 }}
+                >marca</motion.span>
+                <motion.span
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.6 }}
+                >,{' '}</motion.span>
                 <br className="hidden sm:block" />
-                tú{' '}
-                <span className="text-primary-600">decides</span>.
+                <motion.span
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.7 }}
+                >tú </motion.span>
+                <motion.span
+                  className="text-primary-600 inline-block"
+                  initial={{ opacity: 0, scale: 0.8, rotateX: 40 }}
+                  animate={{ opacity: 1, scale: 1, rotateX: 0 }}
+                  transition={{ duration: 0.6, delay: 1.0, type: 'spring', stiffness: 100 }}
+                >decides</motion.span>
+                <motion.span
+                  initial={{ opacity: 0, scale: 0 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 1.3, type: 'spring', stiffness: 200 }}
+                >.</motion.span>
               </h1>
-              <p className="mt-6 text-lg text-gray-500 leading-relaxed max-w-lg">
+              <motion.p
+                className="mt-6 text-lg text-gray-500 leading-relaxed max-w-lg"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 1.4 }}
+              >
                 Control de asistencia con reconocimiento facial. Sin fraude, sin tarjetas, sin contacto. Reportes inteligentes que te dicen quién premiar y quién necesita atención.
-              </p>
-              <div className="mt-8 flex flex-col sm:flex-row gap-3">
+              </motion.p>
+              <motion.div
+                className="mt-8 flex flex-col sm:flex-row gap-3"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 1.7 }}
+              >
                 <a
                   href="https://wa.me/56949616038?text=Hola%2C%20me%20interesa%20Flexio%20para%20mi%20empresa"
                   target="_blank"
@@ -317,8 +361,13 @@ export default function LandingPage() {
                 <a href="/login" className="px-7 py-3.5 border-2 border-gray-200 text-gray-700 font-semibold rounded-full hover:border-gray-300 transition-all text-center">
                   Iniciar sesión
                 </a>
-              </div>
-              <p className="mt-4 text-sm text-gray-400">15 días gratis · Sin tarjeta de crédito</p>
+              </motion.div>
+              <motion.p
+                className="mt-4 text-sm text-gray-400"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 2.0 }}
+              >15 días gratis · Sin tarjeta de crédito</motion.p>
             </motion.div>
 
             {/* Right — Dashboard Mockup */}
@@ -342,22 +391,30 @@ export default function LandingPage() {
                   <div className="p-4 space-y-3">
                     {/* KPI Row */}
                     <div className="grid grid-cols-4 gap-2">
-                      <div className="bg-emerald-50 rounded-lg p-2.5 text-center">
+                      <motion.div className="bg-emerald-50 rounded-lg p-2.5 text-center"
+                        initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 1.0, type: 'spring', stiffness: 150 }}>
                         <p className="text-lg font-bold text-emerald-700">92%</p>
                         <p className="text-[9px] text-emerald-600">Asistencia</p>
-                      </div>
-                      <div className="bg-red-50 rounded-lg p-2.5 text-center">
+                      </motion.div>
+                      <motion.div className="bg-red-50 rounded-lg p-2.5 text-center"
+                        initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 1.2, type: 'spring', stiffness: 150 }}>
                         <p className="text-lg font-bold text-red-600">47h</p>
                         <p className="text-[9px] text-red-500">Improductivas</p>
-                      </div>
-                      <div className="bg-primary-50 rounded-lg p-2.5 text-center">
+                      </motion.div>
+                      <motion.div className="bg-primary-50 rounded-lg p-2.5 text-center"
+                        initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 1.4, type: 'spring', stiffness: 150 }}>
                         <p className="text-lg font-bold text-primary-700">100%</p>
                         <p className="text-[9px] text-primary-600">Cumple DT</p>
-                      </div>
-                      <div className="bg-emerald-50 rounded-lg p-2.5 text-center">
+                      </motion.div>
+                      <motion.div className="bg-emerald-50 rounded-lg p-2.5 text-center"
+                        initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 1.6, type: 'spring', stiffness: 150 }}>
                         <p className="text-lg font-bold text-emerald-700">$1.2M</p>
                         <p className="text-[9px] text-emerald-600">Ahorro</p>
-                      </div>
+                      </motion.div>
                     </div>
 
                     {/* Chart */}
