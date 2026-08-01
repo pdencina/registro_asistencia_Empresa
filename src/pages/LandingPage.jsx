@@ -249,13 +249,7 @@ export default function LandingPage() {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-8">
               <div className="flex items-center gap-2">
-                <motion.img
-                  src="/logo-flexio.svg"
-                  alt="Flexio"
-                  className="h-7"
-                  animate={{ rotate: [0, 0, 360] }}
-                  transition={{ duration: 3, repeat: Infinity, repeatDelay: 8, ease: 'easeInOut' }}
-                />
+                <img src="/logo-flexio.svg" alt="Flexio" className="h-7" />
                 <span className="font-bold text-gray-900 text-lg">Flexio</span>
               </div>
               <div className="hidden md:flex items-center gap-6">
@@ -425,7 +419,14 @@ export default function LandingPage() {
                       </div>
                       <div className="flex items-end gap-[3px] h-12">
                         {[62, 68, 72, 78, 74, 82, 85, 80, 88, 85, 92, 96].map((v, i) => (
-                          <div key={i} className={`flex-1 rounded-t-sm ${v >= 85 ? 'bg-emerald-400' : v >= 70 ? 'bg-amber-300' : 'bg-red-300'}`} style={{ height: `${v}%` }} />
+                          <motion.div
+                            key={i}
+                            className={`flex-1 rounded-t-sm ${v >= 85 ? 'bg-emerald-400' : v >= 70 ? 'bg-amber-300' : 'bg-red-300'}`}
+                            initial={{ height: 0 }}
+                            animate={{ height: `${v}%` }}
+                            transition={{ duration: 0.8, delay: 1.8 + i * 0.08, ease: 'easeOut' }}
+                            whileHover={{ scaleY: 1.1 }}
+                          />
                         ))}
                       </div>
                     </div>
@@ -493,10 +494,19 @@ export default function LandingPage() {
               </div>
 
               {/* Floating badge */}
-              <div className="absolute -bottom-3 -left-3 bg-white shadow-lg rounded-full px-4 py-2 border border-gray-100 hidden lg:flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+              <motion.div
+                className="absolute -bottom-3 -left-3 bg-white shadow-lg rounded-full px-4 py-2 border border-gray-100 hidden lg:flex items-center gap-2"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 2.5, duration: 0.5 }}
+              >
+                <motion.div
+                  className="w-2 h-2 rounded-full bg-emerald-500"
+                  animate={{ scale: [1, 1.5, 1], opacity: [1, 0.5, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                />
                 <span className="text-xs text-gray-700 font-medium">En vivo · 69 colaboradores</span>
-              </div>
+              </motion.div>
             </motion.div>
           </div>
         </div>
