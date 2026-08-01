@@ -456,7 +456,7 @@ export default function LandingPage() {
               Una plataforma completa que reemplaza reloj control, huelleros y tarjetas de proximidad.
             </p>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {features.map((feature, i) => (
               <motion.div
                 key={i}
@@ -464,14 +464,16 @@ export default function LandingPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-50px' }}
                 transition={{ duration: 0.5, delay: i * 0.08 }}
-                whileHover={{ y: -4, boxShadow: '0 12px 40px -12px rgba(37, 99, 235, 0.15)' }}
-                className="p-6 rounded-2xl border border-gray-100 transition-all"
+                whileHover={{ y: -6, transition: { duration: 0.2 } }}
+                className="group relative p-[1px] rounded-2xl bg-gradient-to-br from-gray-200 via-transparent to-gray-200 hover:from-primary-400 hover:via-blue-300 hover:to-indigo-400 transition-all duration-300"
               >
-                <div className="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center text-primary-600 mb-4">
-                  {feature.icon}
+                <div className="relative bg-white rounded-2xl p-6 h-full">
+                  <div className="w-12 h-12 bg-gradient-to-br from-primary-50 to-blue-100 rounded-xl flex items-center justify-center text-primary-600 mb-4 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-primary-100 transition-all duration-300">
+                    {feature.icon}
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">{feature.title}</h3>
+                  <p className="text-gray-500 text-sm leading-relaxed">{feature.description}</p>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">{feature.title}</h3>
-                <p className="text-gray-500 text-sm leading-relaxed">{feature.description}</p>
               </motion.div>
             ))}
           </div>
