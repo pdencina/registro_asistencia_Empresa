@@ -3,6 +3,7 @@ import { UserPlus, Edit2, Trash2, Camera, X, Search, Power, PowerOff, Shield, Ke
 import Webcam from 'react-webcam';
 import { employeesApi } from '../api';
 import { useToast } from '../components/Toast';
+import InfoTooltip from '../components/InfoTooltip';
 
 // Tipos de documento soportados
 const DOC_TYPES = [
@@ -469,7 +470,7 @@ export default function EmployeesPage() {
             {error && <p className="text-red-600 text-sm bg-red-50 p-3 rounded-xl mb-4">{error}</p>}
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Documento</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Documento <InfoTooltip text="Selecciona el tipo de identificación oficial del colaborador según su país de origen." /></label>
                 <select value={formData.doc_type} onChange={e => {
                     setFormData({...formData, doc_type: e.target.value, rut: ''});
                     setRutError('');
@@ -482,7 +483,7 @@ export default function EmployeesPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {DOC_TYPES.find(d => d.value === formData.doc_type)?.label || 'Documento'} *
+                  {DOC_TYPES.find(d => d.value === formData.doc_type)?.label || 'Documento'} * <InfoTooltip text="Número de identificación único del colaborador. Se usa para registros legales y reportes de asistencia." />
                 </label>
                 <input value={formData.rut} onChange={e => {
                     const formatted = formatDocument(e.target.value, formData.doc_type);
@@ -495,36 +496,36 @@ export default function EmployeesPage() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Nombre *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Nombre * <InfoTooltip text="Nombre legal del colaborador tal como aparece en su documento de identidad." /></label>
                   <input value={formData.first_name} onChange={e => setFormData({...formData, first_name: capitalize(e.target.value)})}
                     required className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Apellido *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Apellido * <InfoTooltip text="Apellido legal del colaborador. Se muestra en reportes y libro de asistencia." /></label>
                   <input value={formData.last_name} onChange={e => setFormData({...formData, last_name: capitalize(e.target.value)})}
                     required className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none" />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Área</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Área <InfoTooltip text="Departamento o área funcional donde trabaja. Permite filtrar y agrupar colaboradores en reportes." /></label>
                 <input value={formData.department} onChange={e => setFormData({...formData, department: capitalize(e.target.value)})}
                   placeholder="Ej: Operaciones, TI"
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Cargo</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Cargo <InfoTooltip text="Puesto o rol que desempeña el colaborador dentro de la organización." /></label>
                 <input value={formData.position} onChange={e => setFormData({...formData, position: capitalize(e.target.value)})}
                   placeholder="Ej: Analista, Supervisor"
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Email <InfoTooltip text="Correo electrónico para enviarle notificaciones, PIN de acceso y reportes individuales." /></label>
                 <input type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value.toLowerCase()})}
                   placeholder="nombre@empresa.cl"
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono <InfoTooltip text="Número de contacto del colaborador. Útil para comunicaciones urgentes sobre asistencia." /></label>
                 <input type="tel" value={formData.phone} onChange={e => {
                     const formatted = formatPhone(e.target.value);
                     setFormData({...formData, phone: formatted});

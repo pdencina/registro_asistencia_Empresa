@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { MapPin, Shield, Loader, ToggleLeft, ToggleRight, Building2, Upload, Trash2, FileText, ExternalLink, Printer, Bell } from 'lucide-react';
 import { useToast } from '../components/Toast';
+import InfoTooltip from '../components/InfoTooltip';
 
 const API_BASE = '/api';
 
@@ -194,6 +195,7 @@ export default function SettingsPage() {
               <Building2 className="w-5 h-5 text-primary-600" />
             </div>
             <h3 className="font-bold text-gray-900">Logo de la Empresa</h3>
+            <InfoTooltip text="El logo se muestra en la pantalla de marcaje de asistencia para que los colaboradores identifiquen su empresa." />
           </div>
 
           <div className="flex items-center gap-5">
@@ -232,13 +234,14 @@ export default function SettingsPage() {
               <Shield className="w-5 h-5 text-emerald-600" />
             </div>
             <h3 className="font-bold text-gray-900">Seguridad</h3>
+            <InfoTooltip text="Controles de seguridad para el registro de asistencia. Define restricciones de ubicación para los marcajes." />
           </div>
 
           <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
             <div className="flex items-center gap-3">
               <MapPin className={`w-5 h-5 ${settings.geolocation_enabled ? 'text-emerald-600' : 'text-gray-400'}`} />
               <div>
-                <p className="font-medium text-gray-900 text-sm">Geolocalización</p>
+                <p className="font-medium text-gray-900 text-sm">Geolocalización <InfoTooltip text="Si se activa, los colaboradores solo pueden marcar asistencia dentro de un radio de 200 metros de la ubicación configurada de la empresa." /></p>
                 <p className="text-xs text-gray-500">
                   {settings.geolocation_enabled ? 'Solo desde ubicación autorizada (200m)' : 'Marcaje desde cualquier lugar'}
                 </p>
@@ -259,6 +262,7 @@ export default function SettingsPage() {
             <Bell className="w-5 h-5 text-amber-600" />
           </div>
           <h3 className="font-bold text-gray-900">Notificaciones y Alertas</h3>
+          <InfoTooltip text="Configura alertas por correo electrónico cuando haya ausencias o atrasos sin justificar." />
         </div>
 
         {/* Toggle */}
@@ -266,7 +270,7 @@ export default function SettingsPage() {
           <div className="flex items-center gap-3">
             <Bell className={`w-5 h-5 ${settings.alerts_enabled !== false ? 'text-amber-600' : 'text-gray-400'}`} />
             <div>
-              <p className="font-medium text-gray-900 text-sm">Alertas diarias de ausentes</p>
+              <p className="font-medium text-gray-900 text-sm">Alertas diarias de ausentes <InfoTooltip text="Envía un correo al email configurado cada vez que se detectan colaboradores ausentes sin justificación al inicio de la jornada." /></p>
               <p className="text-xs text-gray-500">
                 {settings.alerts_enabled !== false ? 'Correo cuando haya ausencias sin justificar' : 'Desactivadas'}
               </p>
@@ -295,7 +299,7 @@ export default function SettingsPage() {
         {/* Email + Tolerance in grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-semibold text-gray-600 mb-1.5">Email de alertas</label>
+            <label className="block text-xs font-semibold text-gray-600 mb-1.5">Email de alertas <InfoTooltip text="Dirección de correo donde se enviarán las notificaciones de ausencias y atrasos. Puede ser del área de RRHH o del administrador." /></label>
             <div className="flex gap-2">
               <input type="email" value={settings.notification_email || ''}
                 onChange={e => setSettings({ ...settings, notification_email: e.target.value })}
@@ -313,7 +317,7 @@ export default function SettingsPage() {
             </div>
           </div>
           <div>
-            <label className="block text-xs font-semibold text-gray-600 mb-1.5">Tolerancia de atraso</label>
+            <label className="block text-xs font-semibold text-gray-600 mb-1.5">Tolerancia de atraso <InfoTooltip text="Minutos que se espera después de la hora de entrada antes de considerar al colaborador como 'ausente' y enviar la alerta. Diferente a la tolerancia del horario." /></label>
             <div className="flex gap-2 items-center">
               <input type="number" min="5" max="60" value={settings.alert_tolerance_minutes || 15}
                 onChange={e => setSettings({ ...settings, alert_tolerance_minutes: parseInt(e.target.value) || 15 })}

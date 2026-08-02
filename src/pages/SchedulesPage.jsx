@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Clock, Plus, Trash2, X, Users, Star } from 'lucide-react';
 import { schedulesApi, employeesApi, authorizersApi } from '../api';
+import InfoTooltip from '../components/InfoTooltip';
 
 export default function SchedulesPage() {
   const [schedules, setSchedules] = useState([]);
@@ -194,31 +195,31 @@ export default function SchedulesPage() {
                 </div>
                 <form onSubmit={handleCreateSchedule} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Nombre <InfoTooltip text="Nombre descriptivo para identificar este horario. Ej: 'Jornada Completa', 'Turno Noche'." /></label>
                     <input value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})}
                       required placeholder="Ej: Jornada Completa, Media Jornada"
                       className="w-full px-4 py-3 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-primary-500" />
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Entrada</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Entrada <InfoTooltip text="Hora oficial de inicio de la jornada laboral. Los marcajes después de esta hora + tolerancia se consideran atraso." /></label>
                       <input type="time" value={formData.entry_time} onChange={e => setFormData({...formData, entry_time: e.target.value})}
                         className="w-full px-4 py-3 border border-gray-200 rounded-xl outline-none" />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Salida</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Salida <InfoTooltip text="Hora oficial de fin de la jornada. Marcajes después de esta hora se contabilizan como horas extra." /></label>
                       <input type="time" value={formData.exit_time} onChange={e => setFormData({...formData, exit_time: e.target.value})}
                         className="w-full px-4 py-3 border border-gray-200 rounded-xl outline-none" />
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Tolerancia (minutos)</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Tolerancia (minutos) <InfoTooltip text="Minutos de gracia después de la hora de entrada antes de considerarse atraso. Ej: 10 min significa que hasta las 08:40 no es atraso." /></label>
                     <input type="number" value={formData.tolerance_minutes} onChange={e => setFormData({...formData, tolerance_minutes: parseInt(e.target.value) || 0})}
                       min="0" max="60"
                       className="w-full px-4 py-3 border border-gray-200 rounded-xl outline-none" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Pausa almuerzo (minutos)</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Pausa almuerzo (minutos) <InfoTooltip text="Tiempo de colación que se descuenta automáticamente de las horas trabajadas cuando la jornada supera 5 horas." /></label>
                     <input type="number" value={formData.lunch_break_minutes} onChange={e => setFormData({...formData, lunch_break_minutes: parseInt(e.target.value) || 0})}
                       min="0" max="120" placeholder="30"
                       className="w-full px-4 py-3 border border-gray-200 rounded-xl outline-none" />
@@ -228,6 +229,7 @@ export default function SchedulesPage() {
                     <input type="checkbox" checked={formData.is_default} onChange={e => setFormData({...formData, is_default: e.target.checked})}
                       className="w-4 h-4 rounded border-gray-300 text-primary-600" />
                     <span className="text-sm text-gray-700">Horario por defecto</span>
+                    <InfoTooltip text="Si se activa, este horario se asigna automáticamente a todos los colaboradores que no tengan uno personalizado." />
                   </label>
 
                   {/* Block 2 (Split shift) */}
@@ -236,6 +238,7 @@ export default function SchedulesPage() {
                       <input type="checkbox" checked={showBlock2} onChange={e => setShowBlock2(e.target.checked)}
                         className="w-4 h-4 rounded border-gray-300 text-primary-600" />
                       <span className="text-sm text-gray-700 font-medium">Jornada partida (2 bloques)</span>
+                      <InfoTooltip text="Activa un segundo bloque horario para jornadas divididas, como trabajo de mañana y tarde con pausa extendida al medio." />
                     </label>
                     {showBlock2 && (
                       <div className="grid grid-cols-2 gap-3 bg-blue-50 p-3 rounded-xl">
@@ -256,7 +259,7 @@ export default function SchedulesPage() {
 
                   {/* Rotating shifts */}
                   <div className="border-t border-gray-200 pt-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de turno</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de turno <InfoTooltip text="Define cómo se organiza la jornada: Fijo (L-V estándar), Rotativo (ciclos de trabajo/descanso) o Flexible (solo horas semanales sin horario fijo)." /></label>
                     <select value={formData.shift_type} onChange={e => setFormData({...formData, shift_type: e.target.value})}
                       className="w-full px-4 py-3 border border-gray-200 rounded-xl outline-none mb-3">
                       <option value="fixed">Fijo (Lunes a Viernes)</option>
@@ -267,7 +270,7 @@ export default function SchedulesPage() {
                     {formData.shift_type === 'flexible' && (
                       <div className="bg-indigo-50 p-3 rounded-xl space-y-3 mb-3">
                         <div>
-                          <label className="block text-xs font-medium text-indigo-700 mb-1">Horas contratadas por semana</label>
+                          <label className="block text-xs font-medium text-indigo-700 mb-1">Horas contratadas por semana <InfoTooltip text="Total de horas que el colaborador debe cumplir en la semana. No importa en qué horario las trabaje." position="bottom" /></label>
                           <input type="number" value={formData.weekly_hours || ''} onChange={e => setFormData({...formData, weekly_hours: e.target.value})}
                             min="1" max="60" placeholder="Ej: 30"
                             className="w-full px-3 py-2 border border-indigo-200 rounded-lg outline-none text-sm" />
@@ -280,20 +283,20 @@ export default function SchedulesPage() {
                       <div className="bg-purple-50 p-3 rounded-xl space-y-3">
                         <div className="grid grid-cols-2 gap-3">
                           <div>
-                            <label className="block text-xs font-medium text-purple-700 mb-1">Días de trabajo</label>
+                            <label className="block text-xs font-medium text-purple-700 mb-1">Días de trabajo <InfoTooltip text="Cantidad de días consecutivos que el colaborador trabaja antes de su descanso." position="bottom" /></label>
                             <input type="number" value={formData.rotation_days_on} onChange={e => setFormData({...formData, rotation_days_on: e.target.value})}
                               min="1" max="30" placeholder="Ej: 4"
                               className="w-full px-3 py-2 border border-purple-200 rounded-lg outline-none text-sm" />
                           </div>
                           <div>
-                            <label className="block text-xs font-medium text-purple-700 mb-1">Días de descanso</label>
+                            <label className="block text-xs font-medium text-purple-700 mb-1">Días de descanso <InfoTooltip text="Cantidad de días libres consecutivos después del ciclo de trabajo." position="bottom" /></label>
                             <input type="number" value={formData.rotation_days_off} onChange={e => setFormData({...formData, rotation_days_off: e.target.value})}
                               min="1" max="30" placeholder="Ej: 4"
                               className="w-full px-3 py-2 border border-purple-200 rounded-lg outline-none text-sm" />
                           </div>
                         </div>
                         <div>
-                          <label className="block text-xs font-medium text-purple-700 mb-1">Fecha inicio del ciclo</label>
+                          <label className="block text-xs font-medium text-purple-700 mb-1">Fecha inicio del ciclo <InfoTooltip text="Fecha en que comienza el primer ciclo de rotación. El sistema calcula los días de trabajo y descanso a partir de aquí." position="bottom" /></label>
                           <input type="date" value={formData.rotation_start_date} onChange={e => setFormData({...formData, rotation_start_date: e.target.value})}
                             className="w-full px-3 py-2 border border-purple-200 rounded-lg outline-none text-sm" />
                         </div>
@@ -316,7 +319,7 @@ export default function SchedulesPage() {
           <h3 className="font-bold text-gray-900 mb-4">Asignar Horario a Colaborador</h3>
           <form onSubmit={handleAssign} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Colaborador</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Colaborador <InfoTooltip text="Selecciona el colaborador al que quieres asignar un horario específico diferente al por defecto." /></label>
               <select value={assignData.employee_id} onChange={e => setAssignData({...assignData, employee_id: e.target.value})}
                 required className="w-full px-4 py-3 border border-gray-200 rounded-xl outline-none">
                 <option value="">Seleccionar colaborador...</option>
@@ -326,7 +329,7 @@ export default function SchedulesPage() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Horario predefinido</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Horario predefinido <InfoTooltip text="Elige uno de los horarios ya creados, o deja en blanco para definir horas personalizadas." /></label>
               <select value={assignData.schedule_id} onChange={e => setAssignData({...assignData, schedule_id: e.target.value})}
                 className="w-full px-4 py-3 border border-gray-200 rounded-xl outline-none">
                 <option value="">Usar horario personalizado</option>
@@ -338,12 +341,12 @@ export default function SchedulesPage() {
             {!assignData.schedule_id && (
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Entrada personalizada</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Entrada personalizada <InfoTooltip text="Hora de entrada exclusiva para este colaborador, independiente de los horarios predefinidos." /></label>
                   <input type="time" value={assignData.custom_entry_time} onChange={e => setAssignData({...assignData, custom_entry_time: e.target.value})}
                     className="w-full px-4 py-3 border border-gray-200 rounded-xl outline-none" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Salida personalizada</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Salida personalizada <InfoTooltip text="Hora de salida exclusiva para este colaborador." /></label>
                   <input type="time" value={assignData.custom_exit_time} onChange={e => setAssignData({...assignData, custom_exit_time: e.target.value})}
                     className="w-full px-4 py-3 border border-gray-200 rounded-xl outline-none" />
                 </div>

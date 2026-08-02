@@ -3,6 +3,7 @@ import { Users, UserCheck, UserX, Clock, TrendingUp, AlertTriangle, Award, Calen
 import { attendanceApi, employeesApi } from '../api';
 import SetupWizard from '../components/SetupWizard';
 import { DashboardSkeleton } from '../components/Skeleton';
+import InfoTooltip from '../components/InfoTooltip';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar, CartesianGrid } from 'recharts';
 import * as XLSX from 'xlsx';
 
@@ -533,15 +534,16 @@ export default function DashboardPage() {
       {/* KPI Cards */}
       {report && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
-          <StatCard icon={<Users className="w-5 h-5" />} label="Colaboradores" value={report.overview.total_employees} color="blue" />
+          <StatCard icon={<Users className="w-5 h-5" />} label="Colaboradores" value={report.overview.total_employees} color="blue" tooltip="Total de empleados activos en tu empresa." />
           <StatCard
             icon={<TrendingUp className="w-5 h-5" />}
             label="Tasa Asistencia"
             value={`${report.overview.attendance_rate}%`}
             color={report.overview.attendance_rate >= 90 ? 'green' : report.overview.attendance_rate >= 70 ? 'orange' : 'red'}
+            tooltip="Porcentaje de días que los colaboradores se presentaron a trabajar en el período seleccionado. Sobre 90% es excelente."
           />
-          <StatCard icon={<Timer className="w-5 h-5" />} label="Llegadas Tarde" value={report.overview.total_late} color="orange" />
-          <StatCard icon={<Award className="w-5 h-5" />} label="Siempre Puntuales" value={report.overview.punctual_employees} color="green" />
+          <StatCard icon={<Timer className="w-5 h-5" />} label="Llegadas Tarde" value={report.overview.total_late} color="orange" tooltip="Cantidad de ingresos después de la hora + tolerancia configurada. Sirve para detectar patrones de impuntualidad." />
+          <StatCard icon={<Award className="w-5 h-5" />} label="Siempre Puntuales" value={report.overview.punctual_employees} color="green" tooltip="Colaboradores que nunca llegaron tarde en el período. Candidatos al bono de puntualidad." />
         </div>
       )}
 
@@ -550,14 +552,15 @@ export default function DashboardPage() {
         <>
           {/* Today stats */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
-            <StatCard icon={<UserCheck className="w-5 h-5" />} label="Presentes" value={todaySummary.present_today} color="green" />
-            <StatCard icon={<UserX className="w-5 h-5" />} label="Ausentes" value={todaySummary.absent} color="red" />
-            <StatCard icon={<Clock className="w-5 h-5" />} label="Salieron" value={todaySummary.exited_today} color="orange" />
+            <StatCard icon={<UserCheck className="w-5 h-5" />} label="Presentes" value={todaySummary.present_today} color="green" tooltip="Colaboradores que ya registraron su ingreso hoy." />
+            <StatCard icon={<UserX className="w-5 h-5" />} label="Ausentes" value={todaySummary.absent} color="red" tooltip="Colaboradores que aún no han registrado ingreso. Puede incluir permisos o licencias no registradas." />
+            <StatCard icon={<Clock className="w-5 h-5" />} label="Salieron" value={todaySummary.exited_today} color="orange" tooltip="Colaboradores que ya registraron su salida hoy." />
             <StatCard
               icon={<TrendingUp className="w-5 h-5" />}
               label="Tasa Hoy"
               value={`${todaySummary.total_employees > 0 ? Math.round((todaySummary.present_today / todaySummary.total_employees) * 100) : 0}%`}
               color="blue"
+              tooltip="Porcentaje de asistencia del día actual. Se actualiza en tiempo real cada 30 segundos."
             />
           </div>
 
@@ -996,7 +999,7 @@ export default function DashboardPage() {
   );
 }
 
-function StatCard({ icon, label, value, color }) {
+function StatCard({ icon, label, value, color, tooltip }) {
   const colors = {
     blue: 'bg-blue-50 text-blue-600',
     green: 'bg-emerald-50 text-emerald-600',
@@ -1006,9 +1009,12 @@ function StatCard({ icon, label, value, color }) {
   return (
     <div className="card flex items-center gap-3 sm:gap-4">
       <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shrink-0 ${colors[color]}`}>{icon}</div>
-      <div>
+      <div className="flex-1 min-w-0">
         <p className="text-xl sm:text-2xl font-bold text-gray-900">{value}</p>
-        <p className="text-xs sm:text-sm text-gray-500">{label}</p>
+        <div className="flex items-center gap-1.5">
+          <p className="text-xs sm:text-sm text-gray-500">{label}</p>
+          {tooltip && <InfoTooltip text={tooltip} />}
+        </div>
       </div>
     </div>
   );
