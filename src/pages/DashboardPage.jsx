@@ -3,6 +3,7 @@ import { Users, UserCheck, UserX, Clock, TrendingUp, AlertTriangle, Award, Calen
 import { attendanceApi, employeesApi } from '../api';
 import SetupWizard from '../components/SetupWizard';
 import { DashboardSkeleton } from '../components/Skeleton';
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar, CartesianGrid } from 'recharts';
 import * as XLSX from 'xlsx';
 
 const TABS = [
@@ -560,7 +561,44 @@ export default function DashboardPage() {
             />
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Donut Chart - Attendance breakdown */}
+            <div className="card flex flex-col items-center justify-center">
+              <h3 className="font-bold text-gray-900 text-sm mb-3 self-start">Distribución Hoy</h3>
+              {(() => {
+                const pieData = [
+                  { name: 'Presentes', value: todaySummary.present_today, color: '#10b981' },
+                  { name: 'Ausentes', value: todaySummary.absent, color: '#ef4444' },
+                  { name: 'Salieron', value: todaySummary.exited_today, color: '#f59e0b' },
+                ].filter(d => d.value > 0);
+                const total = todaySummary.total_employees || 1;
+                const rate = Math.round((todaySummary.present_today / total) * 100);
+                return (
+                  <div className="relative">
+                    <ResponsiveContainer width={180} height={180}>
+                      <PieChart>
+                        <Pie data={pieData} cx="50%" cy="50%" innerRadius={55} outerRadius={80} dataKey="value" strokeWidth={2} stroke="#fff">
+                          {pieData.map((entry, idx) => <Cell key={idx} fill={entry.color} />)}
+                        </Pie>
+                        <Tooltip formatter={(value, name) => [`${value} personas`, name]} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="text-center">
+                        <p className="text-2xl font-bold text-gray-900">{rate}%</p>
+                        <p className="text-[10px] text-gray-500">asistencia</p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+              <div className="flex gap-4 mt-2">
+                <span className="flex items-center gap-1.5 text-xs text-gray-600"><span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />Presentes</span>
+                <span className="flex items-center gap-1.5 text-xs text-gray-600"><span className="w-2.5 h-2.5 rounded-full bg-red-500" />Ausentes</span>
+                <span className="flex items-center gap-1.5 text-xs text-gray-600"><span className="w-2.5 h-2.5 rounded-full bg-amber-500" />Salieron</span>
+              </div>
+            </div>
+
             {/* Absent today */}
             <div className="card">
               <div className="flex items-center gap-2 mb-4">
@@ -619,66 +657,61 @@ export default function DashboardPage() {
       {/* WEEK/MONTH: Detailed reports */}
       {tab !== 'today' && report && (
         <>
-          {/* Attendance Trend Chart */}
+          {/* Attendance Trend Chart - Recharts */}
           {report.daily_attendance.length > 0 && (
             <div className="card mb-6">
-              <div className="flex items-center gap-2 mb-4">
-                <BarChart3 className="w-5 h-5 text-primary-600" />
-                <h3 className="font-bold text-gray-900">Tendencia de Asistencia</h3>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <BarChart3 className="w-5 h-5 text-primary-600" />
+                  <h3 className="font-bold text-gray-900">Tendencia de Asistencia</h3>
+                </div>
+                <span className="text-xs text-gray-400">{report.start_date} — {report.end_date}</span>
               </div>
-              <div className="flex items-end gap-1" style={{ height: '160px' }}>
-                {report.daily_attendance.map((d, i) => {
-                  const height = Math.max(d.rate, 5);
-                  const dayLabel = new Date(d.date + 'T12:00:00').toLocaleDateString('es-CL', { weekday: 'narrow', day: 'numeric' });
-                  return (
-                    <div key={i} className="flex-1 flex flex-col items-center justify-end cursor-pointer group h-full" onClick={() => drillDayAttendance(d)}>
-                      <span className="text-[10px] text-gray-500 font-medium group-hover:text-primary-600 mb-1">{d.rate}%</span>
-                      <div
-                        className={`w-full rounded-t-md group-hover:ring-2 group-hover:ring-primary-300 transition-all ${
-                          d.rate >= 90 ? 'bg-emerald-500' : d.rate >= 70 ? 'bg-amber-400' : 'bg-red-400'
-                        }`}
-                        style={{ height: `${height}%` }}
-                      />
-                      <span className="text-[9px] text-gray-400 truncate w-full text-center group-hover:text-primary-600 mt-1">{dayLabel}</span>
-                    </div>
-                  );
-                })}
-              </div>
+              <ResponsiveContainer width="100%" height={220}>
+                <AreaChart data={report.daily_attendance.map(d => ({
+                  date: new Date(d.date + 'T12:00:00').toLocaleDateString('es-CL', { day: 'numeric', month: 'short' }),
+                  tasa: d.rate,
+                  presentes: d.present,
+                }))}>
+                  <defs>
+                    <linearGradient id="colorRate" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#2563eb" stopOpacity={0.15} />
+                      <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                  <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                  <YAxis domain={[0, 100]} tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} unit="%" />
+                  <Tooltip
+                    contentStyle={{ borderRadius: 12, border: '1px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}
+                    formatter={(value, name) => [name === 'tasa' ? `${value}%` : value, name === 'tasa' ? 'Asistencia' : 'Presentes']}
+                  />
+                  <Area type="monotone" dataKey="tasa" stroke="#2563eb" strokeWidth={2.5} fill="url(#colorRate)" dot={{ r: 3, fill: '#2563eb' }} activeDot={{ r: 5, strokeWidth: 2 }} />
+                </AreaChart>
+              </ResponsiveContainer>
             </div>
           )}
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            {/* Day of Week Breakdown */}
+            {/* Day of Week Breakdown - Recharts */}
             {report.day_of_week && (
               <div className="card">
                 <div className="flex items-center gap-2 mb-4">
                   <Calendar className="w-5 h-5 text-primary-600" />
                   <h3 className="font-bold text-gray-900">Asistencia por Día</h3>
                 </div>
-                <div className="space-y-2">
-                  {report.day_of_week.map(d => (
-                    <div key={d.name} className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 rounded-lg p-1 -m-1 transition-all" onClick={() => drillDayOfWeek(d)}>
-                      <span className="text-sm text-gray-600 w-20 shrink-0">{d.name}</span>
-                      <div className="flex-1 h-6 bg-gray-100 rounded-full overflow-hidden relative">
-                        <div
-                          className={`h-full rounded-full transition-all ${
-                            d.avg_attendance >= 90 ? 'bg-emerald-500' : d.avg_attendance >= 70 ? 'bg-amber-400' : 'bg-red-400'
-                          }`}
-                          style={{ width: `${d.avg_attendance}%` }}
-                        />
-                        <span className="absolute inset-0 flex items-center justify-center text-xs font-medium text-gray-700">
-                          {d.avg_attendance}%
-                        </span>
-                      </div>
-                      {d.late > 0 && (
-                        <span className="text-xs text-amber-600 shrink-0">{d.late} tarde</span>
-                      )}
-                    </div>
-                  ))}
-                </div>
+                <ResponsiveContainer width="100%" height={200}>
+                  <BarChart data={report.day_of_week.map(d => ({ name: d.name.slice(0, 3), asistencia: d.avg_attendance, atrasos: d.late_rate }))} barGap={4}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                    <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
+                    <YAxis domain={[0, 100]} tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} unit="%" />
+                    <Tooltip contentStyle={{ borderRadius: 12, border: '1px solid #e2e8f0' }} />
+                    <Bar dataKey="asistencia" fill="#2563eb" radius={[4, 4, 0, 0]} name="Asistencia %" />
+                    <Bar dataKey="atrasos" fill="#f59e0b" radius={[4, 4, 0, 0]} name="Atraso %" />
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
             )}
-
             {/* Department Breakdown */}
             {report.department_breakdown && report.department_breakdown.length > 0 && (
               <div className="card">

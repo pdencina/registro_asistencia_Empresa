@@ -6,7 +6,9 @@ import {
 } from 'lucide-react';
 import EmployeesPage from '../pages/EmployeesPage';
 import AttendancePage from '../pages/AttendancePage';
-import DashboardPage from '../pages/DashboardPage';
+
+// Lazy load Dashboard (includes Recharts ~400KB)
+const DashboardPage = lazy(() => import('../pages/DashboardPage'));
 import SettingsPage from '../pages/SettingsPage';
 import SchedulesPage from '../pages/SchedulesPage';
 import OvertimePage from '../pages/OvertimePage';
@@ -145,7 +147,7 @@ export default function AdminLayout() {
       )}
 
       {/* Sidebar */}
-      <aside className={`fixed lg:static inset-y-0 left-0 z-50 bg-white border-r border-gray-200 flex flex-col transition-all duration-200 lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} ${collapsed ? 'lg:w-[68px]' : 'lg:w-64'} w-64`}>
+      <aside className={`fixed lg:fixed inset-y-0 left-0 z-50 bg-white border-r border-gray-200 flex flex-col transition-all duration-200 lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} ${collapsed ? 'lg:w-[68px]' : 'lg:w-64'} w-64`}>
         {/* Logo */}
         <div className={`px-4 py-4 border-b border-gray-100 flex items-center ${collapsed ? 'lg:justify-center' : 'justify-between'}`}>
           <div className={`flex items-center gap-2.5 ${collapsed ? 'lg:hidden' : ''}`}>
@@ -224,7 +226,7 @@ export default function AdminLayout() {
       </aside>
 
       {/* Main area */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className={`flex-1 flex flex-col min-w-0 transition-all duration-200 ${collapsed ? 'lg:ml-[68px]' : 'lg:ml-64'}`}>
         {/* Top bar */}
         <header className="bg-white border-b border-gray-200 px-4 lg:px-6 py-3 flex items-center justify-between sticky top-0 z-30">
           <div className="flex items-center gap-3">
@@ -247,7 +249,7 @@ export default function AdminLayout() {
         {/* Content */}
         <main className="flex-1 overflow-auto">
           <Routes>
-            <Route path="/" element={<DashboardPage />} />
+            <Route path="/" element={<Suspense fallback={<PageLoader />}><DashboardPage /></Suspense>} />
             <Route path="/employees" element={<EmployeesPage />} />
             <Route path="/attendance" element={<AttendancePage />} />
             <Route path="/register" element={<Suspense fallback={<PageLoader />}><CheckInPage /></Suspense>} />
