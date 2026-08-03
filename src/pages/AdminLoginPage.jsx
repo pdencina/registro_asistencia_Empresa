@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Lock, Eye, EyeOff, Mail, ArrowLeft, CheckCircle } from 'lucide-react';
+import ChangePasswordModal from '../components/ChangePasswordModal';
 
 export default function AdminLoginPage({ onLogin }) {
   const [email, setEmail] = useState('');
@@ -12,6 +13,8 @@ export default function AdminLoginPage({ onLogin }) {
   const [recoverEmail, setRecoverEmail] = useState('');
   const [recoverSent, setRecoverSent] = useState(false);
   const [recoverLoading, setRecoverLoading] = useState(false);
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const [loginData, setLoginData] = useState(null);
   const { tenant } = useParams();
 
   async function handleSubmit(e) {
@@ -35,7 +38,14 @@ export default function AdminLoginPage({ onLogin }) {
         sessionStorage.setItem('admin_tenant', data.tenant_slug);
         sessionStorage.setItem('admin_email', data.admin_email);
         sessionStorage.setItem('admin_role', data.role || 'admin');
-        onLogin();
+
+        // Si debe cambiar contraseña, mostrar modal antes de continuar
+        if (data.must_change_password) {
+          setLoginData(data);
+          setShowChangePassword(true);
+        } else {
+          onLogin();
+        }
       } else {
         const data = await res.json();
         setError(data.error || 'Credenciales incorrectas');
@@ -123,6 +133,18 @@ export default function AdminLoginPage({ onLogin }) {
   // Vista principal de login
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+      {/* Modal de cambio de contraseña obligatorio */}
+      {showChangePassword && (
+        <ChangePasswordModal
+          currentPassword={password}
+          tenantSlug={loginData?.tenant_slug || tenant}
+          onSuccess={() => {
+            setShowChangePassword(false);
+            onLogin();
+          }}
+        />
+      )}
+
       <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 w-full max-w-sm">
         <div className="text-center mb-6">
           <div className="w-16 h-16 bg-primary-100 rounded-2xl flex items-center justify-center mx-auto mb-4">

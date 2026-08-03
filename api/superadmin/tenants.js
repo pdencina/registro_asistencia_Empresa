@@ -121,10 +121,11 @@ module.exports = async function handler(req, res) {
 
       // Asegurar columna admin_password
       await sql('ALTER TABLE tenants ADD COLUMN IF NOT EXISTS admin_password VARCHAR(200)');
+      await sql('ALTER TABLE tenants ADD COLUMN IF NOT EXISTS must_change_password BOOLEAN DEFAULT false');
 
       const rows = await sql(`
-        INSERT INTO tenants (name, slug, rut_empresa, plan, max_employees, max_devices, admin_email, admin_pin_hash, admin_password, trial_ends_at)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+        INSERT INTO tenants (name, slug, rut_empresa, plan, max_employees, max_devices, admin_email, admin_pin_hash, admin_password, must_change_password, trial_ends_at)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, true, $10)
         RETURNING *
       `, [name, slug, rut_empresa || null, selectedPlan, limits.max_employees, limits.max_devices, admin_email, admin_pin, tempPassword, trialEnds.toISOString()]);
 

@@ -57,6 +57,7 @@ module.exports = async function handler(req, res) {
         plan: tenant.plan,
         admin_email: tenant.admin_email,
         role: 'admin',
+        must_change_password: tenant.must_change_password === true || tenant.must_change_password === 't',
       });
     }
 

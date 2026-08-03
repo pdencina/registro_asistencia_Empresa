@@ -35,8 +35,8 @@ module.exports = async function handler(req, res) {
       return res.status(401).json({ error: 'Contraseña actual incorrecta' });
     }
 
-    // Actualizar contraseña
-    await sql('UPDATE tenants SET admin_password = $1, updated_at = NOW() WHERE id = $2', [new_password, tenant.id]);
+    // Actualizar contraseña y desactivar flag de cambio obligatorio
+    await sql('UPDATE tenants SET admin_password = $1, must_change_password = false, updated_at = NOW() WHERE id = $2', [new_password, tenant.id]);
 
     return res.status(200).json({ message: 'Contraseña actualizada correctamente' });
   } catch (error) {
