@@ -1,6 +1,7 @@
 const { getDb } = require('../lib/db');
 const { corsHeaders, handleCors } = require('../lib/cors');
 const { requireTenant } = require('../lib/tenant');
+const { verifyPin, hashPin } = require('../lib/hash');
 
 /**
  * POST /api/auth/change-password
@@ -30,13 +31,13 @@ module.exports = async function handler(req, res) {
       return res.status(400).json({ error: 'La nueva contraseña debe tener al menos 6 caracteres' });
     }
 
-    // Verificar contraseña actual
-    if (tenant.admin_password !== current_password) {
+    // Verificar contraseña actual (compatible con legacy texto plano)
+    if (!verifyPin(current_password, tenant.admin_password)) {
       return res.status(401).json({ error: 'Contraseña actual incorrecta' });
     }
 
-    // Actualizar contraseña y desactivar flag de cambio obligatorio
-    await sql('UPDATE tenants SET admin_password = $1, must_change_password = false, updated_at = NOW() WHERE id = $2', [new_password, tenant.id]);
+    // Actualizar contraseña hasheada y desactivar flag de cambio obligatorio
+    await sql('UPDATE tenants SET admin_password = $1, must_change_password = false, updated_at = NOW() WHERE id = $2', [hashPin(new_password), tenant.id]);
 
     return res.status(200).json({ message: 'Contraseña actualizada correctamente' });
   } catch (error) {

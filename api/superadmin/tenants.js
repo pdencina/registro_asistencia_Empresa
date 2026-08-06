@@ -1,5 +1,6 @@
 const { getDb } = require('../lib/db');
 const { corsHeaders, handleCors } = require('../lib/cors');
+const { hashPin } = require('../lib/hash');
 
 /**
  * Verifica que el request venga del super admin.
@@ -127,7 +128,7 @@ module.exports = async function handler(req, res) {
         INSERT INTO tenants (name, slug, rut_empresa, plan, max_employees, max_devices, admin_email, admin_pin_hash, admin_password, must_change_password, trial_ends_at)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, true, $10)
         RETURNING *
-      `, [name, slug, rut_empresa || null, selectedPlan, limits.max_employees, limits.max_devices, admin_email, admin_pin, tempPassword, trialEnds.toISOString()]);
+      `, [name, slug, rut_empresa || null, selectedPlan, limits.max_employees, limits.max_devices, admin_email, hashPin(admin_pin), hashPin(tempPassword), trialEnds.toISOString()]);
 
       // Crear settings por defecto
       await sql('INSERT INTO tenant_settings (tenant_id) VALUES ($1)', [rows[0].id]);

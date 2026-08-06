@@ -23,8 +23,10 @@
     .hero h1 span { color: #2563eb; }
     .hero p { font-size: 15px; color: #475569; max-width: 580px; margin: 0 auto; }
     
-    /* Badge */
-    .badge { display: inline-block; background: #eff6ff; color: #2563eb; font-size: 12px; font-weight: 600; padding: 6px 14px; border-radius: 20px; margin-bottom: 20px; }
+    /* Badges */
+    .badges { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px; }
+    .badge { display: inline-block; background: #eff6ff; color: #2563eb; font-size: 11px; font-weight: 600; padding: 5px 12px; border-radius: 20px; }
+    .badge.green { background: #f0fdf4; color: #16a34a; }
 
     /* Sections */
     .section { margin-bottom: 45px; }
@@ -46,6 +48,7 @@
     .feature { padding: 18px 14px; border: 1px solid #e2e8f0; border-radius: 10px; }
     .feature h4 { font-size: 13px; font-weight: 600; margin-bottom: 4px; color: #0f172a; }
     .feature p { font-size: 11px; color: #64748b; }
+    .feature.highlight { border-color: #2563eb; background: #f8faff; }
     
     /* Steps */
     .steps { display: flex; gap: 20px; }
@@ -55,15 +58,23 @@
     .step p { font-size: 11px; color: #64748b; }
     
     /* Pricing */
-    .pricing { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
-    .plan { border: 1px solid #e2e8f0; border-radius: 10px; padding: 20px; }
-    .plan.featured { background: #2563eb; color: white; border-color: #2563eb; }
-    .plan h4 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
-    .plan .price { font-size: 22px; font-weight: 800; }
-    .plan .period { font-size: 11px; opacity: 0.7; margin-bottom: 12px; }
-    .plan ul { list-style: none; font-size: 11px; line-height: 2; }
-    .plan ul li::before { content: "— "; color: #94a3b8; }
-    .plan.featured ul li::before { color: #93c5fd; }
+    .pricing-simple { text-align: center; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 36px; }
+    .pricing-simple .price-main { font-size: 48px; font-weight: 800; color: #2563eb; }
+    .pricing-simple .price-unit { font-size: 16px; color: #64748b; font-weight: 500; }
+    .pricing-simple .price-note { font-size: 13px; color: #64748b; margin-top: 6px; }
+    .pricing-simple .includes { margin-top: 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; text-align: left; max-width: 500px; margin-left: auto; margin-right: auto; }
+    .pricing-simple .includes li { list-style: none; font-size: 12px; color: #374151; padding: 4px 0; }
+    .pricing-simple .includes li::before { content: "✓ "; color: #16a34a; font-weight: 700; }
+    .pricing-example { margin-top: 20px; padding-top: 16px; border-top: 1px solid #e2e8f0; }
+    .pricing-example p { font-size: 12px; color: #64748b; }
+    .pricing-example strong { color: #0f172a; }
+    
+    /* Compliance */
+    .compliance { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 24px; margin-bottom: 30px; }
+    .compliance h4 { font-size: 14px; font-weight: 700; color: #1e40af; margin-bottom: 10px; }
+    .compliance ul { list-style: none; columns: 2; gap: 20px; }
+    .compliance ul li { font-size: 12px; color: #1e40af; padding: 3px 0; }
+    .compliance ul li::before { content: "✓ "; font-weight: 700; color: #2563eb; }
     
     /* CTA */
     .cta { text-align: center; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 40px; margin-top: 40px; }
@@ -98,27 +109,30 @@
 
     <!-- Hero -->
     <div class="hero">
-      <span class="badge">Cumple con Ley 21.719 de Protección de Datos</span>
+      <div class="badges">
+        <span class="badge green">Cumple Resolución 38 Exenta DT</span>
+        <span class="badge">Ley 21.719 Protección de Datos</span>
+      </div>
       <h1>Control de asistencia con<br><span>reconocimiento facial</span></h1>
-      <p>Elimina el fraude en el marcaje. Tu equipo registra su asistencia con el rostro, sin contacto ni tarjetas. Reportes automáticos en tiempo real.</p>
+      <p>Elimina el fraude en el marcaje. Tu equipo registra su asistencia con el rostro, sin contacto ni tarjetas. Registros inalterables con sello de tiempo criptográfico, disponibles para fiscalización en cualquier momento.</p>
     </div>
 
     <!-- Problem -->
     <div class="section">
       <h3 class="section-title">El problema</h3>
-      <p class="section-subtitle">Situaciones que afectan la productividad y generan costos ocultos</p>
+      <p class="section-subtitle">Situaciones que afectan la productividad y generan riesgos legales</p>
       <div class="grid-2">
         <div class="problem-card">
           <p>Un trabajador marca por otro (buddy punching)</p>
         </div>
         <div class="problem-card">
-          <p>No hay visibilidad sobre atrasos reincidentes</p>
+          <p>Registros manipulables que no resisten una fiscalización DT</p>
         </div>
         <div class="problem-card">
           <p>Reportes manuales que consumen horas cada mes</p>
         </div>
         <div class="problem-card">
-          <p>Huelleros que fallan o hardware obsoleto</p>
+          <p>Huelleros que fallan, hardware obsoleto y sin modo offline</p>
         </div>
       </div>
     </div>
@@ -126,24 +140,45 @@
     <!-- Solution -->
     <div class="section">
       <h3 class="section-title">La solución</h3>
-      <p class="section-subtitle">Tecnología facial aplicada al control de asistencia laboral</p>
+      <p class="section-subtitle">Tecnología facial + integridad criptográfica para el control de asistencia</p>
       <div class="grid-2">
         <div class="solution-card">
           <p>Reconocimiento facial con inteligencia artificial</p>
           <p class="detail">Verificación en menos de 2 segundos. Imposible suplantar.</p>
         </div>
         <div class="solution-card">
-          <p>Dashboard en tiempo real</p>
-          <p class="detail">Atrasos, ausencias y salidas anticipadas al instante.</p>
+          <p>Registros inalterables con hash encadenado</p>
+          <p class="detail">SHA-256 encadenado + sello de tiempo. No se pueden borrar ni modificar.</p>
         </div>
         <div class="solution-card">
-          <p>Geolocalización del dispositivo</p>
-          <p class="detail">El registro solo funciona desde la ubicación autorizada.</p>
+          <p>Geolocalización con validación de geofence</p>
+          <p class="detail">El registro solo funciona dentro del radio autorizado (configurable).</p>
         </div>
         <div class="solution-card">
-          <p>Sin hardware especial</p>
-          <p class="detail">Funciona con cualquier tablet, celular o computador con cámara.</p>
+          <p>Modo offline con sincronización automática</p>
+          <p class="detail">Si cae internet, el sistema sigue operando y sincroniza al reconectarse.</p>
         </div>
+      </div>
+    </div>
+
+    <!-- Compliance -->
+    <div class="section">
+      <h3 class="section-title">Cumplimiento normativo</h3>
+      <p class="section-subtitle">Preparado para fiscalización de la Dirección del Trabajo</p>
+      <div class="compliance">
+        <h4>Conforme a Resolución Exenta N°38 (abril 2024) — Art. 33 Código del Trabajo</h4>
+        <ul>
+          <li>Inalterabilidad de registros (hash SHA-256 encadenado)</li>
+          <li>Sello de tiempo criptográfico por registro</li>
+          <li>Geolocalización obligatoria con geofence</li>
+          <li>Acceso directo para fiscalizadores DT (token)</li>
+          <li>Libro de Asistencia electrónico Art. 33</li>
+          <li>Modo offline ante fallas de conectividad</li>
+          <li>Auditoría completa de acciones (actor, IP, fecha)</li>
+          <li>Respaldo y retención de datos por 5 años</li>
+          <li>Consentimiento biométrico con alternativa PIN</li>
+          <li>Exportación de datos (Ley 21.719 portabilidad)</li>
+        </ul>
       </div>
     </div>
 
@@ -151,29 +186,41 @@
     <div class="section">
       <h3 class="section-title">Funcionalidades</h3>
       <div class="features">
+        <div class="feature highlight">
+          <h4>Integridad criptográfica</h4>
+          <p>Hash encadenado + sello de tiempo. Registros a prueba de manipulación.</p>
+        </div>
+        <div class="feature highlight">
+          <h4>Acceso fiscalizador DT</h4>
+          <p>Token para que la DT consulte libro y verifique integridad</p>
+        </div>
+        <div class="feature highlight">
+          <h4>Verificación de cadena</h4>
+          <p>Endpoint que valida que ningún registro fue alterado</p>
+        </div>
         <div class="feature">
           <h4>Control de horarios</h4>
           <p>Turnos, tolerancias y cálculo automático de atrasos</p>
         </div>
         <div class="feature">
-          <h4>Salidas anticipadas</h4>
-          <p>Registro con motivo, quién autorizó y hora exacta</p>
+          <h4>Reporte de nómina</h4>
+          <p>Horas extras 50%/100%, ausencias, tardanzas por empleado</p>
         </div>
         <div class="feature">
           <h4>Reportes exportables</h4>
-          <p>Filtros por fecha, área y persona. Exporta a Excel</p>
+          <p>Filtros por fecha, área y persona. Exporta a Excel y CSV</p>
         </div>
         <div class="feature">
           <h4>Notificaciones</h4>
-          <p>Email automático al colaborador en cada registro</p>
+          <p>Email automático al colaborador y admin en cada registro</p>
         </div>
         <div class="feature">
-          <h4>Seguridad de datos</h4>
-          <p>Encriptación TLS 1.3 + AES-256. Cumplimiento legal</p>
+          <h4>Alertas de jornada</h4>
+          <p>Aviso automático cuando se acerca o excede el límite semanal</p>
         </div>
         <div class="feature">
           <h4>Implementación inmediata</h4>
-          <p>Configuración en 5 minutos. Sin instalaciones</p>
+          <p>Configuración en 5 minutos. Sin hardware especial</p>
         </div>
       </div>
     </div>
@@ -191,56 +238,48 @@
         <div class="step">
           <div class="number">2</div>
           <h4>Registras colaboradores</h4>
-          <p>Foto frontal de cada persona</p>
+          <p>Nombre, RUT y foto frontal</p>
         </div>
         <div class="step">
           <div class="number">3</div>
           <h4>Listo para operar</h4>
-          <p>Dispositivo con cámara en la entrada</p>
+          <p>Cualquier dispositivo con cámara en la entrada</p>
         </div>
       </div>
     </div>
 
     <!-- Pricing -->
     <div class="section">
-      <h3 class="section-title">Planes</h3>
-      <p class="section-subtitle">Sin permanencia mínima. Precios mensuales + IVA.</p>
-      <div class="pricing">
-        <div class="plan">
-          <h4>Básico</h4>
-          <div class="price">$59.990</div>
-          <div class="period">/mes</div>
-          <ul>
-            <li>Hasta 30 colaboradores</li>
-            <li>1 dispositivo</li>
-            <li>Reconocimiento facial</li>
-            <li>Reportes básicos</li>
-            <li>Soporte por email</li>
-          </ul>
-        </div>
-        <div class="plan featured">
-          <h4>Profesional</h4>
-          <div class="price">$119.990</div>
-          <div class="period">/mes</div>
-          <ul>
-            <li>Hasta 100 colaboradores</li>
-            <li>3 dispositivos</li>
-            <li>Reportes avanzados + Excel</li>
-            <li>Geolocalización</li>
-            <li>Soporte prioritario</li>
-          </ul>
-        </div>
-        <div class="plan">
-          <h4>Enterprise</h4>
-          <div class="price">$199.990</div>
-          <div class="period">/mes</div>
-          <ul>
-            <li>Hasta 300 colaboradores</li>
-            <li>10 dispositivos</li>
-            <li>Multi-sucursal</li>
-            <li>API completa</li>
-            <li>SLA 99.9%</li>
-          </ul>
+      <h3 class="section-title">Precio</h3>
+      <p class="section-subtitle">Simple, transparente, sin permanencia mínima.</p>
+      <div class="pricing-simple">
+        <div class="price-main">$1.590</div>
+        <div class="price-unit">por persona / mes + IVA</div>
+        <div class="price-note">Sin contratos de permanencia. Paga solo por los colaboradores activos.</div>
+        
+        <ul class="includes">
+          <li>Reconocimiento facial IA</li>
+          <li>Marcaje por PIN (alternativa)</li>
+          <li>Registros inalterables (hash)</li>
+          <li>Sello de tiempo criptográfico</li>
+          <li>Geolocalización con geofence</li>
+          <li>Modo offline + sync automático</li>
+          <li>Libro de Asistencia DT</li>
+          <li>Acceso fiscalizador DT</li>
+          <li>Reportes + exportación Excel/CSV</li>
+          <li>Reporte de nómina con HHEE</li>
+          <li>Notificaciones por email</li>
+          <li>Alertas de jornada excedida</li>
+          <li>Auditoría completa</li>
+          <li>Dispositivos ilimitados</li>
+          <li>Soporte por WhatsApp</li>
+          <li>15 días de prueba gratis</li>
+        </ul>
+
+        <div class="pricing-example">
+          <p><strong>Ejemplo:</strong> Empresa con 25 colaboradores → $39.750 + IVA/mes ($47.323 total)</p>
+          <p><strong>Ejemplo:</strong> Empresa con 50 colaboradores → $79.500 + IVA/mes ($94.605 total)</p>
+          <p><strong>Ejemplo:</strong> Empresa con 100 colaboradores → $159.000 + IVA/mes ($189.210 total)</p>
         </div>
       </div>
     </div>
@@ -258,7 +297,7 @@
 
     <!-- Footer -->
     <div class="footer">
-      <p>Flexio SpA · Santiago, Chile · Cumple con Ley 19.628 y Ley 21.719 de Protección de Datos Personales</p>
+      <p>Flexio SpA · Santiago, Chile · Conforme a Resolución Exenta N°38 DT · Ley 21.719 Protección de Datos · Art. 33 Código del Trabajo</p>
     </div>
   </div>
 </body>

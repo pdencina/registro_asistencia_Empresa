@@ -1,6 +1,7 @@
 const { getDb } = require('../lib/db');
 const { corsHeaders, handleCors } = require('../lib/cors');
 const { requireTenant } = require('../lib/tenant');
+const { verifyPin } = require('../lib/hash');
 
 module.exports = async function handler(req, res) {
   if (handleCors(req, res)) return;
@@ -40,7 +41,7 @@ module.exports = async function handler(req, res) {
       }
 
       // Verificar PIN del tenant
-      if (pin !== tenant.admin_pin_hash) {
+      if (!verifyPin(pin, tenant.admin_pin_hash)) {
         return res.status(401).json({ error: 'PIN incorrecto' });
       }
 
@@ -79,7 +80,7 @@ module.exports = async function handler(req, res) {
     if (req.method === 'DELETE') {
       const { device_id, pin } = req.body;
 
-      if (pin !== tenant.admin_pin_hash) {
+      if (!verifyPin(pin, tenant.admin_pin_hash)) {
         return res.status(401).json({ error: 'PIN incorrecto' });
       }
 

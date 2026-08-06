@@ -29,6 +29,7 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({
         geolocation_enabled: settings.geolocation_enabled,
         geolocation_radius_meters: settings.geolocation_radius_meters,
+        geolocation_required: settings.geolocation_required || false,
         biometric_consent_required: settings.biometric_consent_required,
         notification_email: settings.notification_email,
         alert_tolerance_minutes: settings.alert_tolerance_minutes || 15,
@@ -40,27 +41,30 @@ module.exports = async function handler(req, res) {
 
     // PUT: Update settings for this tenant
     if (req.method === 'PUT') {
-      const { geolocation_enabled, geolocation_radius_meters, biometric_consent_required, notification_email, webhook_url, alert_tolerance_minutes, alerts_enabled } = req.body;
+      const { geolocation_enabled, geolocation_radius_meters, geolocation_required, biometric_consent_required, notification_email, webhook_url, alert_tolerance_minutes, alerts_enabled } = req.body;
 
       await sql('ALTER TABLE tenant_settings ADD COLUMN IF NOT EXISTS alert_tolerance_minutes INTEGER DEFAULT 15');
       await sql('ALTER TABLE tenant_settings ADD COLUMN IF NOT EXISTS alerts_enabled BOOLEAN DEFAULT true');
+      await sql('ALTER TABLE tenant_settings ADD COLUMN IF NOT EXISTS geolocation_required BOOLEAN DEFAULT false');
 
       await sql(`
-        INSERT INTO tenant_settings (tenant_id, geolocation_enabled, geolocation_radius_meters, biometric_consent_required, notification_email, webhook_url, alert_tolerance_minutes, alerts_enabled, updated_at)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())
+        INSERT INTO tenant_settings (tenant_id, geolocation_enabled, geolocation_radius_meters, geolocation_required, biometric_consent_required, notification_email, webhook_url, alert_tolerance_minutes, alerts_enabled, updated_at)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW())
         ON CONFLICT (tenant_id) DO UPDATE SET
           geolocation_enabled = COALESCE($2, tenant_settings.geolocation_enabled),
           geolocation_radius_meters = COALESCE($3, tenant_settings.geolocation_radius_meters),
-          biometric_consent_required = COALESCE($4, tenant_settings.biometric_consent_required),
-          notification_email = COALESCE($5, tenant_settings.notification_email),
-          webhook_url = COALESCE($6, tenant_settings.webhook_url),
-          alert_tolerance_minutes = COALESCE($7, tenant_settings.alert_tolerance_minutes),
-          alerts_enabled = COALESCE($8, tenant_settings.alerts_enabled),
+          geolocation_required = COALESCE($4, tenant_settings.geolocation_required),
+          biometric_consent_required = COALESCE($5, tenant_settings.biometric_consent_required),
+          notification_email = COALESCE($6, tenant_settings.notification_email),
+          webhook_url = COALESCE($7, tenant_settings.webhook_url),
+          alert_tolerance_minutes = COALESCE($8, tenant_settings.alert_tolerance_minutes),
+          alerts_enabled = COALESCE($9, tenant_settings.alerts_enabled),
           updated_at = NOW()
       `, [
         tenant.id,
         geolocation_enabled !== undefined ? geolocation_enabled : true,
         geolocation_radius_meters || 100,
+        geolocation_required !== undefined ? geolocation_required : false,
         biometric_consent_required !== undefined ? biometric_consent_required : true,
         notification_email || null,
         webhook_url || null,

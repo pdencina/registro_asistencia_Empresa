@@ -1,5 +1,6 @@
 const { getDb } = require('../lib/db');
 const { corsHeaders, handleCors } = require('../lib/cors');
+const { verifyPin } = require('../lib/hash');
 
 /**
  * POST /api/auth/login
@@ -48,7 +49,7 @@ module.exports = async function handler(req, res) {
 
     // Login exitoso — check if it's the main admin or a tenant_user
     // First try: main admin
-    if (tenant.admin_email.toLowerCase() === email.toLowerCase() && tenant.admin_password === password) {
+    if (tenant.admin_email.toLowerCase() === email.toLowerCase() && verifyPin(password, tenant.admin_password)) {
       return res.status(200).json({
         success: true,
         tenant_id: tenant.id,
@@ -67,7 +68,7 @@ module.exports = async function handler(req, res) {
         'SELECT * FROM tenant_users WHERE tenant_id = $1 AND email = $2 AND active = true',
         [tenant.id, email.toLowerCase()]
       );
-      if (user && user.password === password) {
+      if (user && verifyPin(password, user.password)) {
         return res.status(200).json({
           success: true,
           tenant_id: tenant.id,

@@ -1,5 +1,6 @@
 const { getDb } = require('../lib/db');
 const { corsHeaders, handleCors } = require('../lib/cors');
+const { hashPin } = require('../lib/hash');
 
 /**
  * POST /api/auth/recover-pin
@@ -49,8 +50,8 @@ module.exports = async function handler(req, res) {
     // Generar contraseña temporal
     const tempPassword = Math.random().toString(36).slice(-8);
     
-    // Guardar contraseña temporal
-    await sql('UPDATE tenants SET admin_password = $1, updated_at = NOW() WHERE id = $2', [tempPassword, tenant.id]);
+    // Guardar contraseña temporal (hasheada)
+    await sql('UPDATE tenants SET admin_password = $1, must_change_password = true, updated_at = NOW() WHERE id = $2', [hashPin(tempPassword), tenant.id]);
 
     // Enviar email con la contraseña temporal
     const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'notificaciones@flexio.cl';

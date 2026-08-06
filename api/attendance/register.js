@@ -3,6 +3,8 @@ const { corsHeaders, handleCors } = require('../lib/cors');
 const { requireTenant } = require('../lib/tenant');
 const { validateRequest } = require('../lib/validate');
 const { put } = require('@vercel/blob');
+const { insertAttendanceRecord } = require('../lib/integrity');
+const { validateGeofence, getTenantGeoConfig, getNearestDevice } = require('../lib/geofence');
 
 module.exports = async function handler(req, res) {
   if (handleCors(req, res)) return;
@@ -49,13 +51,59 @@ module.exports = async function handler(req, res) {
     }
 
     const id = crypto.randomUUID();
-    const now = new Date().toISOString();
+    // Si viene de sync offline, usar el timestamp original de la marcación
+    const now = req.body._offline_timestamp || new Date().toISOString();
+    const isOfflineSync = !!req.body._offline_sync;
 
-    await sql(
-      `INSERT INTO attendance_records (id, tenant_id, employee_id, type, timestamp, photo_snapshot_url, method, notes)
-       VALUES ($1, $2, $3, $4, $5, $6, 'visual', $7)`,
-      [id, tenant.id, employee_id, type, now, snapshot_url, notes || null]
-    );
+    // Extraer coordenadas GPS si vienen en notes o body
+    let latitude = req.body.latitude || null;
+    let longitude = req.body.longitude || null;
+    if (!latitude && notes && notes.includes('GPS:')) {
+      const gpsMatch = notes.match(/GPS:\s*([-\d.]+),\s*([-\d.]+)/);
+      if (gpsMatch) {
+        latitude = parseFloat(gpsMatch[1]);
+        longitude = parseFloat(gpsMatch[2]);
+      }
+    }
+
+    // Validar geofence (Res. 38 DT — ubicación de la marcación)
+    const geoConfig = await getTenantGeoConfig(sql, tenant.id);
+    if (geoConfig.geolocationEnabled) {
+      const nearestDevice = latitude != null
+        ? await getNearestDevice(sql, tenant.id, latitude, longitude)
+        : null;
+
+      const geoResult = validateGeofence({
+        latitude,
+        longitude,
+        device: nearestDevice,
+        radiusMeters: geoConfig.radiusMeters,
+        geolocationRequired: geoConfig.geolocationRequired,
+      });
+
+      if (!geoResult.valid) {
+        return res.status(403).json({
+          error: geoResult.message,
+          distance: geoResult.distance,
+          max_radius: geoConfig.radiusMeters,
+          code: 'GEOFENCE_VIOLATION',
+        });
+      }
+    }
+
+    // Insertar con hash de integridad encadenado (Res. 38 DT)
+    await insertAttendanceRecord({
+      id,
+      tenant_id: tenant.id,
+      employee_id,
+      type,
+      timestamp: now,
+      method: 'visual',
+      notes: notes || null,
+      photo_snapshot_url: snapshot_url,
+      latitude,
+      longitude,
+    });
 
     const [record] = await sql(`
       SELECT ar.*, e.first_name, e.last_name, e.rut, e.department
