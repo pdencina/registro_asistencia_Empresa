@@ -26,8 +26,6 @@ export default function SettingsPage() {
   const [subscriptionData, setSubscriptionData] = useState(null);
   const [paymentHistory, setPaymentHistory] = useState([]);
   const [subscribing, setSubscribing] = useState(false);
-  const [showSubscribeForm, setShowSubscribeForm] = useState(false);
-  const [subscribeEmail, setSubscribeEmail] = useState('');
   const logoInputRef = useRef(null);
   const toast = useToast();
 
@@ -367,193 +365,150 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      {/* Suscripción y Facturación */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm mt-6">
-        <div className="flex items-center gap-3 mb-5">
-          <div className="w-9 h-9 bg-violet-50 rounded-lg flex items-center justify-center">
-            <CreditCard className="w-5 h-5 text-violet-600" />
-          </div>
-          <h3 className="font-bold text-gray-900">Suscripción y Facturación</h3>
+      {/* Mi Suscripción — estilo Kiva360 */}
+      <div className="mt-6 space-y-4">
+        <div>
+          <h3 className="text-xl font-bold text-gray-900">Mi Suscripción</h3>
+          <p className="text-sm text-gray-500">Plan y estado de pago de tu cuenta Flexio</p>
         </div>
 
         {subscriptionData ? (
-          <div className="space-y-4">
-            {/* Estado + Plan */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="p-4 bg-gray-50 rounded-xl">
-                <p className="text-xs text-gray-500 uppercase font-semibold mb-1">Plan actual</p>
-                <p className="text-lg font-bold text-gray-900 capitalize">{subscriptionData.plan || 'Trial'}</p>
-              </div>
-              <div className="p-4 bg-gray-50 rounded-xl">
-                <p className="text-xs text-gray-500 uppercase font-semibold mb-1">Estado</p>
-                <div className="flex items-center gap-2">
-                  {subscriptionData.status === 'active' || subscriptionData.status === 'trial' ? (
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                  ) : subscriptionData.status === 'past_due' ? (
-                    <AlertTriangle className="w-4 h-4 text-red-500" />
-                  ) : (
-                    <Clock className="w-4 h-4 text-amber-500" />
-                  )}
-                  <p className={`text-lg font-bold ${
-                    subscriptionData.status === 'active' ? 'text-emerald-600' :
-                    subscriptionData.status === 'trial' ? 'text-blue-600' :
-                    subscriptionData.status === 'past_due' ? 'text-red-600' : 'text-amber-600'
-                  }`}>
-                    {subscriptionData.status === 'active' ? 'Activa' :
-                     subscriptionData.status === 'trial' ? 'Prueba gratuita' :
-                     subscriptionData.status === 'past_due' ? 'Pago pendiente' :
-                     subscriptionData.status === 'cancelled' ? 'Cancelada' : subscriptionData.status}
-                  </p>
-                </div>
-              </div>
-              <div className="p-4 bg-gray-50 rounded-xl">
-                <p className="text-xs text-gray-500 uppercase font-semibold mb-1">
-                  {subscriptionData.status === 'trial' ? 'Trial vence' : 'Próximo cobro'}
-                </p>
-                <p className="text-lg font-bold text-gray-900">
-                  {subscriptionData.status === 'trial' && subscriptionData.trial_ends_at
-                    ? new Date(subscriptionData.trial_ends_at).toLocaleDateString('es-CL', { day: 'numeric', month: 'short', year: 'numeric' })
-                    : subscriptionData.current_period_end
-                    ? new Date(subscriptionData.current_period_end).toLocaleDateString('es-CL', { day: 'numeric', month: 'short', year: 'numeric' })
-                    : '—'}
-                </p>
-              </div>
-            </div>
-
-            {/* Período actual */}
-            {subscriptionData.current_period_start && (
-              <div className="flex items-center gap-2 p-3 bg-blue-50 border border-blue-100 rounded-xl">
-                <Calendar className="w-4 h-4 text-blue-600" />
-                <p className="text-sm text-blue-800">
-                  Período actual: <strong>{new Date(subscriptionData.current_period_start).toLocaleDateString('es-CL')}</strong> al <strong>{new Date(subscriptionData.current_period_end).toLocaleDateString('es-CL')}</strong>
-                </p>
-              </div>
-            )}
-
-            {/* Trial warning */}
-            {subscriptionData.status === 'trial' && subscriptionData.trial_ends_at && (
-              <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl">
-                <div className="flex items-start gap-3">
-                  <AlertTriangle className="w-5 h-5 text-amber-600 mt-0.5 shrink-0" />
+          <>
+            {/* Card principal: Plan + Estado */}
+            <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+              <div className="flex items-center justify-between mb-5">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-violet-100 rounded-full flex items-center justify-center">
+                    <CreditCard className="w-5 h-5 text-violet-600" />
+                  </div>
                   <div>
-                    <p className="font-medium text-amber-900">Período de prueba</p>
-                    <p className="text-sm text-amber-700 mt-1">
-                      Tu prueba gratuita termina el <strong>{new Date(subscriptionData.trial_ends_at).toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric' })}</strong>.
-                      Después de esa fecha necesitarás activar un plan para seguir usando Flexio.
+                    <p className="font-bold text-gray-900">
+                      Plan {subscriptionData.plan ? subscriptionData.plan.charAt(0).toUpperCase() + subscriptionData.plan.slice(1) : 'Trial'}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      Desde {subscriptionData.current_period_start 
+                        ? new Date(subscriptionData.current_period_start).toLocaleDateString('es-CL', { month: 'long', year: 'numeric' })
+                        : new Date().toLocaleDateString('es-CL', { month: 'long', year: 'numeric' })}
                     </p>
                   </div>
                 </div>
+                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                  subscriptionData.status === 'active' ? 'bg-emerald-100 text-emerald-700' :
+                  subscriptionData.status === 'trial' ? 'bg-blue-100 text-blue-700' :
+                  subscriptionData.status === 'past_due' ? 'bg-red-100 text-red-700' :
+                  'bg-amber-100 text-amber-700'
+                }`}>
+                  {subscriptionData.status === 'active' ? 'ACTIVA' :
+                   subscriptionData.status === 'trial' ? 'TRIAL' :
+                   subscriptionData.status === 'past_due' ? 'VENCIDA' : subscriptionData.status?.toUpperCase()}
+                </span>
               </div>
-            )}
 
-            {/* Datos de pago */}
-            <div className="border-t pt-4 mt-4">
-              <p className="text-xs text-gray-500 font-semibold uppercase mb-3">Datos para transferencia</p>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
-                <div className="p-3 bg-gray-50 rounded-lg">
-                  <p className="text-[11px] text-gray-500">Razón Social</p>
-                  <p className="font-medium text-gray-900">Flexio Technologies Spa</p>
+              <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-100">
+                <div>
+                  <p className="text-[11px] text-gray-500 uppercase font-semibold mb-1">Monto mensual</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {subscriptionData.status === 'trial' ? '$0' : '$1.590'}
+                  </p>
+                  {subscriptionData.status !== 'trial' && (
+                    <p className="text-[11px] text-gray-400">× colaborador</p>
+                  )}
                 </div>
-                <div className="p-3 bg-gray-50 rounded-lg">
-                  <p className="text-[11px] text-gray-500">RUT</p>
-                  <p className="font-medium text-gray-900">78.479.402-4</p>
+                <div>
+                  <p className="text-[11px] text-gray-500 uppercase font-semibold mb-1">Próximo pago</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {(() => {
+                      const endDate = subscriptionData.status === 'trial' 
+                        ? subscriptionData.trial_ends_at 
+                        : subscriptionData.current_period_end;
+                      if (!endDate) return '—';
+                      return new Date(endDate).toLocaleDateString('es-CL', { day: 'numeric', month: 'short' });
+                    })()}
+                  </p>
+                  <p className="text-[11px] text-gray-400">
+                    {(() => {
+                      const endDate = subscriptionData.status === 'trial' 
+                        ? subscriptionData.trial_ends_at 
+                        : subscriptionData.current_period_end;
+                      if (!endDate) return '';
+                      const days = Math.max(0, Math.ceil((new Date(endDate) - new Date()) / 86400000));
+                      return `en ${days} días`;
+                    })()}
+                  </p>
                 </div>
-                <div className="p-3 bg-gray-50 rounded-lg">
-                  <p className="text-[11px] text-gray-500">Banco</p>
-                  <p className="font-medium text-gray-900">Bci</p>
-                </div>
-                <div className="p-3 bg-gray-50 rounded-lg">
-                  <p className="text-[11px] text-gray-500">Tipo de cuenta</p>
-                  <p className="font-medium text-gray-900">Cta. Cte. en pesos</p>
-                </div>
-                <div className="p-3 bg-gray-50 rounded-lg">
-                  <p className="text-[11px] text-gray-500">N° Cuenta</p>
-                  <p className="font-medium text-gray-900 font-mono">68569265</p>
-                </div>
-                <div className="p-3 bg-gray-50 rounded-lg">
-                  <p className="text-[11px] text-gray-500">Email</p>
-                  <p className="font-medium text-gray-900">pablo@flexio.cl</p>
+                <div>
+                  <p className="text-[11px] text-gray-500 uppercase font-semibold mb-1">Meses pagados</p>
+                  <p className="text-2xl font-bold text-gray-900">{subscriptionData.meses_pagados || 0}</p>
                 </div>
               </div>
-              <p className="text-xs text-gray-400 mt-3">Envía tu comprobante a pablo@flexio.cl para activar el pago más rápido.</p>
             </div>
 
-            {/* Cobro automático con tarjeta */}
-            <div className="border-t pt-4 mt-4">
-              {subscriptionData.mp_subscription_id && subscriptionData.status === 'active' ? (
-                <div className="flex items-center gap-3 p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+            {/* Card: Pago automático */}
+            <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 bg-gray-100 rounded-lg flex items-center justify-center">
+                    <CreditCard className="w-4.5 h-4.5 text-gray-600" />
+                  </div>
                   <div>
-                    <p className="font-medium text-emerald-900 text-sm">Tarjeta inscrita — Cobro automático activo</p>
-                    <p className="text-xs text-emerald-700">Se cobra el día 30 de cada mes. Si falla, se reintenta hasta 3 veces en 5 días.</p>
+                    <p className="font-semibold text-gray-900 text-sm">Pago automático mensual</p>
+                    <p className="text-xs text-gray-500">Inscribe tu tarjeta para cobro automático los 30 de cada mes</p>
                   </div>
                 </div>
-              ) : !showSubscribeForm ? (
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-semibold text-gray-900 text-sm">Cobro automático con tarjeta</p>
-                    <p className="text-xs text-gray-500">Se cobra el día 30 de cada mes. 5 días de gracia si falla.</p>
-                  </div>
-                  <button onClick={() => { setSubscribeEmail(settings.notification_email || ''); setShowSubscribeForm(true); }}
-                    className="flex items-center gap-2 px-4 py-2.5 bg-violet-600 hover:bg-violet-700 text-white rounded-xl text-sm font-medium transition">
-                    <CreditCard className="w-4 h-4" /> Suscribir tarjeta
+                {subscriptionData.mp_subscription_id && subscriptionData.status === 'active' ? (
+                  <span className="flex items-center gap-1.5 px-3 py-2 bg-emerald-100 text-emerald-700 rounded-lg text-xs font-semibold">
+                    <CheckCircle2 className="w-3.5 h-3.5" /> Activo
+                  </span>
+                ) : (
+                  <button
+                    onClick={async () => {
+                      setSubscribing(true);
+                      try {
+                        const email = settings.notification_email || subscriptionData.admin_email || '';
+                        if (!email) { toast.error('Configura un email de alertas primero'); setSubscribing(false); return; }
+                        const res = await fetch(`${API_BASE}/billing/subscribe`, {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json', ...tenantHeaders() },
+                          body: JSON.stringify({ payer_email: email }),
+                        });
+                        const data = await res.json();
+                        if (data.init_point) {
+                          window.location.href = data.init_point;
+                        } else {
+                          toast.error(data.error || 'Error al crear suscripción');
+                        }
+                      } catch { toast.error('Error de conexión'); }
+                      setSubscribing(false);
+                    }}
+                    disabled={subscribing}
+                    className="px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-white rounded-lg text-sm font-medium transition disabled:opacity-50"
+                  >
+                    {subscribing ? 'Redirigiendo...' : 'Suscribir tarjeta'}
                   </button>
-                </div>
-              ) : (
-                <div className="p-5 bg-violet-50 border border-violet-200 rounded-xl space-y-4">
-                  <div className="flex items-center gap-2">
-                    <CreditCard className="w-5 h-5 text-violet-600" />
-                    <p className="font-semibold text-violet-900">Inscribir tarjeta para cobro automático</p>
-                  </div>
-                  <p className="text-sm text-violet-700">
-                    Serás redirigido a MercadoPago para inscribir tu tarjeta de crédito o débito. 
-                    El cobro de <strong>$1.590 × colaborador</strong> se realizará automáticamente el día 30 de cada mes.
-                  </p>
-                  <div>
-                    <label className="block text-xs font-semibold text-violet-700 mb-1.5">Email asociado al pago</label>
-                    <input type="email" value={subscribeEmail} onChange={e => setSubscribeEmail(e.target.value)}
-                      placeholder="tu@email.cl"
-                      className="w-full px-3 py-2.5 border border-violet-200 rounded-lg text-sm focus:ring-2 focus:ring-violet-500 outline-none bg-white" />
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <button
-                      onClick={async () => {
-                        if (!subscribeEmail) { toast.error('Ingresa un email'); return; }
-                        setSubscribing(true);
-                        try {
-                          const res = await fetch(`${API_BASE}/billing/subscribe`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json', ...tenantHeaders() },
-                            body: JSON.stringify({ payer_email: subscribeEmail }),
-                          });
-                          const data = await res.json();
-                          if (data.init_point) {
-                            window.location.href = data.init_point;
-                          } else {
-                            toast.error(data.error || 'Error al crear suscripción');
-                          }
-                        } catch { toast.error('Error de conexión'); }
-                        setSubscribing(false);
-                      }}
-                      disabled={subscribing || !subscribeEmail}
-                      className="flex items-center gap-2 px-5 py-2.5 bg-violet-600 hover:bg-violet-700 text-white rounded-xl text-sm font-semibold transition disabled:opacity-50"
-                    >
-                      <CreditCard className="w-4 h-4" />
-                      {subscribing ? 'Redirigiendo a MercadoPago...' : 'Continuar a MercadoPago'}
-                    </button>
-                    <button onClick={() => setShowSubscribeForm(false)}
-                      className="px-4 py-2.5 text-gray-600 hover:bg-gray-100 rounded-xl text-sm font-medium transition">
-                      Cancelar
-                    </button>
-                  </div>
-                </div>
-              )}
+                )}
+              </div>
+            </div>
+
+            {/* Card: Datos para pago por transferencia */}
+            <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+              <div className="flex items-center gap-2 mb-4">
+                <Building2 className="w-4 h-4 text-gray-600" />
+                <p className="font-semibold text-gray-900 text-sm">Datos para realizar tu pago</p>
+              </div>
+              <div className="space-y-2 text-sm text-gray-700">
+                <p><strong>Nombre:</strong> Flexio Technologies Spa</p>
+                <p><strong>RUT:</strong> 78.479.402-4</p>
+                <p><strong>Banco:</strong> Bci</p>
+                <p><strong>Cuenta Corriente:</strong> 68569265</p>
+                <p><strong>Email:</strong> pablo@flexio.cl</p>
+              </div>
+              <p className="text-xs text-gray-400 mt-4">Realiza la transferencia antes del día 30 de cada mes. Envía el comprobante a pablo@flexio.cl.</p>
             </div>
 
             {/* Historial de pagos */}
             {paymentHistory.length > 0 && (
-              <div className="border-t pt-4 mt-4">
-                <p className="text-xs text-gray-500 font-semibold uppercase mb-3">Historial de pagos</p>
+              <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+                <p className="font-semibold text-gray-900 text-sm mb-4">Historial de pagos</p>
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
@@ -586,10 +541,10 @@ export default function SettingsPage() {
                 </div>
               </div>
             )}
-          </div>
+          </>
         ) : (
-          <div className="p-4 bg-gray-50 rounded-xl text-center">
-            <p className="text-sm text-gray-500">Cargando información de suscripción...</p>
+          <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+            <p className="text-sm text-gray-500 text-center">Cargando información de suscripción...</p>
           </div>
         )}
       </div>

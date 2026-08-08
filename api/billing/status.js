@@ -58,6 +58,8 @@ module.exports = async function handler(req, res) {
       current_period_end: subscription.current_period_end,
       trial_ends_at: subscription.trial_ends_at,
       last_payment_date: subscription.last_payment_date,
+      meses_pagados: subscription.meses_pagados || 0,
+      admin_email: subscription.tenant_plan ? undefined : undefined,
     });
   } catch (error) {
     return res.status(500).json({ error: error.message });
