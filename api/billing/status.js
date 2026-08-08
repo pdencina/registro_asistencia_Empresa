@@ -13,23 +13,31 @@ module.exports = async function handler(req, res) {
   }
 
   const sql = getDb();
-  const { tenant_id } = req.query;
+  const { tenant_id, tenant_slug } = req.query;
 
-  if (!tenant_id) {
-    return res.status(400).json({ error: 'tenant_id es obligatorio' });
+  if (!tenant_id && !tenant_slug) {
+    return res.status(400).json({ error: 'tenant_id o tenant_slug es obligatorio' });
   }
 
   try {
+    // Resolve tenant_id from slug if needed
+    let resolvedTenantId = tenant_id;
+    if (!resolvedTenantId && tenant_slug) {
+      const [tenant] = await sql('SELECT id FROM tenants WHERE slug = $1', [tenant_slug]);
+      if (!tenant) return res.status(404).json({ error: 'Empresa no encontrada' });
+      resolvedTenantId = tenant.id;
+    }
+
     const rows = await sql(`
       SELECT s.*, t.name as tenant_name, t.plan as tenant_plan, t.trial_ends_at
       FROM subscriptions s
       JOIN tenants t ON t.id = s.tenant_id
       WHERE s.tenant_id = $1
-    `, [tenant_id]);
+    `, [resolvedTenantId]);
 
     if (rows.length === 0) {
       // Verificar si el tenant existe pero no tiene suscripción
-      const tenantRows = await sql('SELECT * FROM tenants WHERE id = $1', [tenant_id]);
+      const tenantRows = await sql('SELECT * FROM tenants WHERE id = $1', [resolvedTenantId]);
       if (tenantRows.length === 0) {
         return res.status(404).json({ error: 'Empresa no encontrada' });
       }

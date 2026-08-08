@@ -2,8 +2,8 @@ const { corsHeaders, handleCors } = require('../lib/cors');
 
 /**
  * GET /api/billing/plans
- * Retorna los planes disponibles con sus precios y IDs de MercadoPago.
- * Los plan IDs se crean una vez en MercadoPago y se guardan como env vars.
+ * Retorna los planes disponibles con precios por persona.
+ * Modelo: $1.590/persona/mes + IVA
  */
 module.exports = async function handler(req, res) {
   if (handleCors(req, res)) return;
@@ -12,39 +12,40 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  const PRICE_PER_PERSON = 1590; // CLP neto por persona/mes
+
   const plans = [
     {
-      id: 'basico',
-      name: 'Básico',
-      price: 59990,
+      id: 'flexio',
+      name: 'Flexio',
+      price_per_person: PRICE_PER_PERSON,
       currency: 'CLP',
       interval: 'monthly',
-      max_employees: 30,
-      max_devices: 1,
-      features: ['Hasta 30 colaboradores', '1 dispositivo', 'Reconocimiento facial', 'Reportes básicos', 'Soporte por email'],
-      mp_plan_id: process.env.MP_PLAN_BASICO_ID || null,
-    },
-    {
-      id: 'profesional',
-      name: 'Profesional',
-      price: 119990,
-      currency: 'CLP',
-      interval: 'monthly',
-      max_employees: 100,
-      max_devices: 3,
-      features: ['Hasta 100 colaboradores', '3 dispositivos', 'Reportes y exportación Excel', 'Webhooks', 'Geolocalización', 'Soporte prioritario'],
-      mp_plan_id: process.env.MP_PLAN_PROFESIONAL_ID || null,
-    },
-    {
-      id: 'enterprise',
-      name: 'Enterprise',
-      price: 199990,
-      currency: 'CLP',
-      interval: 'monthly',
-      max_employees: 9999,
-      max_devices: 999,
-      features: ['Colaboradores ilimitados', 'Dispositivos ilimitados', 'Multi-sucursal', 'API completa', 'SLA 99.9%', 'Soporte 24/7'],
-      mp_plan_id: process.env.MP_PLAN_ENTERPRISE_ID || null,
+      billing_day: 30,
+      grace_days: 5,
+      features: [
+        'Reconocimiento facial IA',
+        'Marcaje por PIN (alternativa)',
+        'Registros inalterables (hash SHA-256)',
+        'Sello de tiempo criptográfico',
+        'Geolocalización con geofence',
+        'Modo offline + sync automático',
+        'Libro de Asistencia DT',
+        'Acceso fiscalizador DT',
+        'Reportes + exportación Excel/CSV',
+        'Reporte de nómina con HHEE',
+        'Notificaciones por email',
+        'Alertas de jornada excedida',
+        'Auditoría completa',
+        'Dispositivos ilimitados',
+        'Soporte por WhatsApp',
+      ],
+      examples: [
+        { employees: 10, monthly: 15900, monthly_iva: 18921 },
+        { employees: 25, monthly: 39750, monthly_iva: 47323 },
+        { employees: 50, monthly: 79500, monthly_iva: 94605 },
+        { employees: 100, monthly: 159000, monthly_iva: 189210 },
+      ],
     },
   ];
 

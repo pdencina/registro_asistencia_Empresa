@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { MapPin, Shield, Loader, ToggleLeft, ToggleRight, Building2, Upload, Trash2, FileText, ExternalLink, Printer, Bell } from 'lucide-react';
+import { MapPin, Shield, Loader, ToggleLeft, ToggleRight, Building2, Upload, Trash2, FileText, ExternalLink, Printer, Bell, CreditCard, Calendar, CheckCircle2, AlertTriangle, Clock } from 'lucide-react';
 import { useToast } from '../components/Toast';
 import InfoTooltip from '../components/InfoTooltip';
 
@@ -23,6 +23,9 @@ export default function SettingsPage() {
   const [logoUrl, setLogoUrl] = useState(null);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [contractData, setContractData] = useState(null);
+  const [subscriptionData, setSubscriptionData] = useState(null);
+  const [paymentHistory, setPaymentHistory] = useState([]);
+  const [subscribing, setSubscribing] = useState(false);
   const logoInputRef = useRef(null);
   const toast = useToast();
 
@@ -35,6 +38,7 @@ export default function SettingsPage() {
     loadSettings();
     loadLogo();
     loadContract();
+    loadSubscription();
   }, []);
 
   async function loadSettings() {
@@ -81,6 +85,30 @@ export default function SettingsPage() {
     } catch (err) {
       console.error(err);
     }
+  }
+
+  async function loadSubscription() {
+    const slug = getTenantSlug();
+    if (!slug) return;
+    try {
+      const res = await fetch(`${API_BASE}/billing/status?tenant_slug=${slug}`, {
+        headers: { ...tenantHeaders() },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setSubscriptionData(data);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+    // Cargar historial de pagos
+    try {
+      const res = await fetch(`${API_BASE}/billing/payments`, { headers: { ...tenantHeaders() } });
+      if (res.ok) {
+        const data = await res.json();
+        setPaymentHistory(data.payments || []);
+      }
+    } catch (err) {}
   }
 
   async function handleLogoUpload(e) {
@@ -335,6 +363,204 @@ export default function SettingsPage() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Suscripción y Facturación */}
+      <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm mt-6">
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-9 h-9 bg-violet-50 rounded-lg flex items-center justify-center">
+            <CreditCard className="w-5 h-5 text-violet-600" />
+          </div>
+          <h3 className="font-bold text-gray-900">Suscripción y Facturación</h3>
+        </div>
+
+        {subscriptionData ? (
+          <div className="space-y-4">
+            {/* Estado + Plan */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="p-4 bg-gray-50 rounded-xl">
+                <p className="text-xs text-gray-500 uppercase font-semibold mb-1">Plan actual</p>
+                <p className="text-lg font-bold text-gray-900 capitalize">{subscriptionData.plan || 'Trial'}</p>
+              </div>
+              <div className="p-4 bg-gray-50 rounded-xl">
+                <p className="text-xs text-gray-500 uppercase font-semibold mb-1">Estado</p>
+                <div className="flex items-center gap-2">
+                  {subscriptionData.status === 'active' || subscriptionData.status === 'trial' ? (
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                  ) : subscriptionData.status === 'past_due' ? (
+                    <AlertTriangle className="w-4 h-4 text-red-500" />
+                  ) : (
+                    <Clock className="w-4 h-4 text-amber-500" />
+                  )}
+                  <p className={`text-lg font-bold ${
+                    subscriptionData.status === 'active' ? 'text-emerald-600' :
+                    subscriptionData.status === 'trial' ? 'text-blue-600' :
+                    subscriptionData.status === 'past_due' ? 'text-red-600' : 'text-amber-600'
+                  }`}>
+                    {subscriptionData.status === 'active' ? 'Activa' :
+                     subscriptionData.status === 'trial' ? 'Prueba gratuita' :
+                     subscriptionData.status === 'past_due' ? 'Pago pendiente' :
+                     subscriptionData.status === 'cancelled' ? 'Cancelada' : subscriptionData.status}
+                  </p>
+                </div>
+              </div>
+              <div className="p-4 bg-gray-50 rounded-xl">
+                <p className="text-xs text-gray-500 uppercase font-semibold mb-1">
+                  {subscriptionData.status === 'trial' ? 'Trial vence' : 'Próximo cobro'}
+                </p>
+                <p className="text-lg font-bold text-gray-900">
+                  {subscriptionData.status === 'trial' && subscriptionData.trial_ends_at
+                    ? new Date(subscriptionData.trial_ends_at).toLocaleDateString('es-CL', { day: 'numeric', month: 'short', year: 'numeric' })
+                    : subscriptionData.current_period_end
+                    ? new Date(subscriptionData.current_period_end).toLocaleDateString('es-CL', { day: 'numeric', month: 'short', year: 'numeric' })
+                    : '—'}
+                </p>
+              </div>
+            </div>
+
+            {/* Período actual */}
+            {subscriptionData.current_period_start && (
+              <div className="flex items-center gap-2 p-3 bg-blue-50 border border-blue-100 rounded-xl">
+                <Calendar className="w-4 h-4 text-blue-600" />
+                <p className="text-sm text-blue-800">
+                  Período actual: <strong>{new Date(subscriptionData.current_period_start).toLocaleDateString('es-CL')}</strong> al <strong>{new Date(subscriptionData.current_period_end).toLocaleDateString('es-CL')}</strong>
+                </p>
+              </div>
+            )}
+
+            {/* Trial warning */}
+            {subscriptionData.status === 'trial' && subscriptionData.trial_ends_at && (
+              <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="w-5 h-5 text-amber-600 mt-0.5 shrink-0" />
+                  <div>
+                    <p className="font-medium text-amber-900">Período de prueba</p>
+                    <p className="text-sm text-amber-700 mt-1">
+                      Tu prueba gratuita termina el <strong>{new Date(subscriptionData.trial_ends_at).toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric' })}</strong>.
+                      Después de esa fecha necesitarás activar un plan para seguir usando Flexio.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Datos de pago */}
+            <div className="border-t pt-4 mt-4">
+              <p className="text-xs text-gray-500 font-semibold uppercase mb-3">Datos para transferencia</p>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+                <div className="p-3 bg-gray-50 rounded-lg">
+                  <p className="text-[11px] text-gray-500">Razón Social</p>
+                  <p className="font-medium text-gray-900">Flexio Technologies Spa</p>
+                </div>
+                <div className="p-3 bg-gray-50 rounded-lg">
+                  <p className="text-[11px] text-gray-500">RUT</p>
+                  <p className="font-medium text-gray-900">78.479.402-4</p>
+                </div>
+                <div className="p-3 bg-gray-50 rounded-lg">
+                  <p className="text-[11px] text-gray-500">Banco</p>
+                  <p className="font-medium text-gray-900">Bci</p>
+                </div>
+                <div className="p-3 bg-gray-50 rounded-lg">
+                  <p className="text-[11px] text-gray-500">Tipo de cuenta</p>
+                  <p className="font-medium text-gray-900">Cta. Cte. en pesos</p>
+                </div>
+                <div className="p-3 bg-gray-50 rounded-lg">
+                  <p className="text-[11px] text-gray-500">N° Cuenta</p>
+                  <p className="font-medium text-gray-900 font-mono">68569265</p>
+                </div>
+                <div className="p-3 bg-gray-50 rounded-lg">
+                  <p className="text-[11px] text-gray-500">Email</p>
+                  <p className="font-medium text-gray-900">pablo@flexio.cl</p>
+                </div>
+              </div>
+              <p className="text-xs text-gray-400 mt-3">Envía tu comprobante a pablo@flexio.cl para activar el pago más rápido.</p>
+            </div>
+
+            {/* Botón suscribir tarjeta */}
+            <div className="border-t pt-4 mt-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-semibold text-gray-900 text-sm">Cobro automático con tarjeta</p>
+                  <p className="text-xs text-gray-500">Se cobra el día 30 de cada mes. 5 días de gracia si falla.</p>
+                </div>
+                {subscriptionData.mp_subscription_id && subscriptionData.status === 'active' ? (
+                  <span className="flex items-center gap-1.5 text-xs font-medium text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-lg">
+                    <CheckCircle2 className="w-3.5 h-3.5" /> Tarjeta activa
+                  </span>
+                ) : (
+                  <button
+                    onClick={async () => {
+                      setSubscribing(true);
+                      try {
+                        const slug = getTenantSlug();
+                        const email = settings.notification_email || prompt('Ingresa tu email para MercadoPago:');
+                        if (!email) { setSubscribing(false); return; }
+                        const res = await fetch(`${API_BASE}/billing/subscribe`, {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json', ...tenantHeaders() },
+                          body: JSON.stringify({ payer_email: email }),
+                        });
+                        const data = await res.json();
+                        if (data.init_point) {
+                          window.location.href = data.init_point;
+                        } else {
+                          toast.error(data.error || 'Error al crear suscripción');
+                        }
+                      } catch { toast.error('Error de conexión'); }
+                      setSubscribing(false);
+                    }}
+                    disabled={subscribing}
+                    className="flex items-center gap-2 px-4 py-2.5 bg-violet-600 hover:bg-violet-700 text-white rounded-xl text-sm font-medium transition disabled:opacity-50"
+                  >
+                    <CreditCard className="w-4 h-4" />
+                    {subscribing ? 'Procesando...' : 'Suscribir tarjeta'}
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Historial de pagos */}
+            {paymentHistory.length > 0 && (
+              <div className="border-t pt-4 mt-4">
+                <p className="text-xs text-gray-500 font-semibold uppercase mb-3">Historial de pagos</p>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="text-left text-gray-500 border-b text-xs">
+                        <th className="pb-2 font-medium">Período</th>
+                        <th className="pb-2 font-medium">Monto</th>
+                        <th className="pb-2 font-medium">Estado</th>
+                        <th className="pb-2 font-medium">Fecha</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {paymentHistory.slice(0, 6).map(p => (
+                        <tr key={p.id} className="border-b last:border-0">
+                          <td className="py-2 text-gray-700">{p.periodo}</td>
+                          <td className="py-2 font-medium">${p.monto_iva?.toLocaleString('es-CL')}</td>
+                          <td className="py-2">
+                            <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                              p.estado === 'pagado' ? 'bg-emerald-100 text-emerald-700' :
+                              p.estado === 'pendiente' ? 'bg-amber-100 text-amber-700' :
+                              'bg-red-100 text-red-700'
+                            }`}>{p.estado_label}</span>
+                          </td>
+                          <td className="py-2 text-gray-500 text-xs">
+                            {p.pagado_at ? new Date(p.pagado_at).toLocaleDateString('es-CL') : '—'}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="p-4 bg-gray-50 rounded-xl text-center">
+            <p className="text-sm text-gray-500">Cargando información de suscripción...</p>
+          </div>
+        )}
       </div>
 
       {/* Contrato */}
