@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flexio — Tarjeta digital</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  :root{
+    --bg: #070c16;
+    --bg-2: #0c1526;
+    --blue: #2563eb;
+    --cyan: #38bdf8;
+    --ink: #eaf1fb;
+    --muted: #6b7d99;
+    --line: rgba(148,178,224,0.14);
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:
+      radial-gradient(circle at 20% 15%, rgba(37,99,235,0.25), transparent 45%),
+      radial-gradient(circle at 85% 85%, rgba(56,189,248,0.15), transparent 50%),
+      var(--bg);
+    font-family:'Inter', sans-serif;
+    color:var(--ink);
+    padding:24px;
+    overflow:hidden;
+  }
+
+  .card{
+    position:relative;
+    width:380px;
+    max-width:100%;
+    border-radius:28px;
+    background:linear-gradient(160deg, var(--bg-2) 0%, #081020 100%);
+    border:1px solid var(--line);
+    box-shadow:
+      0 40px 80px -30px rgba(0,0,0,0.7),
+      0 0 0 1px rgba(37,99,235,0.05) inset;
+    padding:36px 32px 30px;
+    overflow:hidden;
+  }
+
+  /* scan grid backdrop */
+  .grid{
+    position:absolute;
+    inset:0;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size:26px 26px;
+    -webkit-mask-image: radial-gradient(ellipse at 50% 0%, black 0%, transparent 70%);
+            mask-image: radial-gradient(ellipse at 50% 0%, black 0%, transparent 70%);
+    opacity:0.5;
+    pointer-events:none;
+  }
+
+  /* scanning line — signature element */
+  .scanline{
+    position:absolute;
+    left:0; right:0;
+    height:2px;
+    background:linear-gradient(90deg, transparent, var(--cyan), transparent);
+    box-shadow:0 0 16px 2px var(--cyan);
+    top:0;
+    animation:sweep 3.2s ease-in-out infinite;
+    opacity:0.85;
+    pointer-events:none;
+  }
+  @keyframes sweep{
+    0%   { top:6%; opacity:0; }
+    8%   { opacity:0.9; }
+    50%  { top:94%; opacity:0.9; }
+    58%  { opacity:0; }
+    100% { top:6%; opacity:0; }
+  }
+
+  .eyebrow{
+    position:relative;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-family:'Space Grotesk', sans-serif;
+    font-size:11px;
+    letter-spacing:0.16em;
+    text-transform:uppercase;
+    color:var(--cyan);
+    margin-bottom:18px;
+  }
+  .eyebrow .dot{
+    width:6px;height:6px;border-radius:50%;
+    background:var(--cyan);
+    box-shadow:0 0 8px 2px var(--cyan);
+    animation:pulse 1.8s ease-in-out infinite;
+  }
+  @keyframes pulse{
+    0%,100%{ opacity:1; transform:scale(1); }
+    50%{ opacity:0.4; transform:scale(0.7); }
+  }
+
+  .brand{
+    position:relative;
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:700;
+    font-size:34px;
+    letter-spacing:-0.02em;
+    line-height:1;
+    margin:0 0 6px;
+    background:linear-gradient(120deg, #ffffff 30%, var(--cyan) 100%);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+
+  .tagline{
+    position:relative;
+    font-size:13.5px;
+    color:var(--muted);
+    margin:0 0 28px;
+    max-width:26ch;
+    line-height:1.5;
+  }
+
+  .qr-wrap{
+    position:relative;
+    width:198px;
+    height:198px;
+    margin:0 auto 22px;
+    border-radius:20px;
+    background:#f4f8ff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:
+      0 0 0 1px rgba(56,189,248,0.25),
+      0 24px 50px -20px rgba(37,99,235,0.55);
+  }
+  .corner{
+    position:absolute;
+    width:22px; height:22px;
+    border-color:var(--cyan);
+    border-style:solid;
+    opacity:0.9;
+  }
+  .corner.tl{ top:-8px; left:-8px; border-width:3px 0 0 3px; border-top-left-radius:8px; }
+  .corner.tr{ top:-8px; right:-8px; border-width:3px 3px 0 0; border-top-right-radius:8px; }
+  .corner.bl{ bottom:-8px; left:-8px; border-width:0 0 3px 3px; border-bottom-left-radius:8px; }
+  .corner.br{ bottom:-8px; right:-8px; border-width:0 3px 3px 0; border-bottom-right-radius:8px; }
+
+  #qrcode{ border-radius:12px; overflow:hidden; }
+  #qrcode img, #qrcode canvas{ display:block; border-radius:12px; }
+
+  .scan-cta{
+    position:relative;
+    text-align:center;
+    font-family:'Space Grotesk', sans-serif;
+    font-size:13px;
+    color:var(--ink);
+    letter-spacing:0.02em;
+    margin-bottom:22px;
+  }
+  .scan-cta span{ color:var(--muted); font-weight:400; }
+
+  .divider{
+    position:relative;
+    height:1px;
+    background:linear-gradient(90deg, transparent, var(--line) 20%, var(--line) 80%, transparent);
+    margin-bottom:18px;
+  }
+
+  .footer{
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    font-family:'Space Grotesk', sans-serif;
+  }
+  .footer .url{
+    font-size:15px;
+    font-weight:600;
+    color:var(--ink);
+    letter-spacing:0.01em;
+  }
+  .footer .badge{
+    font-size:10px;
+    color:var(--blue);
+    background:rgba(37,99,235,0.14);
+    border:1px solid rgba(37,99,235,0.35);
+    padding:5px 10px;
+    border-radius:999px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .scanline, .eyebrow .dot { animation:none; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="card">
+    <div class="grid"></div>
+    <div class="scanline"></div>
+
+    <div class="eyebrow"><span class="dot"></span>Reconocimiento facial</div>
+
+    <h1 class="brand">Flexio</h1>
+    <p class="tagline">Control de asistencia sin contacto ni tarjetas. Tu equipo marca con su rostro.</p>
+
+    <div class="qr-wrap">
+      <div class="corner tl"></div>
+      <div class="corner tr"></div>
+      <div class="corner bl"></div>
+      <div class="corner br"></div>
+      <div id="qrcode"></div>
+    </div>
+
+    <div class="scan-cta">Escanea para conocer Flexio <span>· 15 días gratis</span></div>
+
+    <div class="divider"></div>
+
+    <div class="footer">
+      <span class="url">flexio.cl</span>
+      <span class="badge">Ley 21.719</span>
+    </div>
+  </div>
+
+<script>
+  new QRCode(document.getElementById("qrcode"), {
+    text: "https://flexio.cl",
+    width: 168,
+    height: 168,
+    colorDark: "#0c1526",
+    colorLight: "#f4f8ff",
+    correctLevel: QRCode.CorrectLevel.H
+  });
+</script>
+</body>
+</html>
