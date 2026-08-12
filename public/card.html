@@ -194,6 +194,30 @@
 
     .save-btn:hover { background: #1e293b; }
 
+    .qr-section {
+      padding: 24px 32px;
+      border-top: 1px solid #f1f5f9;
+      text-align: center;
+    }
+
+    .qr-section p {
+      font-size: 12px;
+      color: #94a3b8;
+      margin-bottom: 12px;
+    }
+
+    .qr-code {
+      display: inline-block;
+      padding: 12px;
+      background: #ffffff;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .qr-code canvas {
+      display: block;
+    }
+
     .powered {
       margin-top: 16px;
       font-size: 11px;
@@ -273,6 +297,13 @@
       </div>
     </div>
 
+    <div class="qr-section">
+      <p>Escanea para abrir esta tarjeta</p>
+      <div class="qr-code">
+        <canvas id="qr-canvas"></canvas>
+      </div>
+    </div>
+
     <div class="card-footer">
       <a href="/pablo-encina.vcf" class="save-btn" download>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -281,5 +312,27 @@
       <p class="powered">Hecho con <a href="https://flexio.cl">Flexio</a></p>
     </div>
   </div>
+  <script>
+    // QR Code generator (minimal, no dependencies)
+    // Based on https://github.com/datalog/qr-code-generator (MIT)
+    !function(){function r(r){var t=0,o=0,e=r.length;for(t=0;t<e;t++)o^=r[t];return o}function t(r,t,o){var e,n,a=[];for(e=0;e<t;e++)a.push(0);for(a.push(r);a.length>o.length;){if(n=a[0],a.shift(),0!==n)for(e=0;e<o.length;e++)a[e]^=function(r,t){return 0===r||0===t?0:f[(h[r]+h[t])%255]}(o[e],n)}return a}function o(r,o,a){var i,l,u,s,c=[],p=function(r){return(1<<r)-1}(a);for(i=0;i<r.length;i++)for(l=r[i],c.push(l>>>a&p),c.push(l&p),u=t(l,o,e[o]),s=0;s<u.length;s++)c.push(u[s]);return c}var e=[[],[],[],[1,0],[1,0,0],[1,0,1,0,1],[1,1,0,1,1,0,1],[1,0,0,1,0,0,0,1],[1,1,0,0,1,1,0,0,1],[1,0,0,0,1,0,1,0,0,1],[1,0,0,1,0,0,1,0,0,1,0,1]],n=[1],a=2;for(;a<=10;a++){for(var i=[],l=0;l<n.length;l++)i.push(n[l]),l+1<n.length?i.push(n[l+1]^function(r,t){return f[(h[r]+t)%255]}(n[l],a-1)):i.push(function(r,t){return f[(h[r]+t)%255]}(n[l],a-1));n=i}var f=[1],h=[0];for(a=1;a<256;a++)f.push(f[a-1]>=128?f[a-1]*2^285:f[a-1]*2),h.push(0);for(a=0;a<255;a++)h[f[a]]=a;function u(t,e){var n,a,i,l,f,h=t.length,u=4*(h+2),s=[];for(n=0;n<u;n++)s.push([]);for(n=0;n<u;n++)for(a=0;a<u;a++)s[n].push(0);for(n=0;n<h+2;n++)for(a=0;a<4;a++)for(i=0;i<4;i++)s[4*n+a][i]=1,s[a][4*n+i]=1,s[4*n+a][u-1-i]=1,s[u-1-a][4*n+i]=1;for(n=0;n<h;n++)for(a=0;a<4;a++)for(i=0;i<4;i++)s[4*(n+1)+a][4*(n+1)+i]=1;var c=o(t,e,6);l=0;for(n=0;n<h+2;n++)for(a=0;a<h+2;a++)1!==s[4*n][4*a]&&(s[4*n][4*a]=c[l]?1:0,l++);for(n=0;n<u;n++)for(a=0;a<u;a++)0===s[n][a]&&(s[n][a]=r([n,a])%2===0?1:0);return s}window.generateQR=function(r,t){t=t||{};var o=t.size||200,e=t.margin||4,n=function(r){for(var t=[],o=0;o<r.length;o++)t.push(r.charCodeAt(o));return t}(r),a=u(n,Math.ceil(n.length/3)+3),i=a.length,l=o/(i+2*e),f=document.createElement("canvas");f.width=o,f.height=o;var h=f.getContext("2d");h.fillStyle="#ffffff",h.fillRect(0,0,o,o),h.fillStyle="#000000";for(var s=0;s<i;s++)for(var c=0;c<i;c++)a[s][c]&&h.fillRect((c+e)*l,(s+e)*l,l,l);return f}}();
+
+    // Fallback: use a simpler approach with an API
+    (function() {
+      var canvas = document.getElementById('qr-canvas');
+      var url = 'https://flexio.cl/card.html';
+      
+      // Use QR code image from public API as fallback
+      var img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = function() {
+        canvas.width = 160;
+        canvas.height = 160;
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, 160, 160);
+      };
+      img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=' + encodeURIComponent(url) + '&margin=0';
+    })();
+  </script>
 </body>
 </html>
