@@ -13,6 +13,7 @@ import NoTenantPage from './pages/NoTenantPage';
 import PinCheckInPage from './pages/PinCheckInPage';
 import UniversalCheckInPage from './pages/UniversalCheckInPage';
 import ConsentPage from './pages/ConsentPage';
+import MarcajePage from './pages/MarcajePage';
 
 // Lazy-loaded heavy pages (face-api.js only loads when needed)
 const KioskLayout = lazy(() => import('./layouts/KioskLayout'));
@@ -59,6 +60,9 @@ function App() {
 
         {/* Marcaje por PIN: flexio.cl/pin/slug */}
         <Route path="/pin/:tenant" element={<PinCheckInPage />} />
+
+        {/* Marcaje principal PIN/RUT estilo BUK: flexio.cl/marcaje/slug */}
+        <Route path="/marcaje/:tenant" element={<MarcajePage />} />
 
         {/* Acceso universal: flexio.cl/mi */}
         <Route path="/mi" element={<UniversalCheckInPage />} />
