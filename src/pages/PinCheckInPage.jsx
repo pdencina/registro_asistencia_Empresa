@@ -12,7 +12,7 @@ const STEP_CONFIRMED = 'confirmed';
 
 export default function PinCheckInPage() {
   const { tenant } = useParams();
-  const { gpsNotes } = useGeolocation();
+  const { gpsNotes, location } = useGeolocation();
   const [step, setStep] = useState(STEP_PIN);
   const [pin, setPin] = useState('');
   const [employee, setEmployee] = useState(null);
@@ -81,7 +81,7 @@ export default function PinCheckInPage() {
           'Content-Type': 'application/json',
           ...(tenant ? { 'x-tenant-slug': tenant } : {}),
         },
-        body: JSON.stringify({ pin, action: type, notes: gpsNotes }),
+        body: JSON.stringify({ pin, action: type, notes: gpsNotes, latitude: location?.lat || null, longitude: location?.lng || null }),
       });
 
       const data = await res.json();
