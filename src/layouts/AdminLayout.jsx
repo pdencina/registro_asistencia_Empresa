@@ -2,7 +2,7 @@ import { useState, useEffect, lazy, Suspense } from 'react';
 import { Routes, Route, NavLink, Navigate, useNavigate, useParams } from 'react-router-dom';
 import {
   Users, ClipboardList, BarChart3, LogOut, Camera, Settings, Clock, FileText,
-  FileCheck, Palmtree, Calendar, AlertTriangle, Menu, X, Timer, ChevronDown, Loader, DollarSign
+  FileCheck, Palmtree, Calendar, AlertTriangle, Menu, X, Timer, ChevronDown, Loader, DollarSign, KeyRound
 } from 'lucide-react';
 import EmployeesPage from '../pages/EmployeesPage';
 import AttendancePage from '../pages/AttendancePage';
@@ -20,6 +20,7 @@ import WarningsPage from '../pages/WarningsPage';
 import JustificationsPage from '../pages/JustificationsPage';
 import PayrollReportPage from '../pages/PayrollReportPage';
 import OnboardingWizard from '../components/OnboardingWizard';
+import PinCheckInPage from '../pages/PinCheckInPage';
 
 // Lazy load heavy pages (face-api.js = 641KB, only needed for check-in)
 const CheckInPage = lazy(() => import('../pages/CheckInPage'));
@@ -96,7 +97,7 @@ export default function AdminLayout() {
         { to: basePath, icon: BarChart3, label: 'Dashboard', end: true },
         { to: `${basePath}/employees`, icon: Users, label: 'Colaboradores' },
         { to: `${basePath}/attendance`, icon: ClipboardList, label: 'Asistencia' },
-        { to: `${basePath}/register`, icon: Camera, label: 'Registrar Marcaje' },
+        { to: `${basePath}/register`, icon: KeyRound, label: 'Registrar Marcaje' },
       ],
     },
     {
@@ -252,7 +253,7 @@ export default function AdminLayout() {
             <Route path="/" element={<Suspense fallback={<PageLoader />}><DashboardPage /></Suspense>} />
             <Route path="/employees" element={<EmployeesPage />} />
             <Route path="/attendance" element={<AttendancePage />} />
-            <Route path="/register" element={<Suspense fallback={<PageLoader />}><CheckInPage /></Suspense>} />
+            <Route path="/register" element={<PinCheckInPage />} />
             <Route path="/schedules" element={<SchedulesPage />} />
             <Route path="/overtime" element={<OvertimePage />} />
             <Route path="/medical-leaves" element={<MedicalLeavesPage />} />
