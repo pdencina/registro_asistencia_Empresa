@@ -158,16 +158,22 @@ module.exports = async function handler(req, res) {
         const RESEND_API_KEY = process.env.RESEND_API_KEY;
         if (RESEND_API_KEY) {
           let locationText = null;
-          if (latitude && longitude) {
-            try {
+          try {
+            if (latitude && longitude) {
               locationText = await reverseGeocode(latitude, longitude);
-            } catch (e) {}
+            }
+          } catch (e) {
+            // Geocoding falló, enviar sin ubicación
           }
-          sendNotification(RESEND_API_KEY, employee, action, now, tenant, locationText).catch(() => {});
+          try {
+            await sendNotification(RESEND_API_KEY, employee, action, now, tenant, locationText);
+          } catch (err) {
+            console.error('[PIN-checkin] Error enviando email:', err.message);
+          }
         }
       }
 
-      return res.status(201).json({ message: `${action === 'entry' ? 'Ingreso' : 'Salida'} registrado`, method: 'pin' });
+      return res.status(201).json({ message: `${action === 'entry' ? 'Ingreso' : 'Salida'} registrado`, method });
     }
 
     return res.status(400).json({ error: 'Acción no válida' });
