@@ -112,6 +112,7 @@ module.exports = async function handler(req, res) {
         basico: { max_employees: 30, max_devices: 1 },
         profesional: { max_employees: 100, max_devices: 3 },
         enterprise: { max_employees: 300, max_devices: 10 },
+        agricola: { max_employees: 5000, max_devices: 50 },
       };
       const selectedPlan = plan || 'basico';
       const limits = planLimits[selectedPlan] || planLimits.basico;

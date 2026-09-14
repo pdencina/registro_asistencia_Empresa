@@ -1,7 +1,28 @@
 const { getDb } = require('../lib/db');
 const { corsHeaders, handleCors } = require('../lib/cors');
 
-const PRICE_PER_PERSON = 1590; // CLP neto por persona/mes
+const PRICE_PER_PERSON = 1590; // CLP neto por persona/mes (tramo base)
+
+/**
+ * Calcula el monto mensual usando precio escalonado por tramos de volumen.
+ * Tramos: 1-100 = $1590, 101-500 = $990, 501-1000 = $690, 1001+ = $490
+ */
+function calcularMontoEscalonado(numEmployees) {
+  const tiers = [
+    { from: 1, to: 100, price: 1590 },
+    { from: 101, to: 500, price: 990 },
+    { from: 501, to: 1000, price: 690 },
+    { from: 1001, to: Infinity, price: 490 },
+  ];
+  let total = 0;
+  for (const tier of tiers) {
+    if (numEmployees < tier.from) break;
+    const upper = Math.min(numEmployees, tier.to);
+    const countInTier = upper - tier.from + 1;
+    if (countInTier > 0) total += countInTier * tier.price;
+  }
+  return total;
+}
 
 /**
  * POST /api/billing/subscribe
@@ -51,7 +72,8 @@ module.exports = async function handler(req, res) {
       [tenant.id]
     );
     const numEmployees = Math.max(Number(countRow.count), 1);
-    const monthlyAmount = numEmployees * PRICE_PER_PERSON;
+    // Precio escalonado por tramos de volumen (agrícola/alto volumen)
+    const monthlyAmount = calcularMontoEscalonado(numEmployees);
 
     // Crear suscripción en MercadoPago (preapproval)
     const BASE_URL = process.env.BASE_URL || 'https://flexio.cl';

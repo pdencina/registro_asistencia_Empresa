@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cotización Flexio — Pi Berries SpA</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #1e293b; line-height: 1.6; background: #f1f5f9; }
+    .page { max-width: 800px; margin: 0 auto; padding: 50px 48px; background: #fff; }
+
+    .header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 36px; padding-bottom: 20px; border-bottom: 3px solid #2563eb; }
+    .logo { font-size: 30px; font-weight: 800; }
+    .logo span { color: #2563eb; }
+    .tagline { font-size: 12px; color: #64748b; margin-top: 2px; }
+    .doc-meta { text-align: right; font-size: 12px; color: #64748b; line-height: 1.9; }
+    .doc-meta strong { color: #0f172a; }
+
+    .title-block { margin-bottom: 32px; }
+    .title-block .badge { display: inline-block; background: #dcfce7; color: #16a34a; font-size: 11px; font-weight: 700; padding: 5px 12px; border-radius: 20px; margin-bottom: 12px; }
+    .title-block h1 { font-size: 24px; font-weight: 800; color: #0f172a; }
+    .title-block p { font-size: 14px; color: #64748b; margin-top: 4px; }
+
+    .section { margin-bottom: 32px; }
+    .section-title { font-size: 15px; font-weight: 700; color: #0f172a; border-left: 4px solid #2563eb; padding-left: 12px; margin-bottom: 14px; }
+
+    .context-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .context-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px 16px; }
+    .context-card .label { font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; }
+    .context-card .value { font-size: 15px; font-weight: 700; color: #0f172a; margin-top: 2px; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { background: #f1f5f9; text-align: left; padding: 10px 12px; font-weight: 600; color: #475569; border-bottom: 2px solid #e2e8f0; }
+    td { padding: 10px 12px; border-bottom: 1px solid #f1f5f9; }
+    .text-right { text-align: right; }
+    .total-row td { background: #eff6ff; font-weight: 700; color: #1e40af; border-top: 2px solid #2563eb; font-size: 15px; }
+    .subtotal-row td { font-weight: 600; }
+
+    .highlight-box { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 20px; text-align: center; }
+    .highlight-box .big { font-size: 32px; font-weight: 800; color: #2563eb; }
+    .highlight-box .small { font-size: 13px; color: #64748b; margin-top: 4px; }
+
+    .tiers { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .tier { display: flex; justify-content: space-between; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; font-size: 13px; }
+    .tier .price { font-weight: 700; color: #2563eb; }
+
+    .features { columns: 2; column-gap: 24px; font-size: 13px; color: #374151; }
+    .features li { list-style: none; padding: 3px 0; break-inside: avoid; }
+    .features li::before { content: "✓ "; color: #16a34a; font-weight: 700; }
+
+    .conditions { font-size: 13px; color: #475569; }
+    .conditions li { margin: 4px 0; margin-left: 18px; }
+
+    .note { background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 14px 16px; font-size: 12px; color: #92400e; }
+
+    .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #e2e8f0; text-align: center; font-size: 12px; color: #94a3b8; }
+    .footer strong { color: #475569; }
+
+    @media print { body { background: #fff; } .page { padding: 24px; } }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="header">
+      <div>
+        <div class="logo">flex<span>io</span></div>
+        <p class="tagline">Control de asistencia inteligente</p>
+      </div>
+      <div class="doc-meta">
+        <strong>Cotización</strong><br>
+        14 de septiembre de 2026<br>
+        Válida por 30 días
+      </div>
+    </div>
+
+    <div class="title-block">
+      <span class="badge">Plan Agrícola · Alto Volumen</span>
+      <h1>Pi Berries SpA — Fundo Las Tres Marías</h1>
+      <p>Mafil, Valdivia · Atención: Stephanie Arancibia</p>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">Contexto operacional</h2>
+      <div class="context-grid">
+        <div class="context-card">
+          <div class="label">Dotación en cosecha</div>
+          <div class="value">~1.200 trabajadores</div>
+        </div>
+        <div class="context-card">
+          <div class="label">Composición</div>
+          <div class="value">1.000 temporeros + 200 packing</div>
+        </div>
+        <div class="context-card">
+          <div class="label">Ubicación</div>
+          <div class="value">Mafil, Región de Los Ríos</div>
+        </div>
+        <div class="context-card">
+          <div class="label">Conectividad</div>
+          <div class="value">Modo offline incluido</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">Modelo de precio por tramos</h2>
+      <p style="font-size:13px;color:#64748b;margin-bottom:14px;">Precio escalonado por trabajador activo/mes. Solo se cobra por trabajadores activos — al terminar la temporada, los temporeros se desactivan y no se cobran.</p>
+      <div class="tiers">
+        <div class="tier"><span>1 - 100 trabajadores</span><span class="price">$1.590</span></div>
+        <div class="tier"><span>101 - 500</span><span class="price">$990</span></div>
+        <div class="tier"><span>501 - 1.000</span><span class="price">$690</span></div>
+        <div class="tier"><span>1.001 en adelante</span><span class="price">$490</span></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">Cálculo en peak de cosecha (1.200 trabajadores)</h2>
+      <table>
+        <thead>
+          <tr><th>Tramo</th><th class="text-right">Personas</th><th class="text-right">Precio unit.</th><th class="text-right">Subtotal</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1 - 100</td><td class="text-right">100</td><td class="text-right">$1.590</td><td class="text-right">$159.000</td></tr>
+          <tr><td>101 - 500</td><td class="text-right">400</td><td class="text-right">$990</td><td class="text-right">$396.000</td></tr>
+          <tr><td>501 - 1.000</td><td class="text-right">500</td><td class="text-right">$690</td><td class="text-right">$345.000</td></tr>
+          <tr><td>1.001 - 1.200</td><td class="text-right">200</td><td class="text-right">$490</td><td class="text-right">$98.000</td></tr>
+          <tr class="subtotal-row"><td>Total neto</td><td class="text-right">1.200</td><td></td><td class="text-right">$998.000</td></tr>
+          <tr><td colspan="3">IVA (19%)</td><td class="text-right">$189.620</td></tr>
+          <tr class="total-row"><td colspan="3">Total mensual con IVA</td><td class="text-right">$1.187.620</td></tr>
+        </tbody>
+      </table>
+      <div style="margin-top:16px;">
+        <div class="highlight-box">
+          <div class="big">~$832</div>
+          <div class="small">precio promedio efectivo por trabajador/mes (vs. $1.590 lista)</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">Temporada regular (ejemplo: 150 trabajadores)</h2>
+      <table>
+        <tbody>
+          <tr><td>1 - 100</td><td class="text-right">100</td><td class="text-right">$1.590</td><td class="text-right">$159.000</td></tr>
+          <tr><td>101 - 150</td><td class="text-right">50</td><td class="text-right">$990</td><td class="text-right">$49.500</td></tr>
+          <tr class="subtotal-row"><td>Total neto</td><td class="text-right">150</td><td></td><td class="text-right">$208.500</td></tr>
+          <tr class="total-row"><td colspan="3">Total con IVA</td><td class="text-right">$248.115</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">Qué incluye</h2>
+      <ul class="features">
+        <li>Marcaje por RUT (ideal temporeros)</li>
+        <li>Marcaje por PIN (packing/admin)</li>
+        <li>Modo offline con sincronización</li>
+        <li>Múltiples puntos de marcaje simultáneos</li>
+        <li>Geolocalización con dirección</li>
+        <li>Registros inalterables (Res. 38 DT)</li>
+        <li>Sello de tiempo criptográfico</li>
+        <li>Libro de Asistencia Art. 33</li>
+        <li>Acceso para fiscalizadores DT</li>
+        <li>Reportes de nómina + HHEE 50%/100%</li>
+        <li>Carga masiva por Excel</li>
+        <li>Comprobante por email</li>
+        <li>Dispositivos ilimitados (hasta 50)</li>
+        <li>Soporte prioritario</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">Condiciones</h2>
+      <ul class="conditions">
+        <li>Sin permanencia mínima — se paga por temporada</li>
+        <li>Facturación mensual según trabajadores activos</li>
+        <li>Solo se cobra por trabajadores activos en el sistema</li>
+        <li>Prueba gratuita de 15 días</li>
+        <li>Implementación asistida para carga inicial de temporeros</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <div class="note">
+        <strong>Nota — Certificación DT:</strong> El sistema está diseñado conforme a la Resolución Exenta N°38 de la Dirección del Trabajo. La certificación formal se encuentra en proceso.
+      </div>
+    </div>
+
+    <div class="footer">
+      <strong>Pablo Encina</strong> · Flexio Technologies SpA<br>
+      +56 9 4961 6038 · pablo@flexio.cl · flexio.cl
+    </div>
+  </div>
+</body>
+</html>

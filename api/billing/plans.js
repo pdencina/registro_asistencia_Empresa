@@ -14,11 +14,20 @@ module.exports = async function handler(req, res) {
 
   const PRICE_PER_PERSON = 1590; // CLP neto por persona/mes
 
+  // Tramos de precio por volumen (para agrícola / alto volumen)
+  const volumeTiers = [
+    { from: 1, to: 100, price: 1590 },
+    { from: 101, to: 500, price: 990 },
+    { from: 501, to: 1000, price: 690 },
+    { from: 1001, to: null, price: 490 },
+  ];
+
   const plans = [
     {
       id: 'flexio',
       name: 'Flexio',
       price_per_person: PRICE_PER_PERSON,
+      volume_tiers: volumeTiers,
       currency: 'CLP',
       interval: 'monthly',
       billing_day: 30,

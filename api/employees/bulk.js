@@ -27,8 +27,8 @@ module.exports = async function handler(req, res) {
     return res.status(400).json({ error: 'Se requiere un array de empleados' });
   }
 
-  if (employees.length > 500) {
-    return res.status(400).json({ error: 'Máximo 500 empleados por importación' });
+  if (employees.length > 2000) {
+    return res.status(400).json({ error: 'Máximo 2000 empleados por importación' });
   }
 
   const results = { created: 0, skipped: 0, errors: [] };
