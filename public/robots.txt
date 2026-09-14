@@ -1,7 +1,11 @@
 User-agent: *
 Allow: /
-Disallow: /admin
-Disallow: /superadmin
-Disallow: /app
+Disallow: /admin/
+Disallow: /superadmin/
+Disallow: /api/
+Disallow: /pin/
+Disallow: /marcaje/
+Disallow: /contrato/
+Disallow: /consentimiento/
 
 Sitemap: https://flexio.cl/sitemap.xml

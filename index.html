@@ -22,25 +22,27 @@
     <meta name="msapplication-TileColor" content="#2563eb" />
     
     <!-- SEO Meta Tags -->
-    <meta name="description" content="Flexio - Sistema de control de asistencia con reconocimiento facial para empresas en Chile. Elimina el fraude, sin contacto ni tarjetas. Reportes en tiempo real. Cumple Ley 21.719." />
-    <meta name="keywords" content="control asistencia, reconocimiento facial, reloj control, registro asistencia, biometría facial, control horario, asistencia laboral, Chile, software RRHH, marcaje facial" />
-    <meta name="author" content="Flexio SpA" />
-    <meta name="robots" content="index, follow" />
+    <meta name="description" content="Flexio - Sistema de control de asistencia digital para empresas en Chile. Marcaje por RUT o PIN, geolocalización, modo offline. Diseñado conforme a la Resolución 38 de la Dirección del Trabajo y la Ley 40 horas. Desde $1.590 por trabajador/mes." />
+    <meta name="keywords" content="control de asistencia, control asistencia certificado DT, resolución 38, resolución exenta 38, ley 40 horas, reloj control digital, registro de asistencia, control horario, dirección del trabajo, asistencia laboral Chile, software RRHH, marcaje por RUT, control asistencia agrícola, sistema control jornada, libro de asistencia electrónico" />
+    <meta name="author" content="Flexio Technologies SpA" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="geo.region" content="CL" />
+    <meta name="geo.placename" content="Santiago, Chile" />
     <link rel="canonical" href="https://flexio.cl" />
     
     <!-- Open Graph (Facebook, LinkedIn) -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://flexio.cl" />
-    <meta property="og:title" content="Flexio - Control de Asistencia con Reconocimiento Facial" />
-    <meta property="og:description" content="Elimina el fraude en el registro de asistencia. Tu equipo marca con su rostro, sin contacto ni tarjetas. Reportes en tiempo real para tu empresa." />
+    <meta property="og:title" content="Flexio - Control de Asistencia Digital | Conforme Resolución 38 DT" />
+    <meta property="og:description" content="Control de asistencia para empresas en Chile. Marcaje por RUT o PIN, geolocalización, modo offline. Diseñado para la Resolución 38 de la Dirección del Trabajo. Desde $1.590/trabajador." />
     <meta property="og:image" content="https://flexio.cl/og-image.png" />
     <meta property="og:locale" content="es_CL" />
     <meta property="og:site_name" content="Flexio" />
     
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Flexio - Control de Asistencia con Reconocimiento Facial" />
-    <meta name="twitter:description" content="Sistema de control de asistencia con reconocimiento facial para empresas en Chile. 15 días gratis." />
+    <meta name="twitter:title" content="Flexio - Control de Asistencia Digital | Resolución 38 DT" />
+    <meta name="twitter:description" content="Control de asistencia digital para empresas en Chile. Conforme Resolución 38 de la Dirección del Trabajo. 15 días gratis." />
     <meta name="twitter:image" content="https://flexio.cl/og-image.png" />
     
     <!-- Structured Data (JSON-LD) -->
@@ -51,18 +53,26 @@
       "name": "Flexio",
       "applicationCategory": "BusinessApplication",
       "operatingSystem": "Web",
-      "description": "Sistema de control de asistencia laboral con reconocimiento facial para empresas en Chile",
+      "description": "Sistema de control de asistencia digital para empresas en Chile. Marcaje por RUT o PIN, geolocalización, modo offline, libro de asistencia electrónico. Diseñado conforme a la Resolución 38 de la Dirección del Trabajo y la Ley 40 horas.",
       "url": "https://flexio.cl",
       "offers": {
-        "@type": "AggregateOffer",
+        "@type": "Offer",
         "priceCurrency": "CLP",
-        "lowPrice": "59990",
-        "highPrice": "199990",
-        "offerCount": "3"
+        "price": "1590",
+        "description": "Precio por trabajador al mes. Precio escalonado por volumen para alto volumen (agrícola)."
       },
+      "featureList": [
+        "Marcaje por RUT o PIN personal",
+        "Geolocalización de marcaciones",
+        "Modo offline con sincronización",
+        "Registros inalterables (hash SHA-256)",
+        "Libro de Asistencia electrónico Art. 33",
+        "Reportes de nómina y horas extra",
+        "Conforme Resolución 38 Dirección del Trabajo"
+      ],
       "provider": {
         "@type": "Organization",
-        "name": "Flexio SpA",
+        "name": "Flexio Technologies SpA",
         "url": "https://flexio.cl",
         "contactPoint": {
           "@type": "ContactPoint",
@@ -76,6 +86,48 @@
           "addressCountry": "CL"
         }
       }
+    }
+    </script>
+
+    <!-- FAQ Schema (aparece en resultados de Google) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "¿El sistema de control de asistencia cumple con la Resolución 38 de la Dirección del Trabajo?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Flexio está diseñado conforme a la Resolución Exenta N°38 de la Dirección del Trabajo: registros inalterables con hash SHA-256, sello de tiempo, geolocalización, libro de asistencia electrónico y acceso para fiscalización. La certificación formal se encuentra en proceso."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Cuánto cuesta el control de asistencia de Flexio?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Desde $1.590 por trabajador al mes. Para empresas con alto volumen (como agrícolas) el precio es escalonado por tramos, bajando hasta $490 por trabajador. Solo se cobra por trabajadores activos."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Funciona sin internet en lugares con mala señal?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Sí. Flexio tiene modo offline: si cae la conexión, las marcaciones se guardan en el dispositivo y se sincronizan automáticamente al recuperar internet. Ideal para campos agrícolas y faenas rurales."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Cómo marcan los trabajadores?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Los trabajadores marcan con su RUT o un PIN personal en una tablet o celular. No requiere hardware especial ni relojes control. Ideal para temporeros y equipos grandes."
+          }
+        }
+      ]
     }
     </script>
     
@@ -101,10 +153,34 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;800&display=swap" rel="stylesheet" />
-    <title>Flexio - Control de Asistencia con Reconocimiento Facial | Chile</title>
+    <title>Flexio - Control de Asistencia Digital para Empresas | Resolución 38 DT Chile</title>
   </head>
   <body class="bg-gray-50">
-    <div id="root"></div>
+    <div id="root">
+      <!-- Contenido pre-renderizado para SEO (React lo reemplaza al cargar) -->
+      <div style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);">
+        <h1>Flexio — Control de Asistencia Digital para Empresas en Chile</h1>
+        <p>Sistema de control de asistencia y registro de jornada laboral diseñado conforme a la Resolución Exenta N°38 de la Dirección del Trabajo y la Ley de 40 horas. Marcaje por RUT o PIN personal, geolocalización, modo offline y libro de asistencia electrónico.</p>
+        <h2>Control de asistencia conforme a la Resolución 38 de la Dirección del Trabajo</h2>
+        <p>Registros inalterables con hash criptográfico, sello de tiempo, y acceso para fiscalización de la DT. Cumple con el Artículo 33 del Código del Trabajo.</p>
+        <h2>Ideal para empresas agrícolas y alto volumen</h2>
+        <p>Marcaje masivo por RUT para temporeros, modo offline para faenas rurales con mala señal, y precio escalonado por volumen desde $1.590 por trabajador al mes. Solo pagas por trabajadores activos.</p>
+        <h2>Sin hardware especial</h2>
+        <p>Funciona con cualquier tablet o celular con navegador. No necesitas comprar relojes control ni instalar software. Implementación el mismo día.</p>
+        <h2>Funcionalidades</h2>
+        <ul>
+          <li>Marcaje por RUT o PIN personal</li>
+          <li>Reconocimiento facial opcional</li>
+          <li>Geolocalización de cada marca con dirección</li>
+          <li>Modo offline con sincronización automática</li>
+          <li>Registros inalterables (hash SHA-256 encadenado)</li>
+          <li>Libro de Asistencia electrónico Artículo 33</li>
+          <li>Reportes de nómina, horas extra y ausencias</li>
+          <li>Control de jornada Ley 40 horas</li>
+        </ul>
+        <p>Solicita una demostración sin costo. Contacto: +56 9 4961 6038 · pablo@flexio.cl</p>
+      </div>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

@@ -23,6 +23,8 @@ import MyHoursPage from './pages/MyHoursPage';
 import SimpleCheckInPage from './pages/SimpleCheckInPage';
 import ProposalPage from './pages/ProposalPage';
 import CotizadorPage from './pages/CotizadorPage';
+import BlogIndexPage from './pages/blog/BlogIndexPage';
+import BlogPostPage from './pages/blog/BlogPostPage';
 import TermsPage from './pages/legal/TermsPage';
 import PrivacyPage from './pages/legal/PrivacyPage';
 import DpaPage from './pages/legal/DpaPage';
@@ -76,6 +78,10 @@ function App() {
 
         {/* Contrato digital: flexio.cl/contrato/slug */}
         <Route path="/contrato/:tenant" element={<ContractPage />} />
+
+        {/* Blog: flexio.cl/blog */}
+        <Route path="/blog" element={<BlogIndexPage />} />
+        <Route path="/blog/:slug" element={<BlogPostPage />} />
 
         {/* Cotizador público interactivo: flexio.cl/propuesta */}
         <Route path="/propuesta" element={<CotizadorPage />} />
