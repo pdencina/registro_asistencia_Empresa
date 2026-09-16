@@ -66,28 +66,22 @@ module.exports = async function handler(req, res) {
       }
     }
 
-    // Validar geofence (Res. 38 DT — ubicación de la marcación)
+    // Evaluar geofence SIN bloquear la marca (ORD. N°408 DT, 10-09-2026):
+    // se permite marcar y se deja evidencia de si estuvo dentro o fuera
+    // del perímetro. NO se impide el registro por estar fuera de la geocerca.
+    let geoObservacion = '';
     const geoConfig = await getTenantGeoConfig(sql, tenant.id);
-    if (geoConfig.geolocationEnabled) {
-      const nearestDevice = latitude != null
-        ? await getNearestDevice(sql, tenant.id, latitude, longitude)
-        : null;
-
+    if (geoConfig.geolocationEnabled && latitude != null) {
+      const nearestDevice = await getNearestDevice(sql, tenant.id, latitude, longitude);
       const geoResult = validateGeofence({
         latitude,
         longitude,
         device: nearestDevice,
         radiusMeters: geoConfig.radiusMeters,
-        geolocationRequired: geoConfig.geolocationRequired,
+        geolocationRequired: false, // nunca bloquear
       });
-
-      if (!geoResult.valid) {
-        return res.status(403).json({
-          error: geoResult.message,
-          distance: geoResult.distance,
-          max_radius: geoConfig.radiusMeters,
-          code: 'GEOFENCE_VIOLATION',
-        });
+      if (!geoResult.valid && geoResult.distance != null) {
+        geoObservacion = ` | FUERA DE PERÍMETRO: ${geoResult.distance}m (máx ${geoConfig.radiusMeters}m)`;
       }
     }
 
@@ -99,7 +93,7 @@ module.exports = async function handler(req, res) {
       type,
       timestamp: now,
       method: 'visual',
-      notes: notes || null,
+      notes: (notes || '') + geoObservacion || null,
       photo_snapshot_url: snapshot_url,
       latitude,
       longitude,

@@ -269,9 +269,9 @@ export default function SettingsPage() {
             <div className="flex items-center gap-3">
               <MapPin className={`w-5 h-5 ${settings.geolocation_enabled ? 'text-emerald-600' : 'text-gray-400'}`} />
               <div>
-                <p className="font-medium text-gray-900 text-sm">Geolocalización <InfoTooltip text="Si se activa, los colaboradores solo pueden marcar asistencia dentro de un radio de 200 metros de la ubicación configurada de la empresa." /></p>
+                <p className="font-medium text-gray-900 text-sm">Geolocalización <InfoTooltip text="Si se activa, se registra la ubicación de cada marca y se deja constancia cuando ocurre fuera del perímetro configurado. La marca siempre se permite (conforme al criterio de la Dirección del Trabajo); la geolocalización solo genera evidencia y alertas, no bloquea el marcaje." /></p>
                 <p className="text-xs text-gray-500">
-                  {settings.geolocation_enabled ? 'Solo desde ubicación autorizada (200m)' : 'Marcaje desde cualquier lugar'}
+                  {settings.geolocation_enabled ? 'Registra ubicación y alerta marcas fuera de perímetro' : 'No registra ubicación'}
                 </p>
               </div>
             </div>

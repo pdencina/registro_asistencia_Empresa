@@ -113,33 +113,29 @@ module.exports = async function handler(req, res) {
       const latitude = req.body.latitude || null;
       const longitude = req.body.longitude || null;
 
-      // Validar geofence (Res. 38 DT)
+      // Evaluar geofence SIN bloquear la marca (ORD. N°408 DT, 10-09-2026):
+      // el sistema debe permitir marcar y dejar evidencia de si estuvo
+      // dentro o fuera del perímetro, NO impedir el registro.
+      let geoObservacion = '';
       const geoConfig = await getTenantGeoConfig(sql, tenant.id);
-      if (geoConfig.geolocationEnabled) {
-        const nearestDevice = latitude != null
-          ? await getNearestDevice(sql, tenant.id, latitude, longitude)
-          : null;
-
+      if (geoConfig.geolocationEnabled && latitude != null) {
+        const nearestDevice = await getNearestDevice(sql, tenant.id, latitude, longitude);
         const geoResult = validateGeofence({
           latitude,
           longitude,
           device: nearestDevice,
           radiusMeters: geoConfig.radiusMeters,
-          geolocationRequired: geoConfig.geolocationRequired,
+          geolocationRequired: false, // nunca bloquear
         });
-
-        if (!geoResult.valid) {
-          return res.status(403).json({
-            error: geoResult.message,
-            distance: geoResult.distance,
-            max_radius: geoConfig.radiusMeters,
-            code: 'GEOFENCE_VIOLATION',
-          });
+        if (!geoResult.valid && geoResult.distance != null) {
+          // Solo se deja constancia; la marca se registra igual
+          geoObservacion = ` | FUERA DE PERÍMETRO: ${geoResult.distance}m (máx ${geoConfig.radiusMeters}m)`;
         }
       }
 
       // Insertar con hash de integridad encadenado (Res. 38 DT)
       const method = pin ? 'pin' : 'rut';
+      const baseNote = notes || `Marcaje por ${method === 'pin' ? 'PIN personal' : 'RUT'}`;
       await insertAttendanceRecord({
         id,
         tenant_id: tenant.id,
@@ -147,7 +143,7 @@ module.exports = async function handler(req, res) {
         type: action,
         timestamp: now,
         method,
-        notes: notes || `Marcaje por ${method === 'pin' ? 'PIN personal' : 'RUT'}`,
+        notes: baseNote + geoObservacion,
         photo_snapshot_url: null,
         latitude,
         longitude,

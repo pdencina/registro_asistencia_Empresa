@@ -1,9 +1,11 @@
 /**
- * Módulo de Validación de Geolocalización — Resolución 38 Exenta DT
- * 
- * Valida que las marcaciones se realicen dentro del radio autorizado
- * del dispositivo o ubicación configurada para el tenant.
- * 
+ * Módulo de Geolocalización — Resolución 38 Exenta DT + ORD. N°408 (10-09-2026)
+ *
+ * IMPORTANTE (criterio DT): la geolocalización se usa para REGISTRAR y ACREDITAR
+ * dónde ocurrió una marcación y generar alertas/reportes de marcas fuera de un
+ * perímetro. NO debe usarse para IMPEDIR que el trabajador marque por estar fuera
+ * de una geocerca. La marca siempre se registra; el geofence solo deja evidencia.
+ *
  * Usa la fórmula de Haversine para calcular distancia entre coordenadas.
  */
 
