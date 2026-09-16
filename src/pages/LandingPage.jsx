@@ -233,8 +233,8 @@ export default function LandingPage() {
     },
     {
       icon: <BarChart3 className="w-6 h-6" />,
-      title: 'Libro DT + 9 Reportes Excel',
-      description: <>Libro de asistencia para fiscalizaciones, consolidado por departamento, eventos con GPS. <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 text-gray-700 text-xs font-semibold rounded-full border border-gray-200">Dirección del Trabajo</span></>,
+      title: 'Libro de Asistencia + 9 Reportes Excel',
+      description: <>Libro de asistencia exportable, consolidado por departamento, eventos con GPS. <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 text-gray-700 text-xs font-semibold rounded-full border border-gray-200">Formato Art. 33</span></>,
     },
     {
       icon: <Shield className="w-6 h-6" />,

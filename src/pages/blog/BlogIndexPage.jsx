@@ -44,7 +44,7 @@ export default function BlogIndexPage() {
         {/* CTA */}
         <div className="mt-12 bg-blue-600 rounded-2xl p-8 text-center text-white">
           <h3 className="text-xl font-bold mb-2">¿Necesitas un sistema de control de asistencia?</h3>
-          <p className="text-blue-100 mb-5 text-sm">Diseñado conforme a la Resolución 38. Desde $1.590 por trabajador. 15 días gratis.</p>
+          <p className="text-blue-100 mb-5 text-sm">Plataforma de control de asistencia diseñada según los estándares de la Resolución 38. Desde $1.590 por trabajador. 15 días gratis.</p>
           <a href="https://wa.me/56949616038?text=Hola,%20me%20interesa%20Flexio"
             className="inline-block bg-white text-blue-600 px-6 py-3 rounded-xl font-semibold hover:bg-blue-50 transition">
             Solicitar demo

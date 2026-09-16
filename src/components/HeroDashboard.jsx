@@ -103,7 +103,7 @@ export default function HeroDashboard() {
             <motion.div className="bg-primary-50 rounded-lg p-2.5 text-center"
               initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
               <p className="text-lg font-bold text-primary-700">{cumple}%</p>
-              <p className="text-[9px] text-primary-600">Cumple DT</p>
+              <p className="text-[9px] text-primary-600">Registros OK</p>
             </motion.div>
             <motion.div className="bg-emerald-50 rounded-lg p-2.5 text-center"
               initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
@@ -175,7 +175,7 @@ export default function HeroDashboard() {
             <motion.div className="bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 flex items-center gap-2"
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.7 }}>
               <span className="text-[11px]">📋</span>
-              <p className="text-[10px] text-blue-800">Libro DT actualizado — <strong>$0 riesgo de multas</strong></p>
+              <p className="text-[10px] text-blue-800">Libro de asistencia — <strong>siempre al día</strong></p>
             </motion.div>
           </div>
         </div>
