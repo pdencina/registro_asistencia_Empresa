@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { motion, useInView } from 'motion/react';
 import { Shield, Users, Clock, MapPin, Camera, BarChart3, Smartphone, CheckCircle, ArrowRight, Menu, X } from 'lucide-react';
 import AnimatedStats from '../components/AnimatedStats';
+import HeroDashboard from '../components/HeroDashboard';
 
 export default function LandingPage() {
   const [mobileMenu, setMobileMenu] = useState(false);
@@ -373,131 +374,7 @@ export default function LandingPage() {
               transition={{ duration: 0.8, delay: 0.3, ease: 'easeOut' }}
             >
               <div className="bg-primary-50 rounded-3xl p-4 lg:p-5">
-                <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
-                  {/* Browser dots */}
-                  <div className="bg-gray-50 border-b border-gray-100 px-4 py-2 flex items-center gap-1.5">
-                    <div className="w-2.5 h-2.5 rounded-full bg-red-400"></div>
-                    <div className="w-2.5 h-2.5 rounded-full bg-yellow-400"></div>
-                    <div className="w-2.5 h-2.5 rounded-full bg-green-400"></div>
-                    <span className="ml-3 text-[10px] text-gray-400">flexio.cl/admin/tu-empresa</span>
-                  </div>
-
-                  {/* Dashboard content */}
-                  <div className="p-4 space-y-3">
-                    {/* KPI Row */}
-                    <div className="grid grid-cols-4 gap-2">
-                      <motion.div className="bg-emerald-50 rounded-lg p-2.5 text-center"
-                        initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: 1.0, type: 'spring', stiffness: 150 }}>
-                        <p className="text-lg font-bold text-emerald-700">92%</p>
-                        <p className="text-[9px] text-emerald-600">Asistencia</p>
-                      </motion.div>
-                      <motion.div className="bg-red-50 rounded-lg p-2.5 text-center"
-                        initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: 1.2, type: 'spring', stiffness: 150 }}>
-                        <p className="text-lg font-bold text-red-600">47h</p>
-                        <p className="text-[9px] text-red-500">Improductivas</p>
-                      </motion.div>
-                      <motion.div className="bg-primary-50 rounded-lg p-2.5 text-center"
-                        initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: 1.4, type: 'spring', stiffness: 150 }}>
-                        <p className="text-lg font-bold text-primary-700">100%</p>
-                        <p className="text-[9px] text-primary-600">Cumple DT</p>
-                      </motion.div>
-                      <motion.div className="bg-emerald-50 rounded-lg p-2.5 text-center"
-                        initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: 1.6, type: 'spring', stiffness: 150 }}>
-                        <p className="text-lg font-bold text-emerald-700">$1.2M</p>
-                        <p className="text-[9px] text-emerald-600">Ahorro</p>
-                      </motion.div>
-                    </div>
-
-                    {/* Chart */}
-                    <div className="bg-gray-50 rounded-xl p-3">
-                      <div className="flex items-center justify-between mb-2">
-                        <p className="text-[10px] font-semibold text-gray-700">Tendencia 12 meses</p>
-                        <p className="text-[10px] text-emerald-600 font-medium">↑ +16%</p>
-                      </div>
-                      <div className="flex items-end gap-[3px] h-12">
-                        {[62, 68, 72, 78, 74, 82, 85, 80, 88, 85, 92, 96].map((v, i) => (
-                          <motion.div
-                            key={i}
-                            className={`flex-1 rounded-t-sm origin-bottom ${v >= 85 ? 'bg-emerald-400' : v >= 70 ? 'bg-amber-300' : 'bg-red-300'}`}
-                            style={{ height: `${v}%` }}
-                            animate={{
-                              scaleY: [1, 0.85 + Math.random() * 0.3, 1, 0.9 + Math.random() * 0.2, 1],
-                            }}
-                            transition={{
-                              duration: 3 + Math.random() * 2,
-                              repeat: Infinity,
-                              delay: i * 0.3,
-                              ease: 'easeInOut',
-                            }}
-                          />
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Two columns */}
-                    <div className="grid grid-cols-2 gap-2">
-                      {/* Ranking atrasos */}
-                      <div className="bg-gray-50 rounded-xl p-2.5">
-                        <p className="text-[9px] font-semibold text-gray-600 mb-1.5">⚠️ Requieren atención</p>
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-1.5">
-                            <div className="w-4 h-4 rounded-full bg-red-100 flex items-center justify-center text-[7px] font-bold text-red-600">1</div>
-                            <span className="text-[10px] text-gray-700 flex-1">J. Ramírez</span>
-                            <span className="text-[9px] text-red-600 font-medium">7 atrasos</span>
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            <div className="w-4 h-4 rounded-full bg-orange-100 flex items-center justify-center text-[7px] font-bold text-orange-600">2</div>
-                            <span className="text-[10px] text-gray-700 flex-1">F. Torres</span>
-                            <span className="text-[9px] text-orange-600 font-medium">4 atrasos</span>
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            <div className="w-4 h-4 rounded-full bg-gray-100 flex items-center justify-center text-[7px] font-bold text-gray-600">3</div>
-                            <span className="text-[10px] text-gray-700 flex-1">C. Muñoz</span>
-                            <span className="text-[9px] text-amber-600 font-medium">4 atrasos</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Bono puntualidad */}
-                      <div className="bg-gray-50 rounded-xl p-2.5">
-                        <p className="text-[9px] font-semibold text-gray-600 mb-1.5">🏆 Bono puntualidad</p>
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-[10px]">🥇</span>
-                            <span className="text-[10px] text-gray-700 flex-1">R. Fuentes</span>
-                            <span className="text-[9px] text-emerald-600 font-bold">100%</span>
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-[10px]">🥈</span>
-                            <span className="text-[10px] text-gray-700 flex-1">A. Soto</span>
-                            <span className="text-[9px] text-emerald-600 font-bold">100%</span>
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-[10px]">🥉</span>
-                            <span className="text-[10px] text-gray-700 flex-1">V. Díaz</span>
-                            <span className="text-[9px] text-emerald-600 font-bold">95%</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Action suggestions */}
-                    <div className="space-y-1.5">
-                      <div className="bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2 flex items-center gap-2">
-                        <span className="text-[11px]">💰</span>
-                        <p className="text-[10px] text-emerald-800"><strong>28 colaboradores</strong> merecen bono — mejora retención</p>
-                      </div>
-                      <div className="bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 flex items-center gap-2">
-                        <span className="text-[11px]">📋</span>
-                        <p className="text-[10px] text-blue-800">Libro DT actualizado — <strong>$0 riesgo de multas</strong></p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <HeroDashboard />
               </div>
 
               {/* Floating badge */}
