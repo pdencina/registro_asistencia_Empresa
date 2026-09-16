@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { motion, useInView } from 'motion/react';
 import { Shield, Users, Clock, MapPin, Camera, BarChart3, Smartphone, CheckCircle, ArrowRight, Menu, X } from 'lucide-react';
+import AnimatedStats from '../components/AnimatedStats';
 
 export default function LandingPage() {
   const [mobileMenu, setMobileMenu] = useState(false);
@@ -647,6 +648,9 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* Estadísticas animadas */}
+      <AnimatedStats />
 
       {/* Pricing */}
       <section id="pricing" className="py-20 px-4 sm:px-6 lg:px-8">

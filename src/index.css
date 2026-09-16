@@ -67,3 +67,32 @@
     @apply bg-white rounded-2xl shadow-sm border border-gray-100 p-6;
   }
 }
+
+/* Animación flotante suave para elementos decorativos */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-14px); }
+}
+.floaty { animation: float 7s ease-in-out infinite; }
+.floaty-slow { animation: float 11s ease-in-out infinite; }
+
+/* Brillo/shimmer para botones destacados */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 3s infinite;
+}
+
+/* Respeto por accesibilidad: desactiva animaciones si el usuario lo pide */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
