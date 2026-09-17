@@ -12,48 +12,53 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const PRICE_PER_PERSON = 1590; // CLP neto por persona/mes
+  // Planes fijos (hasta 300 colaboradores)
+  const fixedPlans = [
+    { id: 'basico', name: 'Básico', price: 39990, max_employees: 30, max_devices: 1 },
+    { id: 'profesional', name: 'Profesional', price: 99990, max_employees: 100, max_devices: 3 },
+    { id: 'enterprise', name: 'Enterprise', price: 249990, max_employees: 300, max_devices: 10 },
+  ];
 
-  // Tramos de precio por volumen (para agrícola / alto volumen)
-  const volumeTiers = [
-    { from: 1, to: 100, price: 1590 },
-    { from: 101, to: 500, price: 990 },
-    { from: 501, to: 1000, price: 690 },
-    { from: 1001, to: null, price: 490 },
+  // Plan corporativo: tarifa por trabajador activo según dotación (sobre 300)
+  const corporateTiers = [
+    { from: 301, to: 750, price: 700 },
+    { from: 751, to: 1500, price: 600 },
+    { from: 1501, to: 3000, price: 500 },
+    { from: 3001, to: null, price: null }, // a convenir
   ];
 
   const plans = [
     {
       id: 'flexio',
       name: 'Flexio',
-      price_per_person: PRICE_PER_PERSON,
-      volume_tiers: volumeTiers,
+      fixed_plans: fixedPlans,
+      corporate_tiers: corporateTiers,
       currency: 'CLP',
       interval: 'monthly',
       billing_day: 30,
       grace_days: 5,
       features: [
         'Reconocimiento facial IA',
-        'Marcaje por PIN (alternativa)',
+        'Marcaje por PIN o RUT',
         'Registros inalterables (hash SHA-256)',
         'Sello de tiempo criptográfico',
-        'Geolocalización con geofence',
+        'Geolocalización con registro de perímetro',
         'Modo offline + sync automático',
-        'Libro de Asistencia DT',
-        'Acceso fiscalizador DT',
+        'Libro de asistencia formato Art. 33',
+        'Acceso para fiscalización mediante token',
         'Reportes + exportación Excel/CSV',
         'Reporte de nómina con HHEE',
         'Notificaciones por email',
         'Alertas de jornada excedida',
         'Auditoría completa',
-        'Dispositivos ilimitados',
+        '15 días de prueba gratis',
         'Soporte por WhatsApp',
       ],
       examples: [
-        { employees: 10, monthly: 15900, monthly_iva: 18921 },
-        { employees: 25, monthly: 39750, monthly_iva: 47323 },
-        { employees: 50, monthly: 79500, monthly_iva: 94605 },
-        { employees: 100, monthly: 159000, monthly_iva: 189210 },
+        { plan: 'Básico', employees: 'hasta 30', monthly: 39990, monthly_iva: 47588 },
+        { plan: 'Profesional', employees: 'hasta 100', monthly: 99990, monthly_iva: 118988 },
+        { plan: 'Enterprise', employees: 'hasta 300', monthly: 249990, monthly_iva: 297488 },
+        { plan: 'Corporativo', employees: '1.200 (agrícola)', monthly: 720000, monthly_iva: 856800 },
       ],
     },
   ];

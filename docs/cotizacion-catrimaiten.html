@@ -106,37 +106,31 @@
 
     <div class="section">
       <h2 class="section-title">Modelo de precio por tramos</h2>
-      <p style="font-size:13px;color:#64748b;margin-bottom:14px;">Solo se cobra por trabajadores activos. Al terminar la cosecha, los temporeros se desactivan y no se cobran.</p>
+      <p style="font-size:13px;color:#64748b;margin-bottom:14px;">Tarifa por trabajador activo al mes, según dotación total. Solo se cobra por trabajadores activos. Al terminar la cosecha, los temporeros se desactivan y no se cobran.</p>
       <div class="tiers">
-        <div class="tier"><span>1 - 100 trabajadores</span><span class="price">$1.590</span></div>
-        <div class="tier"><span>101 - 500</span><span class="price">$990</span></div>
-        <div class="tier"><span>501 - 1.000</span><span class="price">$690</span></div>
-        <div class="tier"><span>1.001 en adelante</span><span class="price">$490</span></div>
+        <div class="tier"><span>301 - 750 trabajadores</span><span class="price">$700</span></div>
+        <div class="tier"><span>751 - 1.500</span><span class="price">$600</span></div>
+        <div class="tier"><span>1.501 - 3.000</span><span class="price">$500</span></div>
+        <div class="tier"><span>Sobre 3.000</span><span class="price">A convenir</span></div>
       </div>
     </div>
 
     <div class="section">
       <h2 class="section-title">Cálculo en peak de cosecha (1.500 trabajadores)</h2>
       <table>
-        <thead>
-          <tr><th>Tramo</th><th class="text-right">Personas</th><th class="text-right">Precio unit.</th><th class="text-right">Subtotal</th></tr>
-        </thead>
         <tbody>
-          <tr><td>1 - 100</td><td class="text-right">100</td><td class="text-right">$1.590</td><td class="text-right">$159.000</td></tr>
-          <tr><td>101 - 500</td><td class="text-right">400</td><td class="text-right">$990</td><td class="text-right">$396.000</td></tr>
-          <tr><td>501 - 1.000</td><td class="text-right">500</td><td class="text-right">$690</td><td class="text-right">$345.000</td></tr>
-          <tr><td>1.001 - 1.500</td><td class="text-right">500</td><td class="text-right">$490</td><td class="text-right">$245.000</td></tr>
-          <tr class="subtotal-row"><td>Total neto</td><td class="text-right">1.500</td><td></td><td class="text-right">$1.145.000</td></tr>
-          <tr><td colspan="3">IVA (19%)</td><td class="text-right">$217.550</td></tr>
-          <tr class="total-row"><td colspan="3">Total mensual con IVA</td><td class="text-right">$1.362.550</td></tr>
+          <tr><td>1.500 trabajadores (tramo 751 - 1.500)</td><td class="text-right">× $600</td><td class="text-right">$900.000</td></tr>
+          <tr><td colspan="2">IVA (19%)</td><td class="text-right">$171.000</td></tr>
+          <tr class="total-row"><td colspan="2">Total mensual con IVA</td><td class="text-right">$1.071.000</td></tr>
         </tbody>
       </table>
       <div style="margin-top:16px;">
         <div class="highlight-box">
-          <div class="big">~$763</div>
-          <div class="small">precio promedio efectivo por trabajador/mes (vs. $1.590 lista)</div>
+          <div class="big">$600</div>
+          <div class="small">por trabajador activo/mes + IVA · solo se cobran los activos</div>
         </div>
       </div>
+      <p style="font-size:12px;color:#64748b;margin-top:12px;">Implementación: $350.000 + IVA pago único, o 3 cuotas de $120.000 + IVA.</p>
     </div>
 
     <div class="section">
@@ -166,11 +160,11 @@
             <tr><th>Fundo</th><th class="text-right">Peak cosecha (neto)</th><th class="text-right">Con IVA</th></tr>
           </thead>
           <tbody>
-            <tr><td>Pi Berries (1.200)</td><td class="text-right">$998.000</td><td class="text-right">$1.187.620</td></tr>
-            <tr><td>Catrimaitén (1.500)</td><td class="text-right">$1.145.000</td><td class="text-right">$1.362.550</td></tr>
-            <tr class="subtotal-row"><td>Subtotal neto</td><td class="text-right">$2.143.000</td><td></td></tr>
-            <tr><td>Descuento combo 10%</td><td class="text-right">-$214.300</td><td></td></tr>
-            <tr class="total-row"><td>Total neto</td><td class="text-right">$1.928.700</td><td class="text-right">$2.295.153</td></tr>
+            <tr><td>Pi Berries (1.200 × $600)</td><td class="text-right">$720.000</td><td class="text-right">$856.800</td></tr>
+            <tr><td>Catrimaitén (1.500 × $600)</td><td class="text-right">$900.000</td><td class="text-right">$1.071.000</td></tr>
+            <tr class="subtotal-row"><td>Subtotal neto</td><td class="text-right">$1.620.000</td><td></td></tr>
+            <tr><td>Descuento combo 10%</td><td class="text-right">-$162.000</td><td></td></tr>
+            <tr class="total-row"><td>Total neto</td><td class="text-right">$1.458.000</td><td class="text-right">$1.735.020</td></tr>
           </tbody>
         </table>
       </div>

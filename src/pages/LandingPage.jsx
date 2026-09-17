@@ -110,8 +110,8 @@ export default function LandingPage() {
   const plans = [
     {
       name: 'Básico',
-      price: billingCycle === 'monthly' ? '59.990' : '47.990',
-      period: '/mes',
+      price: '39.990',
+      period: '/mes + IVA',
       description: 'Ideal para PYMEs y equipos pequeños',
       features: [
         'Hasta 30 colaboradores',
@@ -119,15 +119,15 @@ export default function LandingPage() {
         'Reconocimiento facial',
         'Reportes básicos',
         'Soporte por email',
-        'Almacenamiento 5 GB',
+        '15 días de prueba gratis',
       ],
       cta: 'Solicitar demo',
       highlighted: false,
     },
     {
       name: 'Profesional',
-      price: billingCycle === 'monthly' ? '119.990' : '95.990',
-      period: '/mes',
+      price: '99.990',
+      period: '/mes + IVA',
       description: 'Para empresas en crecimiento',
       features: [
         'Hasta 100 colaboradores',
@@ -137,15 +137,15 @@ export default function LandingPage() {
         'Webhooks e integraciones',
         'Geolocalización de registros',
         'Soporte prioritario',
-        'Almacenamiento 20 GB',
+        '15 días de prueba gratis',
       ],
       cta: 'Solicitar demo',
       highlighted: true,
     },
     {
       name: 'Enterprise',
-      price: '199.990',
-      period: '/mes',
+      price: '249.990',
+      period: '/mes + IVA',
       description: 'Para grandes organizaciones',
       features: [
         'Hasta 300 colaboradores',
@@ -155,25 +155,25 @@ export default function LandingPage() {
         'Exportación Excel y reportes avanzados',
         'SLA 99.9% uptime',
         'Soporte dedicado',
-        'Almacenamiento ilimitado',
+        'Sin costo de implementación',
       ],
       cta: 'Solicitar demo',
       highlighted: false,
     },
     {
       name: 'Corporativo',
-      price: 'A medida',
-      period: '',
-      description: 'Para operaciones complejas',
+      price: 'Por trabajador',
+      period: 'desde $500 + IVA',
+      description: 'Más de 300 colaboradores · agrícola y alto volumen',
       features: [
         'Colaboradores ilimitados',
         'Dispositivos ilimitados',
-        'Personalización de marca',
-        'Implementación asistida',
+        'Tarifa por trabajador activo',
+        'Precio escalonado por volumen',
+        'Marcaje masivo por RUT',
+        'Modo offline para faenas',
         'Account manager dedicado',
         'SLA personalizado',
-        'Integraciones a medida',
-        'Facturación especial',
       ],
       cta: 'Conversemos',
       highlighted: false,
@@ -794,10 +794,10 @@ export default function LandingPage() {
                       className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none text-gray-700"
                     >
                       <option value="">No estoy seguro</option>
-                      <option value="basico">Básico ($59.990/mes)</option>
-                      <option value="profesional">Profesional ($119.990/mes)</option>
-                      <option value="enterprise">Enterprise ($199.990/mes)</option>
-                      <option value="corporativo">Corporativo (a medida)</option>
+                      <option value="basico">Básico ($39.990/mes + IVA)</option>
+                      <option value="profesional">Profesional ($99.990/mes + IVA)</option>
+                      <option value="enterprise">Enterprise ($249.990/mes + IVA)</option>
+                      <option value="corporativo">Corporativo (por trabajador, desde $500 + IVA)</option>
                     </select>
                   </div>
 
