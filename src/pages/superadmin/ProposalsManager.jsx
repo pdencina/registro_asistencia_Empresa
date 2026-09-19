@@ -11,6 +11,7 @@ export default function ProposalsManager({ onBack }) {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [copied, setCopied] = useState(null);
+  const [sending, setSending] = useState(null);
   const [form, setForm] = useState(getEmptyForm());
 
   function getEmptyForm() {
@@ -104,6 +105,24 @@ export default function ProposalsManager({ onBack }) {
     navigator.clipboard.writeText(`https://www.flexio.cl/propuesta/${reference}`);
     setCopied(reference);
     setTimeout(() => setCopied(null), 2000);
+  }
+
+  async function sendEmail(p) {
+    if (!p.contact_email) { alert('Esta propuesta no tiene email de contacto. Edítala y agrega uno.'); return; }
+    if (!confirm(`¿Enviar la propuesta por email a ${p.contact_email}?`)) return;
+    const secret = sessionStorage.getItem('superadmin_token');
+    setSending(p.reference);
+    try {
+      const res = await fetch('/api/proposals/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${secret}` },
+        body: JSON.stringify({ reference: p.reference }),
+      });
+      const data = await res.json();
+      if (res.ok) { alert(data.message || 'Propuesta enviada'); loadProposals(); }
+      else alert(data.error || 'Error al enviar');
+    } catch { alert('Error de conexión'); }
+    setSending(null);
   }
 
   const statusColors = {
@@ -327,6 +346,10 @@ export default function ProposalsManager({ onBack }) {
                 </div>
 
                 <div className="flex items-center gap-2 shrink-0">
+                  <button onClick={() => sendEmail(p)} title="Enviar por email" disabled={sending === p.reference}
+                    className="p-2 rounded-lg transition bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50">
+                    <Send className="w-4 h-4" />
+                  </button>
                   <button onClick={() => copyLink(p.reference)} title="Copiar link"
                     className={`p-2 rounded-lg transition ${copied === p.reference ? 'bg-emerald-600 text-white' : 'bg-gray-700 text-gray-400 hover:text-white'}`}>
                     {copied === p.reference ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}

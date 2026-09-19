@@ -176,13 +176,13 @@ function calculatePricing(employeeCount) {
 
 function getFeatures() {
   return [
-    { icon: 'scan-face', title: 'Reconocimiento Facial', desc: 'Marca con tu rostro en 2 segundos. Imposible falsificar.' },
-    { icon: 'smartphone', title: 'Sin Hardware Especial', desc: 'Funciona con cualquier tablet o celular con cámara.' },
+    { icon: 'scan-face', title: 'Marcaje por RUT o PIN', desc: 'El trabajador marca con su RUT o PIN en segundos. Sin suplantación.' },
+    { icon: 'smartphone', title: 'Sin Hardware Especial', desc: 'Funciona con cualquier tablet o celular.' },
     { icon: 'wifi-off', title: 'Modo Offline', desc: 'Funciona sin internet. Sincroniza al volver la conexión.' },
-    { icon: 'map-pin', title: 'Geolocalización', desc: 'Dirección real verificada en cada marcaje.' },
+    { icon: 'map-pin', title: 'Geolocalización', desc: 'Registra la ubicación de cada marca y alerta fuera de perímetro.' },
     { icon: 'bell', title: 'Alertas Automáticas', desc: 'Notificaciones de ausencia, exceso de horas, resumen semanal.' },
-    { icon: 'file-text', title: 'Libro DT en 1 Click', desc: 'Exporta el libro de asistencia formato Dirección del Trabajo.' },
-    { icon: 'shield', title: 'Cumplimiento Legal', desc: 'Ley 19.628, Ley 21.719, firma electrónica Ley 19.799.' },
+    { icon: 'file-text', title: 'Libro de Asistencia', desc: 'Exporta el libro de asistencia en formato Art. 33.' },
+    { icon: 'shield', title: 'Registros Inalterables', desc: 'Hash SHA-256 y sello de tiempo. Ley 21.719 y Ley 19.799.' },
     { icon: 'zap', title: 'Implementación Día 1', desc: 'Operando el mismo día. Sin semanas de espera.' },
   ];
 }
@@ -191,7 +191,7 @@ function getComparison() {
   return {
     headers: ['', 'Flexio', 'GeoVictoria', 'Genera'],
     rows: [
-      ['Reconocimiento facial', '✅', '❌', '❌ (solo con reloj)'],
+      ['Marcaje por RUT / PIN', '✅', 'Parcial', 'Parcial'],
       ['Sin hardware especial', '✅', '❌ (venden relojes)', '❌ (reloj incluido)'],
       ['Modo offline', '✅', '❌', '❌'],
       ['Implementación', 'Mismo día', 'Días/semanas', '10-30 días'],
@@ -201,8 +201,8 @@ function getComparison() {
       ['Geolocalización con dirección', '✅', 'Parcial', '❌'],
       ['Dashboard interactivo', '✅ (drill-down)', 'Básico', 'Básico'],
       ['Contrato digital integrado', '✅', '❌', '❌'],
-      ['Sugerencias automáticas (IA)', '✅', '❌', '❌'],
-      ['App móvil con selfie', '✅', '❌', 'Incluida'],
+      ['Registros inalterables (hash)', '✅', 'Parcial', 'Parcial'],
+      ['Precio por tramos de volumen', '✅', '❌', '❌'],
     ],
   };
 }

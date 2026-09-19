@@ -101,7 +101,7 @@ export default function ProposalPage() {
           <p className="text-blue-200 text-sm uppercase tracking-wide mb-2">Propuesta personalizada para</p>
           <h1 className="text-4xl md:text-5xl font-bold mb-4">{company}</h1>
           <p className="text-xl text-blue-100 max-w-2xl">
-            Control de asistencia inteligente con reconocimiento facial. 
+            Control de asistencia digital con marcaje por RUT o PIN. 
             Sin hardware, sin contratos eternos, operando el mismo día.
           </p>
         </div>
@@ -145,8 +145,7 @@ export default function ProposalPage() {
               </div>
               {pricing.employeeCount > 0 && (
                 <p className="text-sm text-gray-500 mt-1">
-                  {pricing.pricePerUser ? `${formatCLP(pricing.pricePerUser)}/usuario × ${pricing.employeeCount} colaboradores` : `≈ ${formatCLP(pricing.perEmployee)}/colaborador al mes`}
-                  {pricing.minimumApplied && <span className="text-amber-600 ml-1">(mínimo {formatCLP(pricing.minimum)})</span>}
+                  Plan {pricing.plan} · para {pricing.employeeCount} colaboradores
                 </p>
               )}
               {pricing.discount > 0 && (
