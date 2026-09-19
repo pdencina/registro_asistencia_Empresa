@@ -16,7 +16,7 @@ export default function ProposalsManager({ onBack }) {
   function getEmptyForm() {
     return {
       company_name: '', company_rut: '', contact_name: '', contact_email: '', contact_phone: '',
-      num_employees: 10, price_per_user: 1490, minimum_monthly: 29900,
+      num_employees: 10, price_per_user: 0, minimum_monthly: 0,
       discount_percent: 0, annual_discount_percent: 20, setup_fee: 0,
       trial_days: 15, min_contract_months: 0, cancellation_days: 15,
       notes: '', valid_until: '',
@@ -43,8 +43,19 @@ export default function ProposalsManager({ onBack }) {
     e.preventDefault();
     const secret = sessionStorage.getItem('superadmin_token');
 
+    // Inyectar precio calculado según el modelo vigente (planes fijos / corporativo)
+    const netoPlan = planCalc.neto || 0;
+    const formConPrecio = {
+      ...form,
+      // price_per_user efectivo y mínimo = neto del plan, para que el backend
+      // calcule num_employees * price_per_user >= minimum = neto del plan
+      price_per_user: form.num_employees > 0 ? Math.round(netoPlan / form.num_employees) : 0,
+      minimum_monthly: netoPlan,
+      plan_name: planCalc.plan,
+    };
+
     const method = editingId ? 'PUT' : 'POST';
-    const body = editingId ? { id: editingId, ...form } : form;
+    const body = editingId ? { id: editingId, ...formConPrecio } : formConPrecio;
 
     const res = await fetch('/api/proposals', {
       method,
@@ -107,12 +118,24 @@ export default function ProposalsManager({ onBack }) {
     draft: 'Borrador', sent: 'Enviada', accepted: 'Aceptada', rejected: 'Rechazada', expired: 'Expirada',
   };
 
-  // Calculate live preview
-  const rawMonthly = form.num_employees * form.price_per_user;
-  const previewMonthly = Math.max(rawMonthly, form.minimum_monthly);
-  const previewDiscounted = form.discount_percent > 0 ? Math.round(previewMonthly * (1 - form.discount_percent / 100)) : previewMonthly;
+  // Cálculo automático según modelo de precios vigente (estudio de mercado)
+  function calcularPlan(n) {
+    if (n <= 30) return { plan: 'Básico', neto: 39990, detalle: 'hasta 30 colaboradores', porTrabajador: false };
+    if (n <= 100) return { plan: 'Profesional', neto: 99990, detalle: 'hasta 100 colaboradores', porTrabajador: false };
+    if (n <= 300) return { plan: 'Enterprise', neto: 249990, detalle: 'hasta 300 colaboradores', porTrabajador: false };
+    // Corporativo: tarifa por trabajador
+    let unit;
+    if (n <= 750) unit = 700;
+    else if (n <= 1500) unit = 600;
+    else if (n <= 3000) unit = 500;
+    else return { plan: 'Corporativo', neto: null, detalle: 'más de 3.000 — a convenir', porTrabajador: true, unit: null };
+    return { plan: 'Corporativo', neto: n * unit, detalle: `${n} × $${unit.toLocaleString('es-CL')} c/u`, porTrabajador: true, unit };
+  }
+
+  const planCalc = calcularPlan(form.num_employees);
+  const baseMonthly = planCalc.neto || 0;
+  const previewDiscounted = form.discount_percent > 0 ? Math.round(baseMonthly * (1 - form.discount_percent / 100)) : baseMonthly;
   const previewIva = Math.round(previewDiscounted * 1.19);
-  const minimumApplied = rawMonthly < form.minimum_monthly;
 
   return (
     <div>
@@ -175,23 +198,12 @@ export default function ProposalsManager({ onBack }) {
                       required className="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-primary-500 outline-none" />
                   </div>
                   <div>
-                    <label className="block text-xs text-gray-500 mb-1">$/usuario/mes</label>
-                    <input type="number" min="0" value={form.price_per_user} onChange={e => setForm({...form, price_per_user: parseInt(e.target.value) || 0})}
-                      className="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-primary-500 outline-none" />
+                    <label className="block text-xs text-gray-500 mb-1">Plan (automático)</label>
+                    <div className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-emerald-400 font-medium">{planCalc.plan}</div>
                   </div>
                   <div>
-                    <label className="block text-xs text-gray-500 mb-1">Mínimo mensual</label>
-                    <input type="number" min="0" value={form.minimum_monthly} onChange={e => setForm({...form, minimum_monthly: parseInt(e.target.value) || 0})}
-                      className="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-primary-500 outline-none" />
-                  </div>
-                  <div>
-                    <label className="block text-xs text-gray-500 mb-1">Descuento mensual %</label>
+                    <label className="block text-xs text-gray-500 mb-1">Descuento %</label>
                     <input type="number" min="0" max="100" value={form.discount_percent} onChange={e => setForm({...form, discount_percent: parseInt(e.target.value) || 0})}
-                      className="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-primary-500 outline-none" />
-                  </div>
-                  <div>
-                    <label className="block text-xs text-gray-500 mb-1">Descuento anual %</label>
-                    <input type="number" min="0" max="100" value={form.annual_discount_percent} onChange={e => setForm({...form, annual_discount_percent: parseInt(e.target.value) || 0})}
                       className="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-primary-500 outline-none" />
                   </div>
                   <div>
@@ -201,18 +213,37 @@ export default function ProposalsManager({ onBack }) {
                   </div>
                 </div>
 
+                {/* Referencia de tramos */}
+                <div className="mt-3 grid grid-cols-2 md:grid-cols-4 gap-2 text-[11px]">
+                  <div className={`px-2 py-1.5 rounded-lg text-center ${form.num_employees <= 30 ? 'bg-primary-600/20 text-primary-300 border border-primary-500/40' : 'bg-gray-900 text-gray-500'}`}>Básico ≤30 · $39.990</div>
+                  <div className={`px-2 py-1.5 rounded-lg text-center ${form.num_employees > 30 && form.num_employees <= 100 ? 'bg-primary-600/20 text-primary-300 border border-primary-500/40' : 'bg-gray-900 text-gray-500'}`}>Profesional ≤100 · $99.990</div>
+                  <div className={`px-2 py-1.5 rounded-lg text-center ${form.num_employees > 100 && form.num_employees <= 300 ? 'bg-primary-600/20 text-primary-300 border border-primary-500/40' : 'bg-gray-900 text-gray-500'}`}>Enterprise ≤300 · $249.990</div>
+                  <div className={`px-2 py-1.5 rounded-lg text-center ${form.num_employees > 300 ? 'bg-primary-600/20 text-primary-300 border border-primary-500/40' : 'bg-gray-900 text-gray-500'}`}>Corporativo +300 · $700/$600/$500</div>
+                </div>
+
                 {/* Live preview */}
                 <div className="mt-4 p-4 bg-gray-900 border border-gray-700 rounded-xl">
                   <p className="text-xs text-gray-500 mb-2">Vista previa del precio</p>
-                  <div className="flex items-baseline gap-3">
-                    <span className="text-2xl font-bold text-emerald-400">{formatCLP(previewIva)}</span>
-                    <span className="text-sm text-gray-500">/mes IVA incl.</span>
-                  </div>
-                  <p className="text-xs text-gray-500 mt-1">
-                    {form.num_employees} × {formatCLP(form.price_per_user)} = {formatCLP(rawMonthly)} neto
-                    {minimumApplied && <span className="text-amber-400"> (se aplica mínimo {formatCLP(form.minimum_monthly)})</span>}
-                    {form.discount_percent > 0 && <span className="text-emerald-400"> -{form.discount_percent}% desc.</span>}
-                  </p>
+                  {planCalc.neto ? (
+                    <>
+                      <div className="flex items-baseline gap-3">
+                        <span className="text-2xl font-bold text-emerald-400">{formatCLP(previewIva)}</span>
+                        <span className="text-sm text-gray-500">/mes IVA incl.</span>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Plan {planCalc.plan} · {planCalc.detalle} · neto {formatCLP(previewDiscounted)}
+                        {form.discount_percent > 0 && <span className="text-emerald-400"> (-{form.discount_percent}% desc.)</span>}
+                      </p>
+                    </>
+                  ) : (
+                    <div>
+                      <span className="text-xl font-bold text-amber-400">Valor a convenir</span>
+                      <p className="text-xs text-gray-500 mt-1">Más de 3.000 colaboradores · {planCalc.detalle}</p>
+                    </div>
+                  )}
+                  {form.setup_fee > 0 && (
+                    <p className="text-xs text-gray-400 mt-2">+ Implementación: {formatCLP(form.setup_fee)} + IVA (pago único)</p>
+                  )}
                 </div>
               </div>
 
