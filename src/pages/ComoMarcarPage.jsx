@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
-import { Monitor, Smartphone, Copy, Check, QrCode } from 'lucide-react';
+import { Monitor, Smartphone, Copy, Check, QrCode, MapPin, Loader2, LocateFixed } from 'lucide-react';
+import { devicesApi } from '../api';
 
 /**
  * Página "Cómo marcar" del panel admin.
@@ -72,6 +73,159 @@ function LinkCard({ icon: Icon, color, title, subtitle, url, description, tips }
   );
 }
 
+// Tarjeta para configurar la ubicación fija del tótem sin correr scripts.
+// Esta ubicación se usa como evidencia en las marcas hechas desde la URL del tótem.
+function TotemLocationCard() {
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [locating, setLocating] = useState(false);
+  const [lat, setLat] = useState('');
+  const [lng, setLng] = useState('');
+  const [name, setName] = useState('');
+  const [configured, setConfigured] = useState(false);
+  const [msg, setMsg] = useState(null); // { type: 'ok'|'error', text }
+
+  useEffect(() => {
+    let alive = true;
+    devicesApi.getTotemLocation()
+      .then((d) => {
+        if (!alive) return;
+        setConfigured(d.configured);
+        if (d.lat != null) setLat(String(d.lat));
+        if (d.lng != null) setLng(String(d.lng));
+        if (d.name) setName(d.name);
+      })
+      .catch(() => {})
+      .finally(() => { if (alive) setLoading(false); });
+    return () => { alive = false; };
+  }, []);
+
+  function useMyLocation() {
+    if (!navigator.geolocation) {
+      setMsg({ type: 'error', text: 'Tu navegador no permite obtener la ubicación.' });
+      return;
+    }
+    setLocating(true);
+    setMsg(null);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setLat(pos.coords.latitude.toFixed(6));
+        setLng(pos.coords.longitude.toFixed(6));
+        setLocating(false);
+        setMsg({ type: 'ok', text: 'Ubicación tomada de tu dispositivo. Revísala y guarda.' });
+      },
+      (err) => {
+        setLocating(false);
+        setMsg({ type: 'error', text: 'No se pudo obtener la ubicación: ' + err.message });
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  }
+
+  async function save() {
+    const nLat = Number(lat), nLng = Number(lng);
+    if (Number.isNaN(nLat) || Number.isNaN(nLng) || !lat || !lng) {
+      setMsg({ type: 'error', text: 'Ingresa una latitud y longitud válidas.' });
+      return;
+    }
+    setSaving(true);
+    setMsg(null);
+    try {
+      await devicesApi.setTotemLocation(nLat, nLng, name || 'Tótem principal');
+      setConfigured(true);
+      setMsg({ type: 'ok', text: 'Ubicación del tótem guardada correctamente.' });
+    } catch (e) {
+      setMsg({ type: 'error', text: e.message || 'No se pudo guardar.' });
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+      <div className="flex items-start gap-4">
+        <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-gray-900">
+          <MapPin className="w-6 h-6 text-white" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="font-bold text-gray-900">Ubicación del tótem fijo</h3>
+          <p className="text-sm text-gray-500 mb-3">
+            El tótem es un punto fijo, así que reporta siempre esta ubicación (no la del navegador). Configúrala una vez.
+          </p>
+
+          {loading ? (
+            <div className="flex items-center gap-2 text-sm text-gray-400 py-4">
+              <Loader2 className="w-4 h-4 animate-spin" /> Cargando…
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Latitud</label>
+                  <input
+                    type="text" inputMode="decimal" value={lat}
+                    onChange={(e) => setLat(e.target.value)}
+                    placeholder="-33.4489"
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Longitud</label>
+                  <input
+                    type="text" inputMode="decimal" value={lng}
+                    onChange={(e) => setLng(e.target.value)}
+                    placeholder="-70.6693"
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  />
+                </div>
+              </div>
+              <div className="mt-3">
+                <label className="block text-xs font-medium text-gray-600 mb-1">Nombre (opcional)</label>
+                <input
+                  type="text" value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Ej: Entrada principal"
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                />
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2 mt-4">
+                <button
+                  onClick={useMyLocation} disabled={locating}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition disabled:opacity-60"
+                >
+                  {locating ? <Loader2 className="w-4 h-4 animate-spin" /> : <LocateFixed className="w-4 h-4" />}
+                  Usar mi ubicación actual
+                </button>
+                <button
+                  onClick={save} disabled={saving}
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium bg-primary-600 text-white hover:bg-primary-700 transition disabled:opacity-60"
+                >
+                  {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                  Guardar ubicación
+                </button>
+              </div>
+
+              {msg && (
+                <p className={`text-sm mt-3 ${msg.type === 'ok' ? 'text-emerald-600' : 'text-red-600'}`}>
+                  {msg.text}
+                </p>
+              )}
+              {!msg && configured && (
+                <p className="text-xs text-gray-400 mt-3">Ubicación configurada. Puedes actualizarla cuando quieras.</p>
+              )}
+
+              <p className="text-xs text-gray-400 mt-3">
+                Tip: párate junto al tótem y usa "Usar mi ubicación actual" para tomar las coordenadas exactas.
+              </p>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function ComoMarcarPage() {
   const { tenant } = useParams();
   const base = 'https://www.flexio.cl';
@@ -101,6 +255,9 @@ export default function ComoMarcarPage() {
             'Funciona sin internet: guarda las marcas y las sincroniza al reconectar',
           ]}
         />
+
+        {/* Ubicación del tótem */}
+        <TotemLocationCard />
 
         {/* Móvil */}
         <LinkCard

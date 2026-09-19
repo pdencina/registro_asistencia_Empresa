@@ -12,6 +12,62 @@ module.exports = async function handler(req, res) {
   const sql = getDb();
 
   try {
+    // GET ?totem=1: Leer la ubicación fija del tótem principal del tenant.
+    // Es la ubicación que se usa como fallback en las marcas de tótem (email/evidencia).
+    if (req.method === 'GET' && (req.query.totem === '1' || req.query.totem === 'true')) {
+      const [device] = await sql(
+        `SELECT name, lat, lng FROM authorized_devices
+         WHERE tenant_id = $1 AND active = true AND lat IS NOT NULL AND lng IS NOT NULL
+         ORDER BY (device_id = 'totem-principal') DESC, updated_at DESC
+         LIMIT 1`,
+        [tenant.id]
+      );
+      return res.status(200).json({
+        configured: !!device,
+        name: device?.name || null,
+        lat: device ? Number(device.lat) : null,
+        lng: device ? Number(device.lng) : null,
+      });
+    }
+
+    // PUT: Guardar/actualizar la ubicación fija del tótem principal del tenant.
+    // No exige PIN (usa el contexto de admin por slug) y NO cuenta contra max_devices:
+    // gestiona un único registro estable con device_id = 'totem-principal'.
+    if (req.method === 'PUT') {
+      const { lat, lng, name } = req.body;
+
+      const nLat = lat === '' || lat == null ? null : Number(lat);
+      const nLng = lng === '' || lng == null ? null : Number(lng);
+
+      if (nLat == null || nLng == null || Number.isNaN(nLat) || Number.isNaN(nLng)) {
+        return res.status(400).json({ error: 'lat y lng son requeridos y deben ser números válidos' });
+      }
+      if (nLat < -90 || nLat > 90 || nLng < -180 || nLng > 180) {
+        return res.status(400).json({ error: 'Coordenadas fuera de rango' });
+      }
+
+      const [existing] = await sql(
+        `SELECT id FROM authorized_devices WHERE tenant_id = $1 AND device_id = 'totem-principal'`,
+        [tenant.id]
+      );
+
+      if (existing) {
+        await sql(
+          `UPDATE authorized_devices SET lat = $1, lng = $2, name = $3, active = true, updated_at = NOW()
+           WHERE tenant_id = $4 AND device_id = 'totem-principal'`,
+          [nLat, nLng, name || 'Tótem principal', tenant.id]
+        );
+      } else {
+        await sql(
+          `INSERT INTO authorized_devices (id, tenant_id, device_id, name, lat, lng, active, created_at, updated_at)
+           VALUES ($1, $2, 'totem-principal', $3, $4, $5, true, NOW(), NOW())`,
+          [crypto.randomUUID(), tenant.id, name || 'Tótem principal', nLat, nLng]
+        );
+      }
+
+      return res.status(200).json({ message: 'Ubicación del tótem guardada', lat: nLat, lng: nLng });
+    }
+
     // GET: Check if device is authorized for this tenant
     if (req.method === 'GET') {
       const { device_id } = req.query;

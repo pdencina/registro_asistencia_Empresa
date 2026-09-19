@@ -109,6 +109,12 @@ export const devicesApi = {
     method: 'POST',
     body: JSON.stringify({ device_id: deviceId, pin, name, lat, lng }),
   }),
+  // Ubicación fija del tótem principal (usada como evidencia en marcas de tótem)
+  getTotemLocation: () => request('/devices?totem=1'),
+  setTotemLocation: (lat, lng, name) => request('/devices', {
+    method: 'PUT',
+    body: JSON.stringify({ lat, lng, name }),
+  }),
 };
 
 // Schedules API
