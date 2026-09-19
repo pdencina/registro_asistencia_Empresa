@@ -2,7 +2,7 @@ import { useState, useEffect, lazy, Suspense } from 'react';
 import { Routes, Route, NavLink, Navigate, useNavigate, useParams } from 'react-router-dom';
 import {
   Users, ClipboardList, BarChart3, LogOut, Camera, Settings, Clock, FileText,
-  FileCheck, Palmtree, Calendar, AlertTriangle, Menu, X, Timer, ChevronDown, Loader, DollarSign, KeyRound
+  FileCheck, Palmtree, Calendar, AlertTriangle, Menu, X, Timer, ChevronDown, Loader, DollarSign, KeyRound, QrCode
 } from 'lucide-react';
 import EmployeesPage from '../pages/EmployeesPage';
 import AttendancePage from '../pages/AttendancePage';
@@ -21,6 +21,7 @@ import JustificationsPage from '../pages/JustificationsPage';
 import PayrollReportPage from '../pages/PayrollReportPage';
 import OnboardingWizard from '../components/OnboardingWizard';
 import PinCheckInPage from '../pages/PinCheckInPage';
+import ComoMarcarPage from '../pages/ComoMarcarPage';
 
 // Lazy load heavy pages (face-api.js = 641KB, only needed for check-in)
 const CheckInPage = lazy(() => import('../pages/CheckInPage'));
@@ -98,6 +99,7 @@ export default function AdminLayout() {
         { to: `${basePath}/employees`, icon: Users, label: 'Colaboradores' },
         { to: `${basePath}/attendance`, icon: ClipboardList, label: 'Asistencia' },
         { to: `${basePath}/register`, icon: KeyRound, label: 'Registrar Marcaje' },
+        { to: `${basePath}/como-marcar`, icon: QrCode, label: 'Cómo Marcar' },
       ],
     },
     {
@@ -254,6 +256,7 @@ export default function AdminLayout() {
             <Route path="/employees" element={<EmployeesPage />} />
             <Route path="/attendance" element={<AttendancePage />} />
             <Route path="/register" element={<PinCheckInPage />} />
+            <Route path="/como-marcar" element={<ComoMarcarPage />} />
             <Route path="/schedules" element={<SchedulesPage />} />
             <Route path="/overtime" element={<OvertimePage />} />
             <Route path="/medical-leaves" element={<MedicalLeavesPage />} />

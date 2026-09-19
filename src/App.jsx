@@ -16,11 +16,9 @@ import ConsentPage from './pages/ConsentPage';
 import MarcajePage from './pages/MarcajePage';
 
 // Lazy-loaded heavy pages (face-api.js only loads when needed)
-const KioskLayout = lazy(() => import('./layouts/KioskLayout'));
 const MobileCheckInPage = lazy(() => import('./pages/MobileCheckInPage'));
 import ContractPage from './pages/ContractPage';
 import MyHoursPage from './pages/MyHoursPage';
-import SimpleCheckInPage from './pages/SimpleCheckInPage';
 import ProposalPage from './pages/ProposalPage';
 import CotizadorPage from './pages/CotizadorPage';
 import BlogIndexPage from './pages/blog/BlogIndexPage';
@@ -42,6 +40,12 @@ function LoadingPage() {
   );
 }
 
+// Redirige rutas de marcaje antiguas a las 2 rutas oficiales (conserva el slug)
+function RedirectMarcaje({ to }) {
+  const { tenant } = useParams();
+  return <Navigate to={`/${to}/${tenant}`} replace />;
+}
+
 function App() {
   return (
     <ErrorBoundary>
@@ -55,26 +59,25 @@ function App() {
         {/* Login: buscar empresa por email */}
         <Route path="/login" element={<LoginRedirectPage />} />
 
-        {/* App por tenant: flexio.cl/app/slug */}
-        <Route path="/app/:tenant" element={<Suspense fallback={<LoadingPage />}><KioskLayout /></Suspense>} />
+        {/* ===== MARCAJE — 2 RUTAS OFICIALES ===== */}
 
-        {/* Marcaje móvil: flexio.cl/marcar/slug */}
-        <Route path="/marcar/:tenant" element={<Suspense fallback={<LoadingPage />}><MobileCheckInPage /></Suspense>} />
-
-        {/* Marcaje por PIN: flexio.cl/pin/slug */}
-        <Route path="/pin/:tenant" element={<PinCheckInPage />} />
-
-        {/* Marcaje principal PIN/RUT estilo BUK: flexio.cl/marcaje/slug */}
+        {/* 1. Tótem fijo (tablet en la entrada): flexio.cl/marcaje/slug */}
         <Route path="/marcaje/:tenant" element={<MarcajePage />} />
+
+        {/* 2. Marcaje móvil (celular del trabajador, terreno): flexio.cl/movil/slug */}
+        <Route path="/movil/:tenant" element={<Suspense fallback={<LoadingPage />}><MobileCheckInPage /></Suspense>} />
+
+        {/* --- Redirects de rutas antiguas (compatibilidad) --- */}
+        <Route path="/app/:tenant" element={<RedirectMarcaje to="marcaje" />} />
+        <Route path="/pin/:tenant" element={<RedirectMarcaje to="marcaje" />} />
+        <Route path="/simple/:tenant" element={<RedirectMarcaje to="marcaje" />} />
+        <Route path="/marcar/:tenant" element={<RedirectMarcaje to="movil" />} />
 
         {/* Acceso universal: flexio.cl/mi */}
         <Route path="/mi" element={<UniversalCheckInPage />} />
 
         {/* Mis horas: flexio.cl/mis-horas */}
         <Route path="/mis-horas" element={<MyHoursPage />} />
-
-        {/* Marcaje simplificado: flexio.cl/simple/slug */}
-        <Route path="/simple/:tenant" element={<SimpleCheckInPage />} />
 
         {/* Contrato digital: flexio.cl/contrato/slug */}
         <Route path="/contrato/:tenant" element={<ContractPage />} />
