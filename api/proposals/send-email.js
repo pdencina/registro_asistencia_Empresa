@@ -70,7 +70,7 @@ module.exports = async function handler(req, res) {
             <a href="${link}" style="display:inline-block;background:#2563eb;color:#fff;padding:14px 32px;border-radius:12px;text-decoration:none;font-weight:600;font-size:15px;">Ver propuesta completa</a>
           </div>
           <p style="font-size:13px;color:#64748b;line-height:1.6;margin:0;">
-            Incluye ${p.trial_days} días de prueba gratis, sin permanencia mínima. En el link puedes ver el detalle y aceptar la propuesta en línea.
+            Contrato mínimo de 6 meses con renovación automática. Implementación asistida el mismo día. En el link puedes ver el detalle y aceptar la propuesta en línea.
           </p>
         </td></tr>
         <tr><td style="padding:16px 28px;background:#f8fafc;border-top:1px solid #e2e8f0;text-align:center;">

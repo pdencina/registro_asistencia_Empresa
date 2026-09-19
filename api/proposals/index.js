@@ -136,9 +136,9 @@ module.exports = async function handler(req, res) {
     `, [
       reference, company_name, company_rut || null, contact_name || null,
       contact_email || null, contact_phone || null,
-      num_employees, price_per_user || 1490, minimum_monthly || 29900,
+      num_employees, price_per_user || 0, minimum_monthly || 0,
       discount_percent || 0, annual_discount_percent || 20, setup_fee || 0,
-      trial_days || 15, min_contract_months || 0, cancellation_days || 15,
+      trial_days || 0, min_contract_months || 6, cancellation_days || 30,
       notes || null, valid_until || null
     ]);
 
@@ -352,7 +352,7 @@ Confirmamos la recepcion de tu aceptacion de la propuesta de servicios Flexio pa
 <p style="font-size:13px;color:#1e40af;margin:0;line-height:1.8;">
 <strong>Plan:</strong> ${proposal.num_employees} colaboradores<br>
 <strong>Precio:</strong> ${priceStr}/mes IVA incl.<br>
-<strong>Trial:</strong> ${proposal.trial_days} dias sin costo
+<strong>Contrato:</strong> minimo 6 meses
 </p>
 </div>
 <p style="font-size:14px;color:#374151;margin:20px 0 0 0;">

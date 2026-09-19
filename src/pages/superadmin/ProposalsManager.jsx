@@ -19,7 +19,7 @@ export default function ProposalsManager({ onBack }) {
       company_name: '', company_rut: '', contact_name: '', contact_email: '', contact_phone: '',
       num_employees: 10, price_per_user: 0, minimum_monthly: 0,
       discount_percent: 0, annual_discount_percent: 20, setup_fee: 0,
-      trial_days: 15, min_contract_months: 0, cancellation_days: 15,
+      trial_days: 0, min_contract_months: 6, cancellation_days: 30,
       notes: '', valid_until: '',
     };
   }
@@ -269,12 +269,7 @@ export default function ProposalsManager({ onBack }) {
               {/* Terms */}
               <div>
                 <h4 className="text-sm font-semibold text-gray-400 uppercase mb-3">Condiciones</h4>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <div>
-                    <label className="block text-xs text-gray-500 mb-1">Trial (días)</label>
-                    <input type="number" min="0" value={form.trial_days} onChange={e => setForm({...form, trial_days: parseInt(e.target.value) || 0})}
-                      className="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-primary-500 outline-none" />
-                  </div>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                   <div>
                     <label className="block text-xs text-gray-500 mb-1">Contrato mín (meses)</label>
                     <input type="number" min="0" value={form.min_contract_months} onChange={e => setForm({...form, min_contract_months: parseInt(e.target.value) || 0})}
