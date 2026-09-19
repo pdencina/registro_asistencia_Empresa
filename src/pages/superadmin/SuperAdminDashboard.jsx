@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Building2, Users, Plus, Search, ToggleLeft, ToggleRight, Edit2, Trash2, FileText } from 'lucide-react';
+import { Building2, Users, Plus, Search, ToggleLeft, ToggleRight, Edit2, Trash2, FileText, Calculator } from 'lucide-react';
 import CreateTenantModal from './CreateTenantModal';
 import ProposalsManager from './ProposalsManager';
+import CalculadoraPrecio from './CalculadoraPrecio';
 
 export default function SuperAdminDashboard({ onLogout }) {
   const [tenants, setTenants] = useState([]);
@@ -10,7 +11,7 @@ export default function SuperAdminDashboard({ onLogout }) {
   const [showCreate, setShowCreate] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [stats, setStats] = useState({ total_tenants: 0, total_employees: 0, active_tenants: 0 });
-  const [view, setView] = useState('tenants'); // 'tenants' | 'proposals'
+  const [view, setView] = useState('tenants'); // 'tenants' | 'proposals' | 'calculadora'
 
   useEffect(() => { loadTenants(); }, []);
 
@@ -98,11 +99,22 @@ export default function SuperAdminDashboard({ onLogout }) {
           >
             <FileText className="w-4 h-4 inline mr-1.5" />Propuestas
           </button>
+          <button
+            onClick={() => setView('calculadora')}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition ${view === 'calculadora' ? 'bg-primary-600 text-white' : 'bg-gray-800 text-gray-400 hover:text-white'}`}
+          >
+            <Calculator className="w-4 h-4 inline mr-1.5" />Calculadora
+          </button>
         </div>
 
         {/* Proposals View */}
         {view === 'proposals' && (
           <ProposalsManager onBack={() => setView('tenants')} />
+        )}
+
+        {/* Calculadora View */}
+        {view === 'calculadora' && (
+          <CalculadoraPrecio onBack={() => setView('tenants')} />
         )}
 
         {/* Tenants View */}
