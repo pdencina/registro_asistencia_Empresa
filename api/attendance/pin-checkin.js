@@ -155,8 +155,18 @@ module.exports = async function handler(req, res) {
         if (RESEND_API_KEY) {
           let locationText = null;
           try {
-            if (latitude && longitude) {
-              locationText = await reverseGeocode(latitude, longitude);
+            let lat = latitude, lng = longitude;
+            // Fallback tótem: si no vino GPS del navegador, usar la ubicación
+            // del dispositivo autorizado del tenant (ubicación fija del tótem).
+            if (lat == null || lng == null) {
+              const [device] = await sql(
+                'SELECT lat, lng FROM authorized_devices WHERE tenant_id = $1 AND active = true AND lat IS NOT NULL AND lng IS NOT NULL LIMIT 1',
+                [tenant.id]
+              );
+              if (device) { lat = device.lat; lng = device.lng; }
+            }
+            if (lat != null && lng != null) {
+              locationText = await reverseGeocode(lat, lng);
             }
           } catch (e) {
             // Geocoding falló, enviar sin ubicación
