@@ -82,7 +82,7 @@ export default function ProposalPage() {
     );
   }
 
-  const { company, pricing, features, comparison, trial, implementation, contract } = data;
+  const { company, pricing, features, trial, implementation, contract } = data;
   const ctaLink = contract?.link || null;
 
   return (
@@ -196,12 +196,12 @@ export default function ProposalPage() {
             </div>
           </div>
 
-          {/* Trial badge */}
+          {/* Contract badge */}
           <div className="mt-6 flex items-center gap-3 bg-primary-50 border border-primary-200 rounded-xl px-4 py-3">
             <Shield className="w-5 h-5 text-primary-600 shrink-0" />
             <p className="text-sm text-primary-800">
-              <strong>{trial.days} días de prueba sin costo ni compromiso.</strong> Sin tarjeta de crédito. 
-              Cancela con {contract.cancellation}, sin carta certificada.
+              <strong>Contrato mínimo de 6 meses.</strong> Implementación asistida incluida. 
+              Renovación automática mensual al término del período.
             </p>
           </div>
         </div>
@@ -225,39 +225,6 @@ export default function ProposalPage() {
               </div>
             );
           })}
-        </div>
-      </section>
-
-      {/* Comparison Table */}
-      <section className="bg-gray-50 py-16">
-        <div className="max-w-5xl mx-auto px-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Flexio vs Competencia</h2>
-          <p className="text-gray-500 mb-8">Comparación directa con los proveedores más comunes en Chile.</p>
-
-          <div className="overflow-x-auto">
-            <table className="w-full bg-white rounded-xl shadow-sm border border-gray-200">
-              <thead>
-                <tr className="border-b border-gray-200">
-                  {comparison.headers.map((h, i) => (
-                    <th key={i} className={`px-4 py-3 text-left text-sm font-semibold ${i === 1 ? 'text-primary-600 bg-primary-50' : 'text-gray-700'}`}>
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {comparison.rows.map((row, i) => (
-                  <tr key={i} className="border-b border-gray-100 last:border-0">
-                    {row.map((cell, j) => (
-                      <td key={j} className={`px-4 py-3 text-sm ${j === 1 ? 'bg-primary-50 font-medium' : ''} ${cell === '✅' ? 'text-primary-600' : cell === '❌' ? 'text-red-400' : 'text-gray-700'}`}>
-                        {cell === '✅' ? <Check className="w-5 h-5 text-primary-600" /> : cell === '❌' ? <X className="w-5 h-5 text-red-400" /> : cell}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
         </div>
       </section>
 
@@ -286,12 +253,12 @@ export default function ProposalPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="bg-white rounded-xl p-6 border border-gray-200">
-              <h3 className="font-semibold text-gray-900 mb-3">Sin Permanencia</h3>
+              <h3 className="font-semibold text-gray-900 mb-3">Contrato</h3>
               <ul className="space-y-2 text-sm text-gray-600">
-                <li className="flex items-start gap-2"><Check className="w-4 h-4 text-primary-600 shrink-0 mt-0.5" /> Sin contrato mínimo</li>
-                <li className="flex items-start gap-2"><Check className="w-4 h-4 text-primary-600 shrink-0 mt-0.5" /> Cancela con 15 días de aviso</li>
-                <li className="flex items-start gap-2"><Check className="w-4 h-4 text-primary-600 shrink-0 mt-0.5" /> Sin carta certificada</li>
-                <li className="flex items-start gap-2"><Check className="w-4 h-4 text-primary-600 shrink-0 mt-0.5" /> Sin cobro de salida</li>
+                <li className="flex items-start gap-2"><Check className="w-4 h-4 text-primary-600 shrink-0 mt-0.5" /> Permanencia mínima de 6 meses</li>
+                <li className="flex items-start gap-2"><Check className="w-4 h-4 text-primary-600 shrink-0 mt-0.5" /> Renovación automática mensual</li>
+                <li className="flex items-start gap-2"><Check className="w-4 h-4 text-primary-600 shrink-0 mt-0.5" /> Aviso de término con 30 días</li>
+                <li className="flex items-start gap-2"><Check className="w-4 h-4 text-primary-600 shrink-0 mt-0.5" /> Contrato digital integrado</li>
               </ul>
             </div>
 
@@ -322,7 +289,7 @@ export default function ProposalPage() {
       <section className="max-w-5xl mx-auto px-6 py-16 text-center">
         <h2 className="text-3xl font-bold text-gray-900 mb-4">¿Listo para comenzar?</h2>
         <p className="text-gray-500 mb-8 max-w-xl mx-auto">
-          Activa tu prueba de {trial.days} días sin costo. Si no te convence, te sales sin pagar nada.
+          Acepta la propuesta e implementamos el mismo día. Contrato mínimo de 6 meses con renovación automática.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -336,7 +303,7 @@ export default function ProposalPage() {
               href={ctaLink}
               className="inline-flex items-center justify-center gap-2 bg-primary-600 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-primary-700 transition shadow-lg shadow-primary-200"
             >
-              Comenzar prueba gratis
+              Aceptar propuesta
               <ArrowRight className="w-5 h-5" />
             </a>
           ) : (
@@ -345,7 +312,7 @@ export default function ProposalPage() {
               disabled={accepting}
               className="inline-flex items-center justify-center gap-2 bg-primary-600 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-primary-700 transition shadow-lg shadow-primary-200 disabled:opacity-50"
             >
-              {accepting ? 'Procesando...' : 'Aceptar y comenzar prueba gratis'}
+              {accepting ? 'Procesando...' : 'Aceptar propuesta'}
               <ArrowRight className="w-5 h-5" />
             </button>
           )}
