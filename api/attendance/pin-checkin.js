@@ -156,9 +156,12 @@ module.exports = async function handler(req, res) {
           let locationText = null;
           try {
             let lat = latitude, lng = longitude;
-            // Fallback tótem: si no vino GPS del navegador, usar la ubicación
-            // del dispositivo autorizado del tenant (ubicación fija del tótem).
-            if (lat == null || lng == null) {
+            // Fallback SOLO para tótem: si es un tótem fijo y el navegador no dio
+            // GPS, usar la ubicación configurada del dispositivo autorizado.
+            // En marcaje móvil NUNCA se inventa ubicación: si no hay GPS real,
+            // el email va sin ubicación (más honesto).
+            const esTotem = req.body.source === 'totem';
+            if ((lat == null || lng == null) && esTotem) {
               const [device] = await sql(
                 'SELECT lat, lng FROM authorized_devices WHERE tenant_id = $1 AND active = true AND lat IS NOT NULL AND lng IS NOT NULL LIMIT 1',
                 [tenant.id]

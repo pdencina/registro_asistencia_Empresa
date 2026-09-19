@@ -121,6 +121,7 @@ export default function MarcajePage() {
     try {
       const body = {
         action,
+        source: 'totem',
         notes: gpsNotes || undefined,
         latitude: latitude || undefined,
         longitude: longitude || undefined,

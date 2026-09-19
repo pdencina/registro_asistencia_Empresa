@@ -97,6 +97,7 @@ export default function MobileCheckInPage() {
           await attendanceApi.register({
             employee_id: employee.id,
             type: nextAction,
+            source: 'movil',
             photo_snapshot: photo,
             notes: location ? `GPS: ${location.lat.toFixed(6)}, ${location.lng.toFixed(6)} (±${Math.round(location.accuracy)}m)` : 'Sin GPS',
           });
@@ -332,6 +333,7 @@ export default function MobileCheckInPage() {
       const result = await attendanceApi.register({
         employee_id: employee.id,
         type,
+        source: 'movil',
         photo_snapshot: photo,
         notes: [
           location ? `GPS: ${location.lat.toFixed(6)}, ${location.lng.toFixed(6)} (±${Math.round(location.accuracy)}m)` : 'Sin GPS',
@@ -527,7 +529,7 @@ export default function MobileCheckInPage() {
         const res = await fetch('/api/attendance/pin-checkin', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'x-tenant-slug': tenant },
-          body: JSON.stringify({ pin, action: status?.status === 'present' ? 'exit' : 'entry' }),
+          body: JSON.stringify({ pin, action: status?.status === 'present' ? 'exit' : 'entry', source: 'movil' }),
         });
         const data = await res.json();
         if (res.ok) {
