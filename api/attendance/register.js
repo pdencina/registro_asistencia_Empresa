@@ -7,6 +7,7 @@ const { insertAttendanceRecord } = require('../lib/integrity');
 const { evaluateGeo } = require('../lib/geofence');
 const { resolveEventTime, parseCoordinates, normalizeChannel, sanitizeDeviceId } = require('../lib/attendanceEvents');
 const { createHash } = require('crypto');
+const { getActivePolicy } = require('../lib/policy');
 
 module.exports = async function handler(req, res) {
   if (handleCors(req, res)) return;
@@ -40,6 +41,16 @@ module.exports = async function handler(req, res) {
     );
     if (!employee) {
       return res.status(404).json({ error: 'Empleado no encontrado o inactivo' });
+    }
+
+    // Con política de marcación activa la verificación facial debe hacerla el servidor (etapa 5 del plan).
+    // Este endpoint confía en la verificación del navegador, así que solo sirve al flujo legado.
+    const policy = await getActivePolicy(sql, tenant.id);
+    if (policy.legacy_marking === false) {
+      return res.status(403).json({
+        code: 'SERVER_VERIFICATION_REQUIRED',
+        error: 'La empresa usa verificación de identidad en el servidor; este método de marcación no está disponible.',
+      });
     }
 
     // Hora del evento: la del servidor, o la del dispositivo solo en sincronización offline acotada
@@ -91,6 +102,7 @@ module.exports = async function handler(req, res) {
       is_offline_sync: eventTime.isOfflineSync,
       auth_method: 'FACIAL',
       auth_result: 'CLIENT_REPORTED',
+      policy_version: policy.version,
       channel: normalizeChannel(req.body.source),
       device_id: sanitizeDeviceId(req.body.device_id),
       geo_status: geo.geo_status,

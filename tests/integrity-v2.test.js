@@ -52,7 +52,7 @@ test('migración 001: dry-run, aplicación, idempotencia y tipos', async () => {
   assert.equal(plan.pending.length, loadMigrations(MIGRATIONS_DIR).length);
 
   const applied = await applyMigrations(ctx.db, MIGRATIONS_DIR);
-  assert.deepEqual(applied.applied, ['001_attendance_v2.sql']);
+  assert.deepEqual(applied.applied, loadMigrations(MIGRATIONS_DIR).map((m) => m.name));
 
   const again = await applyMigrations(ctx.db, MIGRATIONS_DIR);
   assert.deepEqual(again.applied, []);

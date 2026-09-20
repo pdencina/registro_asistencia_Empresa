@@ -1,6 +1,7 @@
 const { getDb } = require('../lib/db');
 const { corsHeaders, handleCors } = require('../lib/cors');
 const { requireAuth } = require('../lib/auth');
+const { getActivePolicy } = require('../lib/policy');
 
 /**
  * POST /api/notifications/send-pin
@@ -26,6 +27,11 @@ module.exports = async function handler(req, res) {
 
   try {
     const { employee_id, pin, slug } = req.body;
+
+    // Con política activa no se envía ningún PIN por correo: el trabajador lo crea con un enlace de un solo uso
+    if ((await getActivePolicy(sql, tenant.id)).legacy_marking === false) {
+      return res.status(409).json({ code: 'USE_RESET_LINK', error: 'Esta empresa no envía PIN por correo. Usa "Restablecer PIN".' });
+    }
 
     const [employee] = await sql('SELECT * FROM employees WHERE id = $1 AND tenant_id = $2', [employee_id, tenant.id]);
     if (!employee || !employee.email) {

@@ -2,6 +2,7 @@ const { getDb } = require('../lib/db');
 const { handleCors } = require('../lib/cors');
 const { requireTenant } = require('../lib/tenant');
 const { verify } = require('../lib/session');
+const { getActivePolicy } = require('../lib/policy');
 const { rateLimit } = require('../lib/rateLimit');
 
 
@@ -25,6 +26,13 @@ module.exports = async function handler(req, res) {
   const bearer = (req.headers.authorization || '').replace('Bearer ', '');
   const session = verify(bearer);
   const isTenantAdmin = !!(session && session.typ === 'admin' && session.tid === tenant.id);
+
+  // Con política de marcación activa el PIN solo se crea con el enlace de un solo uso enviado al correo del trabajador
+  // (crearlo con solo el RUT permitiría que un tercero se adelante y fije el PIN de otra persona).
+  const policy = await getActivePolicy(getDb(), tenant.id);
+  if (policy.legacy_marking === false) {
+    return res.status(403).json({ code: 'USE_RESET_LINK', error: 'Solicita a tu empleador el enlace para crear tu PIN.' });
+  }
 
   const sql = getDb();
 

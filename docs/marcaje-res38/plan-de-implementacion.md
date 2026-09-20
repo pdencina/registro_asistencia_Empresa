@@ -20,8 +20,8 @@
 | 0 | Decisiones, matriz de requisitos configurables, corrección del checklist | ✅ hecha |
 | 1 | Migraciones versionadas, columnas de evidencia v2, `timestamptz`, cadena atómica con `seq`, verificador v1+v2 | ✅ hecha (falta **aplicar** `migrations/001` en producción) |
 | 2 | Hora del evento acotada, auditoría con actor real y "auditar antes de modificar", marcas importadas dentro de la cadena, coordenadas validadas, geolocalización estructurada | ✅ hecha |
-| 3 | Motor de políticas por empresa y pantalla de configuración | ⏳ pendiente |
-| 4 | PIN con hash, bloqueo por intentos, reset seguro; migración de PINs | ⏳ pendiente |
+| 3 | Motor de políticas por empresa (versionado, inmutable, con las reglas del texto) y pantalla de configuración | ✅ hecha (falta **aplicar** `migrations/002`) |
+| 4 | PIN con hash + pepper, bloqueo progresivo, cambio por el trabajador, restablecimiento por enlace de un solo uso; migración de PINs | ✅ hecha (falta **aplicar** `migrations/002` y correr `scripts/migrate-pins.js`) |
 | 5 | Plantillas biométricas cifradas, enrolamiento, verificador en servidor | ⏳ pendiente |
 | 6 | Pipeline nuevo `identificar → autenticar` y reescritura del flujo del tótem/móvil | ⏳ pendiente |
 | 7 | Evidencia cifrada, retención y purga | ⏳ pendiente |
@@ -78,16 +78,37 @@ Con esto se puede consultar cuántas marcas de cada empresa dependen de métodos
 5. **No** activar los triggers de protección (`POST /api/attendance/verify-integrity`) hasta la etapa 9:
    bloquearían la edición administrativa antes de que exista el flujo de correcciones.
 
-## Decisiones tomadas / supuestos
+## Decisiones (resueltas con el texto oficial)
 
-| # | Decisión | Estado |
+Las cuatro decisiones que estaban pendientes se resolvieron leyendo la Resolución publicada en el Diario Oficial;
+el detalle y los artículos están en [decisiones-segun-el-texto.md](decisiones-segun-el-texto.md).
+
+| # | Decisión | Fundamento |
 |---|---|---|
-| 1 | Empresas existentes: interruptor `legacy_marking` por empresa, se apaga cuando estén enroladas | Recomendado, aplica desde la etapa 3 |
-| 2 | Motor facial inicial: `local-descriptor` (face-api), con proveedor intercambiable | **Por confirmar** |
-| 3 | Enrolamiento: desde fotos de perfil revisadas por un admin (solo con consentimiento aprobado) o reenrolamiento | **Por confirmar** |
-| 4 | Offline: verificar al sincronizar y marcar "verificada en diferido", con tope de antigüedad configurable | Recomendado |
-| 5 | Entrada/salida: automática según la última marca, o elegida por el trabajador | **Por confirmar** |
-| 6 | Evidencia: "solo en fallo" o "siempre" y retención inicial | **Por confirmar** |
+| 1 | Empresas existentes: interruptor `legacy_marking` por empresa; se apaga cuando estén enroladas | Continuidad operativa |
+| 2 | Motor facial `local-descriptor` detrás de una interfaz; el PIN es **obligatorio** como alternativa no biométrica | Art. 7 a) y g) |
+| 3 | Enrolamiento solo con consentimiento escrito documentado; plantilla borrable a solicitud; destrucción 90–120 días tras el término | Art. 56, 57 |
+| 4 | Entrada/salida la elige el trabajador; repetidas: se conserva la primera | Art. 35-36, 41 d) |
+| 5 | Foto solo en fallo; marcaciones y posiciones 5 años; fotos 90 días (parámetro propio) | Art. 13, 53 f), 56, 58 l) |
+| 6 | Offline: excepción justificada; tope de antigüedad configurable (parámetro propio) | Art. 9-10 |
+
+## Etapas 3 y 4: qué se entregó
+
+- **Política** (`api/lib/policy.js`, `GET/PUT /api/policy`, pantalla *Política de marcación*): versiones inmutables (trigger en la base),
+  validación que cita el artículo, y las restricciones del texto como `CHECK` en la base (5 años, 90–120 días, geolocalización nunca bloquea).
+  "Solo facial" exige confirmación explícita porque contradice el Art. 7 g). Quitar el flujo legado exige `ENABLE_ENFORCED_MARKING=true`.
+- **PIN** (`api/lib/credentials.js`): hash scrypt sobre HMAC con pepper del entorno; bloqueo progresivo (15, 30, 60… hasta 24 h) en la base de datos;
+  intentos registrados sin el PIN; el trabajador cambia su PIN con correo del resultado (Art. 7 f); la administración solo envía un enlace de un solo uso.
+- **Marcación con política** (`pin-checkin`): exige RUT + PIN, respuestas genéricas (sin enumeración), 423 con espera al bloquear,
+  repetidas ignoradas (Art. 36 c) y `policy_version` en cada marca. `register` (facial validado por el navegador) se rechaza en este modo hasta la etapa 5.
+- **Trabajadores**: con política activa la pantalla ya no genera ni muestra PIN; envía el enlace al correo del trabajador.
+
+### Poner las etapas 3 y 4 en producción
+1. Definir `PIN_PEPPER` en Vercel (no cambiarlo después).
+2. `node scripts/migrate.js` y `--apply` (aplica 002).
+3. `node scripts/migrate-pins.js` (simulación) y `--apply`: crea las credenciales con hash **sin** borrar el texto plano.
+4. Nada cambia para las empresas mientras `legacy_marking` siga en `true` (valor por defecto).
+5. `--purge-plaintext` solo cuando la empresa haya dejado el flujo legado (irreversible).
 
 ## Cambios que rompen algo (y cuándo)
 

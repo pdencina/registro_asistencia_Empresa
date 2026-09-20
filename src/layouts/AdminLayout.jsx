@@ -2,7 +2,7 @@ import { useState, useEffect, lazy, Suspense } from 'react';
 import { Routes, Route, NavLink, Navigate, useNavigate, useParams } from 'react-router-dom';
 import {
   Users, ClipboardList, BarChart3, LogOut, Camera, Settings, Clock, FileText,
-  FileCheck, Palmtree, Calendar, AlertTriangle, Menu, X, Timer, ChevronDown, Loader, DollarSign, KeyRound, QrCode
+  FileCheck, Palmtree, Calendar, AlertTriangle, Menu, X, Timer, ChevronDown, Loader, DollarSign, KeyRound, QrCode, ShieldCheck
 } from 'lucide-react';
 import EmployeesPage from '../pages/EmployeesPage';
 import AttendancePage from '../pages/AttendancePage';
@@ -10,6 +10,7 @@ import AttendancePage from '../pages/AttendancePage';
 // Lazy load Dashboard (includes Recharts ~400KB)
 const DashboardPage = lazy(() => import('../pages/DashboardPage'));
 import SettingsPage from '../pages/SettingsPage';
+const AttendancePolicyPage = lazy(() => import('../pages/AttendancePolicyPage'));
 import SchedulesPage from '../pages/SchedulesPage';
 import OvertimePage from '../pages/OvertimePage';
 import MedicalLeavesPage from '../pages/MedicalLeavesPage';
@@ -129,6 +130,7 @@ export default function AdminLayout() {
       title: 'Configuración',
       items: [
         { to: `${basePath}/settings`, icon: Settings, label: 'Ajustes', hide: role !== 'admin' },
+        { to: `${basePath}/policy`, icon: ShieldCheck, label: 'Política de marcación', hide: role !== 'admin' },
       ],
     },
   ];
@@ -266,6 +268,7 @@ export default function AdminLayout() {
             <Route path="/justifications" element={<JustificationsPage />} />
             <Route path="/payroll" element={<PayrollReportPage />} />
             <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/policy" element={<Suspense fallback={<PageLoader />}><AttendancePolicyPage /></Suspense>} />
             <Route path="*" element={<Navigate to={basePath} replace />} />
           </Routes>
         </main>

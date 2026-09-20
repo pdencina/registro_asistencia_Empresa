@@ -1,6 +1,7 @@
 const { getDb } = require('../lib/db');
 const { corsHeaders, handleCors } = require('../lib/cors');
 const { requireAuth } = require('../lib/auth');
+const { getActivePolicy } = require('../lib/policy');
 const { put } = require('@vercel/blob');
 
 module.exports = async function handler(req, res) {
@@ -27,6 +28,11 @@ module.exports = async function handler(req, res) {
       const [current] = await sql('SELECT * FROM employees WHERE id = $1 AND tenant_id = $2', [id, tenant.id]);
       if (!current) {
         return res.status(404).json({ error: 'Empleado no encontrado' });
+      }
+
+      // Con política de marcación activa la administración no fija ni conoce el PIN (Art. 7 f): lo crea el trabajador
+      if (personal_pin !== undefined && (await getActivePolicy(sql, tenant.id)).legacy_marking === false) {
+        return res.status(403).json({ code: 'USE_RESET_LINK', error: 'El PIN lo crea el propio trabajador. Usa "Restablecer PIN" para enviarle un enlace.' });
       }
 
       if (consent_at) {

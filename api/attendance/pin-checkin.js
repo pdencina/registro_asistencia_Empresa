@@ -6,14 +6,21 @@ const { rateLimit } = require('../lib/rateLimit');
 const { insertAttendanceRecord } = require('../lib/integrity');
 const { evaluateGeo } = require('../lib/geofence');
 const { resolveEventTime, parseCoordinates, normalizeChannel, sanitizeDeviceId } = require('../lib/attendanceEvents');
+const { getActivePolicy, allowsMethod } = require('../lib/policy');
+const { verifyPinForEmployee, logAttempt } = require('../lib/credentials');
 
 const TZ = 'America/Santiago';
 
 /**
  * POST /api/attendance/pin-checkin
- * Marcaje alternativo por PIN personal (para quienes no dieron consentimiento biométrico).
- * 
- * Body: { pin, action: 'identify' | 'entry' | 'exit' }
+ * Marcaje por PIN personal (alternativa no biométrica, Art. 7 g de la Res. Ex. N.º 38).
+ *
+ * Body: { pin, rut, action: 'identify' | 'entry' | 'exit' }
+ *
+ * Dos modos, según la política de la empresa (tenant_attendance_policy.legacy_marking):
+ *  - legado (por defecto): comportamiento anterior; acepta PIN solo o RUT solo.
+ *  - con política: exige RUT + PIN, verifica el PIN con hash y bloqueo por intentos, aplica los métodos
+ *    permitidos por canal y conserva solo la primera de varias marcas seguidas del mismo tipo (Art. 36 c).
  */
 module.exports = async function handler(req, res) {
   if (handleCors(req, res)) return;
@@ -40,9 +47,19 @@ module.exports = async function handler(req, res) {
     // Asegurar columna personal_pin existe
     await sql('ALTER TABLE employees ADD COLUMN IF NOT EXISTS personal_pin VARCHAR(10)');
 
+    const policy = await getActivePolicy(sql, tenant.id);
+    const channel = normalizeChannel(req.body.source);
+    const enforced = policy.legacy_marking === false;
+    let auth = { method: pin ? 'PIN' : 'RUT_ONLY', result: pin ? 'SUCCESS' : 'IDENTIFIED_ONLY' };
+
     let employee;
 
-    if (pin) {
+    if (enforced) {
+      const gate = await authenticateWithPolicy({ sql, tenant, policy, channel, body: req.body, req });
+      if (!gate.ok) return res.status(gate.status).json(gate.body);
+      employee = gate.employee;
+      auth = { method: 'PIN', result: 'SUCCESS' };
+    } else if (pin) {
       // Buscar por PIN personal
       const employees = await sql(
         'SELECT * FROM employees WHERE personal_pin = $1 AND tenant_id = $2 AND active = true',
@@ -104,6 +121,12 @@ module.exports = async function handler(req, res) {
       const currentStatus = !lastRecord ? 'absent' :
                            lastRecord.type === 'entry' ? 'present' : 'exited';
 
+      // Art. 36 c): si marca varias veces seguidas el mismo evento, se mantiene la primera y no se crean más
+      if (enforced && lastRecord && lastRecord.type === action) {
+        await logAttempt(sql, { tenantId: tenant.id, employeeId: employee.id, method: 'PIN', outcome: 'DUPLICATE_IGNORED', channel, ip: clientIp(req) });
+        return res.status(200).json({ duplicate: true, message: 'Ya tenías registrada esta marcación; se conserva la primera.', method: 'pin' });
+      }
+
       if (action === 'entry' && (currentStatus === 'present' || currentStatus === 'exited')) {
         return res.status(400).json({ error: 'Ya registraste tu ingreso hoy' });
       }
@@ -147,9 +170,10 @@ module.exports = async function handler(req, res) {
         server_received_at: eventTime.serverReceivedAt,
         client_timestamp: eventTime.clientTimestamp,
         is_offline_sync: eventTime.isOfflineSync,
-        auth_method: pin ? 'PIN' : 'RUT_ONLY',
-        auth_result: pin ? 'SUCCESS' : 'IDENTIFIED_ONLY',
-        channel: normalizeChannel(req.body.source),
+        auth_method: auth.method,
+        auth_result: auth.result,
+        policy_version: policy.version,
+        channel,
         device_id: sanitizeDeviceId(req.body.device_id),
         geo_status: geo.geo_status,
         geo_distance_m: geo.geo_distance_m,
@@ -197,6 +221,48 @@ module.exports = async function handler(req, res) {
     return res.status(500).json({ error: error.message });
   }
 };
+
+function clientIp(req) {
+  const fwd = req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || '';
+  return typeof fwd === 'string' && fwd ? fwd.split(',')[0].trim() : null;
+}
+
+/**
+ * Modo con política: RUT + PIN, verificado con hash y bloqueo por intentos.
+ * Las respuestas de error son deliberadamente genéricas (no revelan si el RUT existe ni si tiene PIN).
+ */
+async function authenticateWithPolicy({ sql, tenant, policy, channel, body, req }) {
+  if (policy.status === 'UNCONFIGURED') {
+    return { ok: false, status: 403, body: { code: 'POLICY_UNCONFIGURED', error: 'La empresa aún no define su método de marcación.' } };
+  }
+  if (!allowsMethod(policy, 'PIN', channel)) {
+    return { ok: false, status: 403, body: { code: 'METHOD_NOT_ALLOWED', error: 'Este método de marcación no está habilitado para este canal.' } };
+  }
+  if (!body.rut || !body.pin) {
+    return { ok: false, status: 400, body: { code: 'RUT_AND_PIN_REQUIRED', error: 'Ingresa tu RUT y tu PIN.' } };
+  }
+
+  const ctx = { channel, deviceId: sanitizeDeviceId(body.device_id), ip: clientIp(req) };
+  const rutClean = String(body.rut).replace(/[.\-\s]/g, '').toLowerCase();
+  const [employee] = await sql(
+    `SELECT * FROM employees WHERE REPLACE(REPLACE(LOWER(rut), '.', ''), '-', '') = $1 AND tenant_id = $2 AND active = true`,
+    [rutClean, tenant.id]
+  );
+
+  const generic = { ok: false, status: 401, body: { code: 'INVALID_CREDENTIALS', error: 'RUT o PIN incorrectos.' } };
+
+  if (!employee) {
+    await logAttempt(sql, { tenantId: tenant.id, rut: body.rut, method: 'PIN', outcome: 'INVALID', reason: 'UNKNOWN_RUT', channel: ctx.channel, deviceId: ctx.deviceId, ip: ctx.ip });
+    return generic;
+  }
+
+  const check = await verifyPinForEmployee(sql, { tenantId: tenant.id, employee, pin: String(body.pin), policy, ctx });
+  if (check.ok) return { ok: true, employee };
+  if (check.outcome === 'LOCKED') {
+    return { ok: false, status: 423, body: { code: 'LOCKED', error: 'Demasiados intentos. Intenta nuevamente más tarde.', retry_after_seconds: check.retryAfterSeconds } };
+  }
+  return generic;
+}
 
 async function sendNotification(apiKey, employee, type, timestamp, tenant, locationText) {
   const date = new Date(timestamp);

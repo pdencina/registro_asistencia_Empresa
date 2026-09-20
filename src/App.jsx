@@ -29,6 +29,7 @@ import DpaPage from './pages/legal/DpaPage';
 import SuperAdminLoginPage from './pages/superadmin/SuperAdminLoginPage';
 import SuperAdminDashboard from './pages/superadmin/SuperAdminDashboard';
 import { hasAdminSession } from './utils/adminSession';
+const SetPinPage = lazy(() => import('./pages/SetPinPage'));
 
 function LoadingPage() {
   return (
@@ -92,6 +93,9 @@ function App() {
 
         {/* Propuesta comercial personalizada: flexio.cl/propuesta/slug */}
         <Route path="/propuesta/:slug" element={<ProposalPage />} />
+
+        {/* El trabajador crea su PIN con el enlace de un solo uso enviado a su correo */}
+        <Route path="/crear-pin/:tenant" element={<Suspense fallback={<LoadingPage />}><SetPinPage /></Suspense>} />
 
         {/* Consentimiento biométrico: flexio.cl/consentimiento/token */}
         <Route path="/consentimiento/:token" element={<ConsentPage />} />

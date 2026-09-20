@@ -202,6 +202,29 @@ export default function EmployeesPage() {
 
   useEffect(() => { loadEmployees(); }, []);
 
+  // Modo de marcación de la empresa: con política activa el PIN lo crea el trabajador (enlace por correo)
+  const [policyMode, setPolicyMode] = useState(null); // null = cargando | 'legacy' | 'policy'
+  useEffect(() => {
+    const slug = sessionStorage.getItem('admin_tenant') || '';
+    fetch('/api/policy/public', { headers: slug ? { 'x-tenant-slug': slug } : {} })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((p) => setPolicyMode(p && p.legacy_marking === false ? 'policy' : 'legacy'))
+      .catch(() => setPolicyMode('legacy'));
+  }, []);
+
+  async function sendPinResetLink(employee) {
+    try {
+      const res = await fetch('/api/auth/reset-pin', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ employee_id: employee.id }) });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) { setError(data.error || 'No se pudo enviar el enlace.'); return false; }
+      setPinAssigned({ link: true, name: `${employee.first_name} ${employee.last_name}` });
+      return true;
+    } catch {
+      setError('Error de conexión. Intenta nuevamente.');
+      return false;
+    }
+  }
+
   async function loadEmployees() {
     try {
       const data = await employeesApi.getAll();
@@ -314,8 +337,18 @@ export default function EmployeesPage() {
 
   async function handleConsentDeclined() {
     if (!showConsent) return;
-    const pin = String(Math.floor(1000 + Math.random() * 9000));
     const tenantSlug = sessionStorage.getItem('admin_tenant') || '';
+
+    // Con política activa la administración no genera ni conoce el PIN: se envía un enlace al correo del trabajador
+    if (policyMode === 'policy') {
+      await sendPinResetLink(showConsent);
+      setShowConsent(null);
+      setConsentAccepted(false);
+      loadEmployees();
+      return;
+    }
+
+    const pin = String(Math.floor(1000 + Math.random() * 9000));
     try {
       await employeesApi.update(showConsent.id, { personal_pin: pin });
 
@@ -442,6 +475,12 @@ export default function EmployeesPage() {
                   <button onClick={() => setConfirmAction({ employee, action: 'activate' })}
                     className="text-emerald-500 hover:text-emerald-700 p-1" title="Activar">
                     <Power className="w-4 h-4" />
+                  </button>
+                )}
+                {policyMode === 'policy' && (
+                  <button onClick={() => sendPinResetLink(employee)}
+                    className="text-blue-500 hover:text-blue-700 p-1" title="Restablecer PIN (envía un enlace al correo del trabajador)">
+                    <KeyRound className="w-4 h-4" />
                   </button>
                 )}
                 <button onClick={() => setConfirmAction({ employee, action: 'delete' })}
@@ -680,20 +719,28 @@ export default function EmployeesPage() {
             <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-5">
               <KeyRound className="w-8 h-8 text-primary-600" />
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">PIN asignado correctamente</h3>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">{pinAssigned.link ? 'Enlace enviado' : 'PIN asignado correctamente'}</h3>
             <p className="text-sm text-gray-500 mb-5">Para: <strong>{pinAssigned.name}</strong></p>
 
-            <div className="bg-gray-50 border border-gray-200 rounded-xl p-5 mb-5">
-              <p className="text-xs text-gray-400 uppercase tracking-wider mb-2">PIN personal</p>
-              <p className="text-4xl font-bold text-primary-600 tracking-[0.3em] font-mono">{pinAssigned.pin}</p>
-            </div>
+            {pinAssigned.link ? (
+              <p className="text-sm text-gray-600 bg-gray-50 border border-gray-200 rounded-xl p-4 mb-5 text-left">
+                Enviamos un enlace al correo del trabajador para que <strong>cree su propio PIN</strong>. El enlace es de un solo uso y vence en 24 horas. Nadie de la empresa conocerá el PIN.
+              </p>
+            ) : (
+              <>
+                <div className="bg-gray-50 border border-gray-200 rounded-xl p-5 mb-5">
+                  <p className="text-xs text-gray-400 uppercase tracking-wider mb-2">PIN personal</p>
+                  <p className="text-4xl font-bold text-primary-600 tracking-[0.3em] font-mono">{pinAssigned.pin}</p>
+                </div>
 
-            <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-5 text-left">
-              <p className="text-xs text-gray-400 mb-1">URL de marcaje</p>
-              <p className="text-sm font-medium text-primary-600">{pinAssigned.url}</p>
-            </div>
+                <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-5 text-left">
+                  <p className="text-xs text-gray-400 mb-1">URL de marcaje</p>
+                  <p className="text-sm font-medium text-primary-600">{pinAssigned.url}</p>
+                </div>
+              </>
+            )}
 
-            {pinAssigned.hasEmail && (
+            {!pinAssigned.link && pinAssigned.hasEmail && (
               <p className="text-sm text-emerald-600 bg-emerald-50 px-3 py-2 rounded-lg mb-5">
                 Se envió esta información al email del colaborador.
               </p>

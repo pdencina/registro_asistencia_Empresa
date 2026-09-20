@@ -44,7 +44,7 @@ vercel dev               # API + frontend
 
 `npm run dev` levanta solo el frontend (Vite, puerto 5173) y hace proxy de `/api` a `localhost:3000`.
 
-Migraciones versionadas (`/migrations`): `node scripts/migrate.js` (simulación) y `node scripts/migrate.js --apply`. Otros scripts de base de datos: `db:migrate-multitenant`, `db:migrate-billing`. Migraciones adicionales están en `scripts/`. Para aislar por empresa los horarios y autorizadores heredados: `node scripts/migrate-tenant-scoping.js` (simulación) y luego `--apply`.
+Migraciones versionadas (`/migrations`): `node scripts/migrate.js` (simulación) y `node scripts/migrate.js --apply`. PIN de marcación: `scripts/migrate-pins.js` (ver `docs/marcaje-res38/`). Otros scripts de base de datos: `db:migrate-multitenant`, `db:migrate-billing`. Migraciones adicionales están en `scripts/`. Para aislar por empresa los horarios y autorizadores heredados: `node scripts/migrate-tenant-scoping.js` (simulación) y luego `--apply`.
 
 ## Variables de entorno
 
