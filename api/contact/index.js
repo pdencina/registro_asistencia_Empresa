@@ -1,4 +1,5 @@
 const { corsHeaders, handleCors } = require('../lib/cors');
+const { rateLimit } = require('../lib/rateLimit');
 
 /**
  * Calcula el plan y precio según cantidad de colaboradores.
@@ -40,6 +41,8 @@ module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
+
+  if (rateLimit(req, res, { maxAttempts: 5, windowMs: 60000, keyPrefix: 'contact' })) return;
 
   const RESEND_API_KEY = process.env.RESEND_API_KEY;
   if (!RESEND_API_KEY) {

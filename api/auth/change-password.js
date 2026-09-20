@@ -1,6 +1,6 @@
 const { getDb } = require('../lib/db');
 const { corsHeaders, handleCors } = require('../lib/cors');
-const { requireTenant } = require('../lib/tenant');
+const { requireAuth } = require('../lib/auth');
 const { verifyPin, hashPin } = require('../lib/hash');
 
 /**
@@ -15,7 +15,7 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const tenant = await requireTenant(req, res);
+  const tenant = await requireAuth(req, res);
   if (!tenant) return;
 
   const sql = getDb();
@@ -29,6 +29,17 @@ module.exports = async function handler(req, res) {
 
     if (new_password.length < 6) {
       return res.status(400).json({ error: 'La nueva contraseña debe tener al menos 6 caracteres' });
+    }
+
+    // Un usuario secundario (tenant_users) cambia SU contraseña, no la del admin principal
+    const isMainAdmin = req.session.email === String(tenant.admin_email).toLowerCase();
+    if (!isMainAdmin) {
+      const [user] = await sql('SELECT id, password FROM tenant_users WHERE tenant_id = $1 AND email = $2 AND active = true', [tenant.id, req.session.email]);
+      if (!user || !verifyPin(current_password, user.password)) {
+        return res.status(401).json({ error: 'Contraseña actual incorrecta' });
+      }
+      await sql('UPDATE tenant_users SET password = $1 WHERE id = $2', [hashPin(new_password), user.id]);
+      return res.status(200).json({ message: 'Contraseña actualizada correctamente' });
     }
 
     // Verificar contraseña actual (compatible con legacy texto plano)

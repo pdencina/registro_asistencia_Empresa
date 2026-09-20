@@ -1,5 +1,6 @@
 const { getDb } = require('../lib/db');
 const { corsHeaders, handleCors } = require('../lib/cors');
+const { requireAuth } = require('../lib/auth');
 
 const TZ = 'America/Santiago';
 
@@ -10,12 +11,18 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  const tenant = await requireAuth(req, res);
+  if (!tenant) return;
+
   const sql = getDb();
   const { employee_id, period } = req.query;
 
   if (!employee_id) {
     return res.status(400).json({ error: 'employee_id es requerido' });
   }
+
+  const [ownedEmp] = await sql('SELECT id FROM employees WHERE id = $1 AND tenant_id = $2', [employee_id, tenant.id]);
+  if (!ownedEmp) return res.status(404).json({ error: 'Empleado no encontrado' });
 
   try {
     // Get employee's schedule
@@ -35,7 +42,7 @@ module.exports = async function handler(req, res) {
       tolerance = assignment.tolerance_minutes || 10;
     } else {
       // Fall back to default
-      const [defaultSch] = await sql('SELECT entry_time, tolerance_minutes FROM work_schedules WHERE is_default = true LIMIT 1');
+      const [defaultSch] = await sql('SELECT entry_time, tolerance_minutes FROM work_schedules WHERE is_default = true AND (tenant_id = $1 OR tenant_id IS NULL) ORDER BY (tenant_id IS NOT NULL) DESC LIMIT 1', [tenant.id]);
       if (defaultSch) {
         entryTime = (defaultSch.entry_time || '08:30').slice(0, 5);
         tolerance = defaultSch.tolerance_minutes;

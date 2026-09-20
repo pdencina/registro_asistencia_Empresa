@@ -7,9 +7,9 @@ Hola [nombre], soy [tu nombre] de Flexio 👋
 
 Tenemos una plataforma de control de asistencia diseñada según los estándares de la Resolución 38 de la Dirección del Trabajo.
 
-Registros inalterables, sello de tiempo criptográfico, geolocalización validada y acceso directo para fiscalizadores. Todo desde cualquier tablet o celular.
+Registros inalterables, sello de tiempo criptográfico, geolocalización validada y acceso directo para fiscalizadores. Marca desde un tótem fijo (tablet en la entrada) o desde el celular de cada trabajador con GPS.
 
-$1.590 por persona/mes. 15 días gratis.
+Planes desde $39.990/mes + IVA. 15 días gratis.
 
 ¿Tienen 5 minutos esta semana para una demo? Sin compromiso.
 
@@ -38,8 +38,9 @@ En Flexio desarrollamos un sistema de control de asistencia que resuelve ambos:
 ✓ Modo offline: sigue operando sin internet y sincroniza después
 ✓ Auditoría completa de toda acción (actor, IP, fecha, detalle)
 ✓ Alineado a la Ley 21.719 de protección de datos (consentimiento + alternativa PIN)
+✓ Dos formas de marcar: tótem fijo (tablet en la entrada) o móvil con GPS (celular del trabajador)
 
-El precio es simple: $1.590 por persona al mes + IVA. Sin contratos de permanencia.
+Los planes parten en $39.990/mes + IVA (hasta 30 colaboradores), Profesional $99.990 (hasta 100) y Enterprise $249.990 (hasta 300). Sobre 300, plan Corporativo por trabajador activo (desde $500 + IVA).
 
 El setup toma 5 minutos y ofrecemos 15 días de prueba gratis.
 
@@ -61,9 +62,9 @@ flexio.cl
 ```
 Hola [nombre], vi que trabajas en [empresa/cargo]. 
 
-Te escribo porque desarrollamos Flexio, una plataforma de asistencia diseñada según la Resolución 38 de la DT — registros inalterables, sello de tiempo y geolocalización.
+Te escribo porque desarrollamos Flexio, una plataforma de asistencia diseñada según la Resolución 38 de la DT — registros inalterables, sello de tiempo y geolocalización. Marca desde tótem fijo o desde el celular con GPS.
 
-$1.590/persona al mes, sin permanencia. ¿Te interesa ver una demo de 5 min?
+Planes desde $39.990/mes + IVA. ¿Te interesa ver una demo de 5 min?
 
 flexio.cl
 ```
@@ -77,7 +78,7 @@ Hola [nombre], te escribí hace unos días sobre Flexio.
 
 Solo quería saber si tuviste chance de verlo. Si no es el momento, sin problema 👍
 
-Por si sirve: está diseñado según la Resolución 38 DT (registros inalterables + acceso para fiscalizadores) y cuesta $1.590/persona al mes. [link brochure o PDF]
+Por si sirve: está diseñado según la Resolución 38 DT (registros inalterables + acceso para fiscalizadores) y los planes parten en $39.990/mes + IVA. [link brochure o PDF]
 ```
 
 ---
@@ -98,8 +99,9 @@ Armamos Flexio: un sistema que usa reconocimiento facial + integridad criptográ
 - Libro de Asistencia electrónico listo para fiscalización
 - Modo offline (sigue funcionando sin internet)
 - Funciona con cualquier tablet, sin hardware especial
+- Dos formas de marcar: tótem fijo o móvil con GPS
 
-$1.590/persona al mes. 15 días gratis para probar: flexio.cl
+Planes desde $39.990/mes + IVA. 15 días gratis para probar: flexio.cl
 
 Consultas al +56 9 4961 6038 📱
 ```
@@ -113,8 +115,9 @@ Consultas al +56 9 4961 6038 📱
 diseñado según los estándares de la Resolución 38 de la Dirección del 
 Trabajo. Los registros son inalterables — tienen hash criptográfico, sello 
 de tiempo y geolocalización validada. Estamos en proceso de autorización 
-formal ante la DT. Funciona con una tablet, cuesta $1.590 por persona 
-al mes y no tiene contrato de permanencia."
+formal ante la DT. Se marca desde una tablet en la entrada o desde el 
+celular de cada trabajador con GPS, y los planes parten en $39.990 
+al mes + IVA."
 ```
 
 ---
@@ -125,7 +128,7 @@ al mes y no tiene contrato de permanencia."
 → "Perfecto. Flexio está diseñado según los estándares de la Resolución 38: registros inalterables, sello de tiempo, geolocalización validada y acceso para fiscalizadores. Es una plataforma moderna que puedes ir usando desde ya como herramienta de control de asistencia."
 
 **"Es muy caro"**
-→ "Son $1.590 por persona al mes. Para una empresa de 30 personas son menos de $48.000/mes. Un huellero nuevo cuesta $200.000+ y depende de hardware. Flexio funciona con cualquier tablet."
+→ "El plan Básico son $39.990/mes + IVA para hasta 30 personas — es una tarifa fija, no por persona. Un huellero nuevo cuesta $200.000+ y depende de hardware. Flexio funciona con cualquier tablet o con el celular del propio trabajador."
 
 **"¿Y si falla el internet?"**
 → "El sistema tiene modo offline. Si cae internet, las marcaciones se guardan localmente y se sincronizan automáticamente cuando vuelve la conexión. Ideal para faenas o campos con mala señal."

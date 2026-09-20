@@ -1,6 +1,6 @@
 const { getDb } = require('../lib/db');
 const { handleCors } = require('../lib/cors');
-const { requireTenant } = require('../lib/tenant');
+const { requireAuth } = require('../lib/auth');
 const { generateDailyAnchor } = require('../lib/timestamp');
 
 /**
@@ -21,7 +21,7 @@ const { generateDailyAnchor } = require('../lib/timestamp');
 module.exports = async function handler(req, res) {
   if (handleCors(req, res)) return;
 
-  const tenant = await requireTenant(req, res);
+  const tenant = await requireAuth(req, res);
   if (!tenant) return;
 
   const sql = getDb();

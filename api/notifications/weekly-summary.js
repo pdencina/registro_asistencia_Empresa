@@ -1,5 +1,6 @@
 const { getDb } = require('../lib/db');
 const { corsHeaders, handleCors } = require('../lib/cors');
+const { requireJobAccess } = require('../lib/auth');
 
 const TZ = 'America/Santiago';
 
@@ -15,6 +16,9 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  const access = await requireJobAccess(req, res);
+  if (!access) return;
+
   const sql = getDb();
   const RESEND_API_KEY = process.env.RESEND_API_KEY;
   if (!RESEND_API_KEY) return res.status(200).json({ message: 'No RESEND_API_KEY configured' });
@@ -23,7 +27,8 @@ module.exports = async function handler(req, res) {
 
   try {
     // Get all active tenants
-    const tenants = await sql('SELECT * FROM tenants WHERE active = true');
+    const allTenants = await sql('SELECT * FROM tenants WHERE active = true');
+    const tenants = access.scope === 'tenant' ? allTenants.filter(t => t.id === access.tenant.id) : allTenants;
 
     // Last week range (Monday to Sunday)
     const now = new Date();

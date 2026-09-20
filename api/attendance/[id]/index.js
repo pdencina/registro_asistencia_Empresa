@@ -1,12 +1,12 @@
 const { getDb } = require('../../lib/db');
 const { corsHeaders, handleCors } = require('../../lib/cors');
-const { requireTenant } = require('../../lib/tenant');
+const { requireAuth } = require('../../lib/auth');
 const { logAudit } = require('../../lib/auditLog');
 
 module.exports = async function handler(req, res) {
   if (handleCors(req, res)) return;
 
-  const tenant = await requireTenant(req, res);
+  const tenant = await requireAuth(req, res, req.method === 'GET' ? undefined : { roles: ['admin', 'rrhh'] });
   if (!tenant) return;
 
   const { id } = req.query;

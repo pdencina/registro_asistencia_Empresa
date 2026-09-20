@@ -1,104 +1,80 @@
-# Control de Asistencia con Registro Visual (iPad)
+# Flexio — Control de asistencia
 
-Sistema de control de asistencia con captura fotográfica, diseñado para funcionar como kiosco en un iPad. Deploy en Vercel con Neon Postgres + Vercel Blob.
+SaaS multi-tenant de control de asistencia para empresas chilenas, alineado con la Resolución 38 Exenta de la Dirección del Trabajo. Marcaje por tótem (iPad/kiosco) o por móvil, con foto, PIN, RUT o QR, y geolocalización como evidencia.
 
 ## Stack
 
-- **Frontend**: React 18, Vite, TailwindCSS, React Webcam, Lucide Icons
-- **Backend**: Vercel Serverless Functions (Edge Runtime)
-- **Base de datos**: Neon Postgres (serverless)
-- **Storage de fotos**: Vercel Blob (público)
-- **Optimizado para**: iPad (touch-friendly, pantalla completa, PWA)
+- **Frontend:** React 18, Vite, TailwindCSS, react-router, Recharts, face-api.js, react-webcam
+- **Backend:** Vercel Serverless Functions (`api/`, Node, CommonJS)
+- **Base de datos:** Neon Postgres (serverless)
+- **Archivos:** Vercel Blob (fotos y logos)
+- **Correo:** Resend · **Pagos:** MercadoPago (suscripciones)
 
 ## Funcionalidades
 
-- Registro de entrada/salida con captura de foto desde la cámara del iPad
-- Detección automática del tipo de registro (entrada o salida)
-- Gestión de empleados (CRUD con foto de perfil)
-- Dashboard en tiempo real con KPIs de asistencia
-- Historial filtrable por fecha, tipo y departamento
+- **Marcaje:** tótem (`/marcaje/:tenant`) y móvil (`/movil/:tenant`), con foto, PIN/RUT y sello de tiempo
+- **Cumplimiento Res. 38 DT:** hash encadenado SHA-256 por registro (`api/lib/integrity.js`), verificación de integridad, sello de tiempo HMAC, libro de asistencia, reporte de fiscalización, log de auditoría
+- **Geolocalización:** registra dónde se marcó y alerta fuera del perímetro; **nunca bloquea** la marca (criterio DT, ver `api/lib/geofence.js`)
+- **Gestión:** empleados, turnos, calendario, atrasos, horas extra, permisos, licencias médicas, justificaciones, amonestaciones, contratos con firma, consentimiento
+- **Reportes:** dashboard, horas semanales, liquidaciones, exportación a Excel
+- **Plataforma:** onboarding de tenants, facturación, super-admin, propuestas comerciales
 
-## Deploy en Vercel
+## Multi-tenant
 
-### 1. Crear base de datos en Neon
+Cada empresa es un tenant identificado por `slug`. El backend resuelve el tenant en este orden (`api/lib/tenant.js`): header `x-tenant-id`, header `x-tenant-slug`, subdominio, query `?tenant=`.
 
-1. Ve a [neon.tech](https://neon.tech) y crea una cuenta gratuita
-2. Crea un nuevo proyecto y base de datos
-3. Copia el connection string (`DATABASE_URL`)
+## Autenticacion y autorizacion
 
-### 2. Crear Blob store en Vercel
-
-1. En tu proyecto de Vercel, ve a **Storage** > **Create Database** > **Blob**
-2. Selecciona acceso **Public**
-3. El token `BLOB_READ_WRITE_TOKEN` se agrega automáticamente
-
-### 3. Configurar variables de entorno en Vercel
-
-En Settings > Environment Variables, agrega:
-- `DATABASE_URL` → tu connection string de Neon
-
-### 4. Crear las tablas
-
-```bash
-# Local con tu DATABASE_URL
-DATABASE_URL=postgres://... node scripts/setup-db.js
-```
-
-### 5. Deploy
-
-```bash
-# Conectar repo a Vercel
-git push origin main
-# Vercel detecta Vite y despliega automáticamente
-```
+- **Login** (`POST /api/auth/login`) entrega un token firmado (HMAC-SHA256, 12 h) con empresa, rol y correo. El frontend lo guarda en `sessionStorage` y `src/utils/adminSession.js` lo adjunta a toda llamada `/api/`.
+- **Endpoints de administracion** usan `requireAuth` (`api/lib/auth.js`): el tenant sale del token, nunca de headers ni query del cliente. Se puede exigir rol: `requireAuth(req, res, { roles: ['admin'] })`. Roles: `admin`, `rrhh`, `jefe_area`, `supervisor`.
+- **Endpoints publicos por diseno** (marcaje y flujos del trabajador) usan `requireTenant` (solo el slug): `attendance/register`, `attendance/pin-checkin`, `attendance/status/[id]`, `attendance/my-hours`, `auth/find-*`, `auth/create-pin`, `devices` (GET/POST), `settings/logo` (GET), `contracts`, `auth/consent`. `GET /api/employees` sin sesion solo resuelve un RUT completo y nunca devuelve el PIN.
+- **Superadmin**: `POST /api/superadmin/auth` con `GLOBAL_ADMIN_SECRET` entrega un token firmado de 4 h. Tambien se acepta el header `x-admin-secret` para scripts.
+- **Cron**: `check-absent` y `weekly-summary` aceptan `CRON_SECRET`, superadmin o una sesion de admin (limitada a su empresa). Define `CRON_SECRET` en Vercel.
+- Las contrasenas se guardan con scrypt; las antiguas en texto plano se migran solas en el siguiente login.
 
 ## Desarrollo local
 
 ```bash
 npm install
-npm run dev
+cp .env.example .env     # completar variables
+npm run db:setup         # crea las tablas en Neon
+npm i -g vercel
+vercel dev               # API + frontend
 ```
 
-Para que las API routes funcionen localmente necesitas `vercel dev`:
+`npm run dev` levanta solo el frontend (Vite, puerto 5173) y hace proxy de `/api` a `localhost:3000`.
+
+Otros scripts de base de datos: `db:migrate-multitenant`, `db:migrate-billing`. Migraciones adicionales están en `scripts/`. Para aislar por empresa los horarios y autorizadores heredados: `node scripts/migrate-tenant-scoping.js` (simulación) y luego `--apply`.
+
+## Variables de entorno
+
+Ver [.env.example](.env.example). Las imprescindibles: `DATABASE_URL`, `BLOB_READ_WRITE_TOKEN`, `TIMESTAMP_SECRET` (no cambiar una vez en producción, invalida los sellos existentes), `GLOBAL_ADMIN_SECRET`.
+
+## Tests
+
 ```bash
-npm i -g vercel
-vercel dev
+npm test
 ```
+
+Usa el runner nativo de Node (`node --test`), sin dependencias. Cubre la lógica pura de `api/lib`: hashing de PIN, geocerca, hash de integridad y validación. Los tests van en `tests/`.
 
 ## Estructura
 
 ```
-├── api/                      # Vercel Serverless Functions
-│   ├── lib/
-│   │   ├── db.js            # Conexión Neon
-│   │   └── cors.js          # CORS headers
-│   ├── employees/
-│   │   ├── index.js         # GET (listar) / POST (crear)
-│   │   └── [id].js          # GET / PUT / DELETE por ID
-│   └── attendance/
-│       ├── register.js      # POST registro entrada/salida
-│       ├── today.js         # GET registros de hoy
-│       ├── history.js       # GET historial con filtros
-│       ├── summary.js       # GET resumen/dashboard
-│       └── status/[id].js   # GET estado actual del empleado
-├── src/                      # Frontend React
-│   ├── pages/
-│   │   ├── CheckInPage.jsx  # Pantalla principal con cámara
-│   │   ├── EmployeesPage.jsx
-│   │   ├── AttendancePage.jsx
-│   │   └── DashboardPage.jsx
-│   ├── api.js               # Cliente API
-│   ├── App.jsx
-│   └── main.jsx
-├── scripts/
-│   └── setup-db.js          # Crear tablas en Neon
-├── vercel.json               # Configuración Vercel
-├── vite.config.js
-└── package.json
+├── api/                 # Endpoints serverless (una carpeta por dominio)
+│   └── lib/             # db, tenant, integrity, timestamp, geofence, hash, rateLimit, validate
+├── src/                 # Frontend React
+│   ├── pages/           # Una página por pantalla
+│   ├── components/
+│   └── api.js           # Cliente de la API
+├── scripts/             # Setup y migraciones de BD, generadores de seeds
+│   └── seeds/           # SQL de datos demo (sintéticos)
+├── tests/               # Tests unitarios
+├── docs/                # Material comercial y legal (brochure, cotizaciones, checklist Res. 38)
+├── public/
+└── vercel.json          # Cron de ausentes, rewrites y headers
 ```
 
-## Uso desde iPad
+## Deploy
 
-1. Abre la URL de tu deploy en Safari
-2. Toca "Compartir" > "Agregar a pantalla de inicio"
-3. Se abre como app a pantalla completa (modo kiosco)
+Push a `main`: Vercel detecta Vite y despliega. Configurar las variables de entorno en Vercel y crear el Blob store con acceso público. El cron `check-absent` corre de lunes a viernes (definido en `vercel.json`).

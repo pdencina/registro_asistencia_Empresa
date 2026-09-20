@@ -1,6 +1,9 @@
 const { getDb } = require('../lib/db');
 const { handleCors } = require('../lib/cors');
 const { requireTenant } = require('../lib/tenant');
+const { verify } = require('../lib/session');
+const { rateLimit } = require('../lib/rateLimit');
+
 
 /**
  * POST /api/auth/create-pin
@@ -14,8 +17,14 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  if (rateLimit(req, res, { maxAttempts: 10, windowMs: 60000, keyPrefix: 'create-pin' })) return;
+
   const tenant = await requireTenant(req, res);
   if (!tenant) return;
+
+  const bearer = (req.headers.authorization || '').replace('Bearer ', '');
+  const session = verify(bearer);
+  const isTenantAdmin = !!(session && session.typ === 'admin' && session.tid === tenant.id);
 
   const sql = getDb();
 
@@ -50,6 +59,11 @@ module.exports = async function handler(req, res) {
     }
 
     const employee = employees[0];
+
+    // Solo el primer PIN es autoservicio. Cambiarlo exige un administrador de la empresa.
+    if (employee.personal_pin && !isTenantAdmin) {
+      return res.status(403).json({ error: 'Ya tienes un PIN creado. Pídele a tu administrador que lo restablezca.' });
+    }
 
     // Check if PIN is already taken by another employee in same tenant
     const existing = await sql(

@@ -1,8 +1,12 @@
 const { getDb } = require('../lib/db');
 const { corsHeaders, handleCors } = require('../lib/cors');
+const { requireAuth } = require('../lib/auth');
 
 module.exports = async function handler(req, res) {
   if (handleCors(req, res)) return;
+
+  const tenant = await requireAuth(req, res);
+  if (!tenant) return;
 
   const sql = getDb();
 
@@ -34,6 +38,7 @@ module.exports = async function handler(req, res) {
   await sql('ALTER TABLE work_schedules ADD COLUMN IF NOT EXISTS rotation_start_date DATE');
   await sql('ALTER TABLE work_schedules ADD COLUMN IF NOT EXISTS weekly_hours INTEGER');
   await sql('ALTER TABLE work_schedules ADD COLUMN IF NOT EXISTS lunch_break_minutes INTEGER DEFAULT 30');
+  await sql('ALTER TABLE work_schedules ADD COLUMN IF NOT EXISTS tenant_id UUID');
 
   await sql(`
     CREATE TABLE IF NOT EXISTS employee_schedules (
@@ -70,15 +75,15 @@ module.exports = async function handler(req, res) {
   try {
     // GET: List all schedules
     if (req.method === 'GET') {
-      const schedules = await sql('SELECT * FROM work_schedules ORDER BY is_default DESC, name');
+      const schedules = await sql('SELECT * FROM work_schedules WHERE (tenant_id = $1 OR tenant_id IS NULL) ORDER BY is_default DESC, name', [tenant.id]);
 
       // If no schedules exist, create a default one
       if (schedules.length === 0) {
         await sql(`
-          INSERT INTO work_schedules (id, name, entry_time, exit_time, tolerance_minutes, is_default)
-          VALUES (gen_random_uuid(), 'Jornada Completa', '08:30', '18:00', 10, true)
-        `);
-        const newSchedules = await sql('SELECT * FROM work_schedules ORDER BY is_default DESC, name');
+          INSERT INTO work_schedules (id, name, entry_time, exit_time, tolerance_minutes, is_default, tenant_id)
+          VALUES (gen_random_uuid(), 'Jornada Completa', '08:30', '18:00', 10, true, $1)
+        `, [tenant.id]);
+        const newSchedules = await sql('SELECT * FROM work_schedules WHERE (tenant_id = $1 OR tenant_id IS NULL) ORDER BY is_default DESC, name', [tenant.id]);
         return res.status(200).json(newSchedules);
       }
 
@@ -103,14 +108,14 @@ module.exports = async function handler(req, res) {
 
       // If setting as default, unset others
       if (is_default) {
-        await sql('UPDATE work_schedules SET is_default = false');
+        await sql('UPDATE work_schedules SET is_default = false WHERE tenant_id = $1', [tenant.id]);
       }
 
       const [schedule] = await sql(`
-        INSERT INTO work_schedules (id, name, entry_time, exit_time, tolerance_minutes, is_default, block2_entry_time, block2_exit_time, shift_type, rotation_days_on, rotation_days_off, rotation_start_date, weekly_hours, lunch_break_minutes)
-        VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+        INSERT INTO work_schedules (id, name, entry_time, exit_time, tolerance_minutes, is_default, block2_entry_time, block2_exit_time, shift_type, rotation_days_on, rotation_days_off, rotation_start_date, weekly_hours, lunch_break_minutes, tenant_id)
+        VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
         RETURNING *
-      `, [name, entry_time || '00:00', exit_time || '00:00', tolerance_minutes || 10, is_default || false, block2_entry_time || null, block2_exit_time || null, shift_type || 'fixed', rotation_days_on || null, rotation_days_off || null, rotation_start_date || null, req.body.weekly_hours || null, req.body.lunch_break_minutes !== undefined ? req.body.lunch_break_minutes : 30]);
+      `, [name, entry_time || '00:00', exit_time || '00:00', tolerance_minutes || 10, is_default || false, block2_entry_time || null, block2_exit_time || null, shift_type || 'fixed', rotation_days_on || null, rotation_days_off || null, rotation_start_date || null, req.body.weekly_hours || null, req.body.lunch_break_minutes !== undefined ? req.body.lunch_break_minutes : 30, tenant.id]);
 
       return res.status(201).json(schedule);
     }
@@ -122,21 +127,23 @@ module.exports = async function handler(req, res) {
       if (!id) return res.status(400).json({ error: 'id es requerido' });
 
       if (is_default) {
-        await sql('UPDATE work_schedules SET is_default = false');
+        await sql('UPDATE work_schedules SET is_default = false WHERE tenant_id = $1', [tenant.id]);
       }
 
       await sql(`
         UPDATE work_schedules SET name = $1, entry_time = $2, exit_time = $3, tolerance_minutes = $4, is_default = $5, block2_entry_time = $6, block2_exit_time = $7, shift_type = $8, rotation_days_on = $9, rotation_days_off = $10, rotation_start_date = $11
-        WHERE id = $12
-      `, [name, entry_time, exit_time, tolerance_minutes, is_default, block2_entry_time || null, block2_exit_time || null, shift_type || 'fixed', rotation_days_on || null, rotation_days_off || null, rotation_start_date || null, id]);
+        WHERE id = $12 AND (tenant_id = $13 OR tenant_id IS NULL)
+      `, [name, entry_time, exit_time, tolerance_minutes, is_default, block2_entry_time || null, block2_exit_time || null, shift_type || 'fixed', rotation_days_on || null, rotation_days_off || null, rotation_start_date || null, id, tenant.id]);
 
-      const [updated] = await sql('SELECT * FROM work_schedules WHERE id = $1', [id]);
+      const [updated] = await sql('SELECT * FROM work_schedules WHERE id = $1 AND (tenant_id = $2 OR tenant_id IS NULL)', [id, tenant.id]);
       return res.status(200).json(updated);
     }
 
     // DELETE: Remove a schedule
     if (req.method === 'DELETE') {
       const { id } = req.body;
+      const [ownedSch] = await sql('SELECT id FROM work_schedules WHERE id = $1 AND (tenant_id = $2 OR tenant_id IS NULL)', [id, tenant.id]);
+      if (!ownedSch) return res.status(404).json({ error: 'Horario no encontrado' });
       await sql('DELETE FROM employee_schedules WHERE schedule_id = $1', [id]);
       await sql('DELETE FROM work_schedules WHERE id = $1', [id]);
       return res.status(200).json({ message: 'Horario eliminado' });

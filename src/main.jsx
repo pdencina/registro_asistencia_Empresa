@@ -2,7 +2,11 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import './index.css';
+import { installAuthFetch } from './utils/adminSession';
 import { registerServiceWorker, setupAutoSync, listenToSyncEvents } from './utils/offlineSync';
+
+// Adjunta el token de sesión a las llamadas /api/ (debe ir antes del primer render)
+installAuthFetch();
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

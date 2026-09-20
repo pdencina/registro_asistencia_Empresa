@@ -3,8 +3,8 @@
 ## Cómo cargar las demos
 
 1. Entra a tu consola SQL de Neon (neon.tech → tu proyecto → SQL Editor)
-2. Copia y pega el contenido de `seed-pi-berries.sql` → Run
-3. Copia y pega el contenido de `seed-catrimaiten.sql` → Run
+2. Copia y pega el contenido de `scripts/seeds/seed-pi-berries.sql` → Run
+3. Copia y pega el contenido de `scripts/seeds/seed-catrimaiten.sql` → Run
 
 Cada seed crea el tenant + trabajadores + 1 semana de marcajes.
 

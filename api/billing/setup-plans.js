@@ -1,4 +1,5 @@
 const { corsHeaders, handleCors } = require('../lib/cors');
+const { requireSuperAdmin } = require('../lib/auth');
 
 /**
  * POST /api/billing/setup-plans
@@ -15,23 +16,7 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // Verificar super admin
-  const auth = req.headers.authorization || '';
-  const token = auth.replace('Bearer ', '');
-  const GLOBAL_SECRET = process.env.GLOBAL_ADMIN_SECRET;
-
-  if (!token || !GLOBAL_SECRET) {
-    return res.status(401).json({ error: 'No autorizado' });
-  }
-
-  try {
-    const decoded = Buffer.from(token, 'base64').toString('utf8');
-    if (!decoded.startsWith(GLOBAL_SECRET + ':')) {
-      return res.status(401).json({ error: 'No autorizado' });
-    }
-  } catch {
-    return res.status(401).json({ error: 'No autorizado' });
-  }
+  if (!requireSuperAdmin(req, res)) return;
 
   const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN;
   if (!MP_ACCESS_TOKEN) {

@@ -7,3 +7,7 @@ dist/
 # Archivos del enfoque anterior (ignorar)
 server/
 client/
+
+# Documentos personales (no versionar)
+Plan_Vigente_*.pdf
+Solicitud-Reembolso-*.pdf

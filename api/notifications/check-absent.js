@@ -1,6 +1,7 @@
 const { getDb } = require('../lib/db');
 const { corsHeaders, handleCors } = require('../lib/cors');
 const { getTenant } = require('../lib/tenant');
+const { requireJobAccess } = require('../lib/auth');
 
 const TZ = 'America/Santiago';
 
@@ -19,11 +20,14 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  const access = await requireJobAccess(req, res);
+  if (!access) return;
+
   const sql = getDb();
 
   try {
-    // Check if running for a specific tenant or all
-    const tenant = await getTenant(req);
+    // Cron/superadmin: una empresa (por slug) o todas. Admin de empresa: solo la suya.
+    const tenant = access.scope === 'tenant' ? access.tenant : await getTenant(req);
     const tenants = tenant ? [tenant] : await sql('SELECT * FROM tenants WHERE active = true');
 
     const results = [];

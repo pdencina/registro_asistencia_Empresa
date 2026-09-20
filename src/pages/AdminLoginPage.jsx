@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Lock, Eye, EyeOff, Mail, ArrowLeft, CheckCircle } from 'lucide-react';
 import ChangePasswordModal from '../components/ChangePasswordModal';
+import { setAdminSession } from '../utils/adminSession';
 
 export default function AdminLoginPage({ onLogin }) {
   const [email, setEmail] = useState('');
@@ -34,10 +35,7 @@ export default function AdminLoginPage({ onLogin }) {
 
       if (res.ok) {
         const data = await res.json();
-        sessionStorage.setItem('admin_auth', 'true');
-        sessionStorage.setItem('admin_tenant', data.tenant_slug);
-        sessionStorage.setItem('admin_email', data.admin_email);
-        sessionStorage.setItem('admin_role', data.role || 'admin');
+        setAdminSession(data);
 
         // Si debe cambiar contraseña, mostrar modal antes de continuar
         if (data.must_change_password) {

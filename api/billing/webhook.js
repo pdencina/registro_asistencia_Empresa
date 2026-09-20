@@ -28,20 +28,22 @@ module.exports = async function handler(req, res) {
   if (webhookSecret) {
     const xSignature = req.headers['x-signature'];
     const xRequestId = req.headers['x-request-id'];
-    if (xSignature && xRequestId) {
-      const bodyStr = JSON.stringify(req.body);
-      const dataId = req.body?.data?.id || '';
-      const parts = xSignature.split(',');
-      const ts = parts.find(p => p.trim().startsWith('ts='))?.split('=')[1];
-      const hash = parts.find(p => p.trim().startsWith('v1='))?.split('=')[1];
-      if (ts && hash) {
-        const manifest = `id:${dataId};request-id:${xRequestId};ts:${ts};`;
-        const computed = crypto.createHmac('sha256', webhookSecret).update(manifest).digest('hex');
-        if (computed !== hash) {
-          console.error('[Webhook] Firma inválida');
-          return res.status(401).json({ error: 'Firma inválida' });
-        }
-      }
+    const dataId = req.body?.data?.id || '';
+    const parts = String(xSignature || '').split(',');
+    const ts = parts.find(p => p.trim().startsWith('ts='))?.split('=')[1];
+    const hash = parts.find(p => p.trim().startsWith('v1='))?.split('=')[1];
+
+    let valid = false;
+    if (xRequestId && ts && hash) {
+      const manifest = `id:${dataId};request-id:${xRequestId};ts:${ts};`;
+      const computed = crypto.createHmac('sha256', webhookSecret).update(manifest).digest('hex');
+      const a = Buffer.from(computed);
+      const b = Buffer.from(hash);
+      valid = a.length === b.length && crypto.timingSafeEqual(a, b);
+    }
+    if (!valid) {
+      console.error('[Webhook] Firma ausente o inválida');
+      return res.status(401).json({ error: 'Firma inválida' });
     }
   }
 

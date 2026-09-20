@@ -3,14 +3,30 @@
  * Simula el uso normal: crear empleados y registrar asistencia con patrones variados.
  * 
  * Uso: 
- *   BASE_URL=https://flexio.cl TENANT_SLUG=bhs ADMIN_TOKEN=tu_token node scripts/seed-demo-data.js
- * 
- * ADMIN_TOKEN es el mismo token de super admin (base64 de GLOBAL_ADMIN_SECRET:timestamp)
+ *   BASE_URL=https://flexio.cl TENANT_SLUG=bhs ADMIN_EMAIL=admin@empresa.cl ADMIN_PASSWORD=... \
+ *   ADMIN_SECRET=<GLOBAL_ADMIN_SECRET> node scripts/seed-demo-data.js
+ *
+ * ADMIN_EMAIL / ADMIN_PASSWORD: credenciales del admin de la empresa (para crear empleados).
+ * ADMIN_SECRET: GLOBAL_ADMIN_SECRET (para insertar marcas con fecha en /api/attendance/seed).
  */
 
 const BASE_URL = process.env.BASE_URL || 'https://flexio.cl';
 const TENANT_SLUG = process.env.TENANT_SLUG || 'bhs';
-const ADMIN_TOKEN = process.env.ADMIN_TOKEN || '';
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || '';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
+const ADMIN_SECRET = process.env.ADMIN_SECRET || '';
+let sessionToken = '';
+
+async function login() {
+  const res = await fetch(`${BASE_URL}/api/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-tenant-slug': TENANT_SLUG },
+    body: JSON.stringify({ email: ADMIN_EMAIL, password: ADMIN_PASSWORD }),
+  });
+  const data = await res.json();
+  if (!res.ok || !data.token) throw new Error(`Login falló: ${data.error || res.status}`);
+  sessionToken = data.token;
+}
 
 const EMPLOYEES = [
   { rut: '12.456.789-0', first_name: 'María', last_name: 'González', department: 'Administración', position: 'Directora Administrativa', email: '' },
@@ -50,6 +66,7 @@ async function request(path, options = {}) {
     headers: {
       'Content-Type': 'application/json',
       'x-tenant-slug': TENANT_SLUG,
+      ...(sessionToken ? { Authorization: `Bearer ${sessionToken}` } : {}),
       ...options.headers,
     },
     ...options,
@@ -70,6 +87,7 @@ function minutesToTime(minutes) {
 }
 
 async function main() {
+  await login();
   console.log(`\n🚀 Seeding demo data for tenant: ${TENANT_SLUG}`);
   console.log(`   Base URL: ${BASE_URL}\n`);
 
@@ -178,7 +196,7 @@ async function main() {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${ADMIN_TOKEN}`,
+            'x-admin-secret': ADMIN_SECRET,
           },
           body: JSON.stringify({
             tenant_slug: TENANT_SLUG,
@@ -194,7 +212,7 @@ async function main() {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${ADMIN_TOKEN}`,
+            'x-admin-secret': ADMIN_SECRET,
           },
           body: JSON.stringify({
             tenant_slug: TENANT_SLUG,

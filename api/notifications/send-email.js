@@ -1,5 +1,6 @@
 const { getDb } = require('../lib/db');
 const { corsHeaders, handleCors } = require('../lib/cors');
+const { requireAuth } = require('../lib/auth');
 
 const TZ = 'America/Santiago';
 
@@ -16,6 +17,9 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  const tenant = await requireAuth(req, res);
+  if (!tenant) return;
+
   const RESEND_API_KEY = process.env.RESEND_API_KEY;
   if (!RESEND_API_KEY) {
     return res.status(200).json({ message: 'RESEND_API_KEY no configurado, email no enviado' });
@@ -30,7 +34,7 @@ module.exports = async function handler(req, res) {
     await sql('ALTER TABLE employees ADD COLUMN IF NOT EXISTS email VARCHAR(200)');
     await sql('ALTER TABLE employees ADD COLUMN IF NOT EXISTS phone VARCHAR(50)');
 
-    const [employee] = await sql('SELECT * FROM employees WHERE id = $1', [employee_id]);
+    const [employee] = await sql('SELECT * FROM employees WHERE id = $1 AND tenant_id = $2', [employee_id, tenant.id]);
     if (!employee || !employee.email) {
       return res.status(200).json({ message: 'Empleado sin email, notificación no enviada' });
     }

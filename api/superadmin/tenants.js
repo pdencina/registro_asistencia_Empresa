@@ -2,24 +2,7 @@ const { getDb } = require('../lib/db');
 const { corsHeaders, handleCors } = require('../lib/cors');
 const { hashPin } = require('../lib/hash');
 
-/**
- * Verifica que el request venga del super admin.
- */
-function verifySuperAdmin(req) {
-  const GLOBAL_SECRET = process.env.GLOBAL_ADMIN_SECRET;
-  if (!GLOBAL_SECRET) return false;
-
-  const auth = req.headers.authorization || '';
-  const token = auth.replace('Bearer ', '');
-  if (!token) return false;
-
-  try {
-    const decoded = Buffer.from(token, 'base64').toString('utf8');
-    return decoded.startsWith(GLOBAL_SECRET + ':');
-  } catch {
-    return false;
-  }
-}
+const { isSuperAdmin: verifySuperAdmin } = require('../lib/auth');
 
 module.exports = async function handler(req, res) {
   if (handleCors(req, res)) return;

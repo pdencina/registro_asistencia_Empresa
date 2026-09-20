@@ -1,13 +1,49 @@
 const { getDb } = require('../lib/db');
 const { corsHeaders, handleCors } = require('../lib/cors');
 const { requireTenant } = require('../lib/tenant');
+const { requireAuth } = require('../lib/auth');
+const { rateLimit } = require('../lib/rateLimit');
 const { put } = require('@vercel/blob');
 
 module.exports = async function handler(req, res) {
   if (handleCors(req, res)) return;
 
-  // Identificar tenant — OBLIGATORIO
-  const tenant = await requireTenant(req, res);
+  // Lectura SIN sesión: solo para el marcaje (tótem / móvil) que identifica al trabajador por RUT.
+  // Devuelve como máximo 1 trabajador, con campos mínimos, y nunca el PIN ni datos de contacto.
+  if (req.method === 'GET' && !req.headers.authorization) {
+    const publicTenant = await requireTenant(req, res);
+    if (!publicTenant) return;
+    if (rateLimit(req, res, { maxAttempts: 30, windowMs: 60000, keyPrefix: 'emp-lookup' })) return;
+
+    const cleanRut = String(req.query.search || '').replace(/[.\-\s]/g, '').toLowerCase();
+    if (cleanRut.length < 7) {
+      return res.status(401).json({ error: 'Inicia sesión para ver el listado de colaboradores.' });
+    }
+
+    const sqlPublic = getDb();
+    const found = await sqlPublic(
+      `SELECT * FROM employees
+       WHERE tenant_id = $1 AND active = true
+         AND REPLACE(REPLACE(LOWER(rut), '.', ''), '-', '') = $2
+       LIMIT 1`,
+      [publicTenant.id, cleanRut]
+    );
+    return res.status(200).json(found.map(e => ({
+      id: e.id,
+      rut: e.rut,
+      first_name: e.first_name,
+      last_name: e.last_name,
+      department: e.department,
+      position: e.position,
+      photo_url: e.photo_url,
+      active: e.active,
+      consent_status: e.consent_status || 'pending',
+      personal_pin: !!e.personal_pin,
+    })));
+  }
+
+  // Todo lo demás exige sesión de administrador (el tenant sale del token)
+  const tenant = await requireAuth(req, res);
   if (!tenant) return;
 
   const sql = getDb();

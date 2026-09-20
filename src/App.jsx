@@ -28,6 +28,7 @@ import PrivacyPage from './pages/legal/PrivacyPage';
 import DpaPage from './pages/legal/DpaPage';
 import SuperAdminLoginPage from './pages/superadmin/SuperAdminLoginPage';
 import SuperAdminDashboard from './pages/superadmin/SuperAdminDashboard';
+import { hasAdminSession } from './utils/adminSession';
 
 function LoadingPage() {
   return (
@@ -123,10 +124,9 @@ function App() {
 }
 
 function ProtectedAdmin() {
-  const [authenticated, setAuthenticated] = useState(
-    sessionStorage.getItem('admin_auth') === 'true'
-  );
   const { tenant } = useParams();
+  // La sesión debe tener token firmado y ser de la empresa que indica la URL
+  const [authenticated, setAuthenticated] = useState(() => hasAdminSession(tenant));
 
   // Si no hay slug de tenant en la URL, redirigir a login
   if (!tenant) {

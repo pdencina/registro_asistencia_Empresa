@@ -60,7 +60,7 @@ function rateLimit(req, res, { maxAttempts = 10, windowMs = 60000, keyPrefix = '
 }
 
 // Cleanup old entries every 5 minutes
-setInterval(() => {
+const cleanupTimer = setInterval(() => {
   const now = Date.now();
   for (const [key, record] of attempts.entries()) {
     if (now - record.firstAttempt > 300000) { // 5 min
@@ -68,5 +68,7 @@ setInterval(() => {
     }
   }
 }, 300000);
+// No mantener vivo el proceso solo por la limpieza (tests / ejecución local)
+if (cleanupTimer.unref) cleanupTimer.unref();
 
 module.exports = { rateLimit, checkRateLimit };

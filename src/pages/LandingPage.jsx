@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { motion, useInView } from 'motion/react';
-import { Shield, Users, Clock, MapPin, Camera, BarChart3, Smartphone, CheckCircle, ArrowRight, Menu, X } from 'lucide-react';
+import { Shield, Users, Clock, MapPin, Camera, BarChart3, Smartphone, CheckCircle, ArrowRight, Menu, X, Monitor, Fingerprint, KeyRound, CalendarDays, Bell, Plane, FileText, ChevronDown, ScrollText } from 'lucide-react';
 import AnimatedStats from '../components/AnimatedStats';
 import HeroDashboard from '../components/HeroDashboard';
 
@@ -15,6 +15,7 @@ export default function LandingPage() {
   const [quoteLoading, setQuoteLoading] = useState(false);
   const [quoteSent, setQuoteSent] = useState(false);
   const [quoteRutError, setQuoteRutError] = useState('');
+  const [openFaq, setOpenFaq] = useState(0);
 
   async function handleContactSubmit(e) {
     e.preventDefault();
@@ -243,6 +244,93 @@ export default function LandingPage() {
     },
   ];
 
+  // Formas de marcaje — 2 canales oficiales, combinables (estilo comparador claro)
+  const marcajeTypes = [
+    {
+      icon: <Monitor className="w-7 h-7" />,
+      color: 'bg-primary-600',
+      title: 'Tótem fijo',
+      subtitle: 'Tablet o computador en la entrada',
+      desc: 'El punto de marcaje clásico. Una tablet montada en la entrada donde cada colaborador marca su entrada y salida.',
+      methods: [
+        { icon: <Camera className="w-4 h-4" />, label: 'Reconocimiento facial' },
+        { icon: <KeyRound className="w-4 h-4" />, label: 'PIN personal' },
+        { icon: <Fingerprint className="w-4 h-4" />, label: 'RUT del colaborador' },
+      ],
+      best: 'Ideal para oficinas, plantas, packing y recintos con un acceso.',
+    },
+    {
+      icon: <Smartphone className="w-7 h-7" />,
+      color: 'bg-emerald-600',
+      title: 'Marcaje móvil',
+      subtitle: 'Celular del propio trabajador',
+      desc: 'Cada persona marca desde su teléfono con selfie y validación facial. Se registra la ubicación GPS y la dirección exacta de cada marca.',
+      methods: [
+        { icon: <Camera className="w-4 h-4" />, label: 'Selfie + facial' },
+        { icon: <MapPin className="w-4 h-4" />, label: 'GPS con dirección' },
+        { icon: <Shield className="w-4 h-4" />, label: 'Evidencia de perímetro' },
+      ],
+      best: 'Ideal para terreno, cuadrillas, vendedores y equipos distribuidos.',
+    },
+  ];
+
+  // Módulos con más protagonismo (turnos, alertas, permisos)
+  const modules = [
+    {
+      icon: <CalendarDays className="w-6 h-6" />,
+      color: 'from-indigo-500 to-blue-600',
+      title: 'Turnos y horarios',
+      desc: 'Turnos rotativos, jornada partida y tolerancias diferenciadas por grupo. Asignación masiva en segundos.',
+      tag: '130+ horarios',
+    },
+    {
+      icon: <Bell className="w-6 h-6" />,
+      color: 'from-amber-500 to-orange-600',
+      title: 'Alertas en tiempo real',
+      desc: 'Aviso al administrador ante ausentes o atrasos, y notificación al trabajador en cada marca. Configurable on/off.',
+      tag: 'Email + panel',
+    },
+    {
+      icon: <Plane className="w-6 h-6" />,
+      color: 'from-emerald-500 to-teal-600',
+      title: 'Permisos y licencias',
+      desc: 'Solicitudes de permiso, vacaciones y licencias médicas. Justificativos retroactivos sin alterar la hora marcada.',
+      tag: '10 tipos',
+    },
+  ];
+
+  // FAQ — objeciones frecuentes + SEO
+  const faqs = [
+    {
+      q: '¿Flexio reemplaza el reloj control tradicional?',
+      a: 'Sí. Flexio funciona con cualquier tablet o celular con cámara, así que no necesitas comprar relojes, huelleros ni tarjetas de proximidad. El reconocimiento facial registra la marca en segundos.',
+    },
+    {
+      q: '¿Necesito comprar hardware especial?',
+      a: 'No. Basta una tablet o computador con cámara para el tótem fijo, o el propio celular del trabajador para el marcaje móvil. Cero inversión en equipos.',
+    },
+    {
+      q: '¿Flexio cumple con la Resolución N°38 de la Dirección del Trabajo?',
+      a: 'Flexio es una plataforma diseñada bajo los lineamientos de la Resolución N°38 Exenta (libro de asistencia electrónico, registro íntegro con sello de tiempo y exportación en el formato requerido). La autorización formal ante la Dirección del Trabajo se encuentra en proceso. Puedes usar Flexio como plataforma tecnológica de control horario desde ya.',
+    },
+    {
+      q: '¿Cómo protegen los datos biométricos de mis colaboradores?',
+      a: 'Los datos se tratan como datos sensibles, con consentimiento explícito de cada persona, encriptación en tránsito (TLS 1.3) y en reposo (AES-256), y garantía de derechos ARCO. Alineado con la Ley 21.719 y la Ley 19.628.',
+    },
+    {
+      q: '¿Qué pasa si el trabajador marca fuera del perímetro?',
+      a: 'La marca se registra igual y queda la evidencia de que ocurrió fuera del perímetro configurado. Flexio no bloquea el registro: deja la traza para que tú decidas cómo gestionarla.',
+    },
+    {
+      q: '¿Tienen soporte y en qué horario?',
+      a: 'Sí. Ofrecemos soporte por correo y WhatsApp en horario hábil, con acompañamiento en la puesta en marcha. Los planes superiores incluyen soporte prioritario.',
+    },
+    {
+      q: '¿Hay periodo de prueba?',
+      a: 'Sí, 15 días de evaluación sin costo ni compromiso, y sin necesidad de tarjeta de crédito.',
+    },
+  ];
+
   return (
     <div className="min-h-screen bg-white">
       {/* Navbar — Minimal */}
@@ -256,7 +344,9 @@ export default function LandingPage() {
               </div>
               <div className="hidden md:flex items-center gap-6">
                 <a href="#features" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">Soluciones</a>
+                <a href="#marcaje" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">Cómo marcar</a>
                 <a href="#pricing" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">Planes</a>
+                <a href="#faq" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">FAQ</a>
               </div>
             </div>
 
@@ -277,7 +367,9 @@ export default function LandingPage() {
         {mobileMenu && (
           <div className="md:hidden bg-white border-t border-gray-100 px-6 py-4 space-y-3">
             <a href="#features" className="block text-gray-600 py-2">Soluciones</a>
+            <a href="#marcaje" className="block text-gray-600 py-2">Cómo marcar</a>
             <a href="#pricing" className="block text-gray-600 py-2">Planes</a>
+            <a href="#faq" className="block text-gray-600 py-2">FAQ</a>
             <a href="/mi" className="block text-gray-600 py-2">Marcar asistencia</a>
             <a href="/login" className="block text-gray-600 py-2">Iniciar sesión</a>
             <a href="https://wa.me/56949616038?text=Hola%2C%20me%20interesa%20Flexio%20para%20mi%20empresa" target="_blank" rel="noopener noreferrer" className="block w-full text-center px-5 py-3 bg-primary-600 text-white rounded-full font-semibold">
@@ -431,8 +523,104 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* How it works */}
+      {/* Tipos de marcaje */}
+      <section id="marcaje" className="py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto">
+          <motion.div
+            className="text-center mb-14"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
+            <p className="text-primary-600 font-semibold text-sm uppercase tracking-wider mb-3">Formas de marcar</p>
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+              Dos formas de marcar, combinables
+            </h2>
+            <p className="text-lg text-gray-500 max-w-2xl mx-auto">
+              Usa la que se adapte a tu operación, o las dos a la vez. Cada empresa recibe sus URLs listas para el día 1.
+            </p>
+          </motion.div>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            {marcajeTypes.map((m, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-40px' }}
+                transition={{ duration: 0.5, delay: i * 0.12 }}
+                className="relative bg-white rounded-2xl border border-gray-200 p-7 shadow-sm hover:shadow-md transition-shadow"
+              >
+                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-white mb-5 ${m.color}`}>
+                  {m.icon}
+                </div>
+                <h3 className="text-xl font-bold text-gray-900">{m.title}</h3>
+                <p className="text-sm text-gray-400 mb-4">{m.subtitle}</p>
+                <p className="text-gray-500 text-sm leading-relaxed mb-5">{m.desc}</p>
+                <div className="flex flex-wrap gap-2 mb-5">
+                  {m.methods.map((method, j) => (
+                    <span key={j} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-full text-xs font-medium text-gray-700">
+                      <span className="text-primary-600">{method.icon}</span>{method.label}
+                    </span>
+                  ))}
+                </div>
+                <div className="flex items-start gap-2 pt-4 border-t border-gray-100">
+                  <CheckCircle className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
+                  <p className="text-sm text-gray-600">{m.best}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Módulos destacados */}
       <section className="py-20 bg-gray-50 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto">
+          <motion.div
+            className="text-center mb-14"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
+            <p className="text-primary-600 font-semibold text-sm uppercase tracking-wider mb-3">Más que marcar</p>
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+              Módulos de turnos, alertas y permisos
+            </h2>
+            <p className="text-lg text-gray-500 max-w-2xl mx-auto">
+              Gestiona el ciclo completo de asistencia en un solo lugar, sin planillas ni procesos manuales.
+            </p>
+          </motion.div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {modules.map((mod, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-30px' }}
+                transition={{ duration: 0.4, delay: i * 0.1 }}
+                whileHover={{ y: -6, transition: { duration: 0.2 } }}
+                className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm"
+              >
+                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${mod.color} flex items-center justify-center text-white mb-4 shadow-lg`}>
+                  {mod.icon}
+                </div>
+                <div className="flex items-center gap-2 mb-2">
+                  <h3 className="font-bold text-gray-900 text-lg">{mod.title}</h3>
+                  <span className="text-[10px] font-semibold text-primary-600 bg-primary-50 px-2 py-0.5 rounded-full border border-primary-100">{mod.tag}</span>
+                </div>
+                <p className="text-sm text-gray-500 leading-relaxed">{mod.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* How it works */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
             <motion.h2
@@ -621,6 +809,98 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Resolución N°38 — honesto */}
+      <section id="res38" className="py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary-600 to-indigo-700 p-8 sm:p-12 text-white"
+          >
+            <div className="absolute -right-10 -top-10 w-48 h-48 rounded-full bg-white/10" />
+            <div className="absolute -right-4 bottom-0 w-32 h-32 rounded-full bg-white/5" />
+            <div className="relative">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 text-xs font-semibold mb-5">
+                <ScrollText className="w-4 h-4" /> Resolución N°38 Exenta · DT
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-bold mb-4 leading-tight">
+                Diseñado según los lineamientos de la Resolución N°38
+              </h2>
+              <p className="text-white/85 leading-relaxed mb-6 max-w-2xl">
+                Flexio es una plataforma de control horario construida bajo los criterios de la Res. 38 Exenta:
+                libro de asistencia electrónico, registro íntegro con sello de tiempo y exportación en el formato requerido.
+                La <strong className="text-white">autorización formal ante la Dirección del Trabajo se encuentra en proceso</strong>.
+                Puedes comenzar a usar Flexio como tu plataforma tecnológica de control de asistencia desde hoy.
+              </p>
+              <div className="grid sm:grid-cols-3 gap-4">
+                {[
+                  { icon: <FileText className="w-5 h-5" />, t: 'Libro electrónico', d: 'Formato exportable Art. 33' },
+                  { icon: <Shield className="w-5 h-5" />, t: 'Registro íntegro', d: 'Hash + sello de tiempo' },
+                  { icon: <Clock className="w-5 h-5" />, t: 'Trazabilidad', d: 'Audit log de cada marca' },
+                ].map((it, i) => (
+                  <div key={i} className="bg-white/10 rounded-xl p-4">
+                    <div className="mb-2">{it.icon}</div>
+                    <p className="font-semibold text-sm">{it.t}</p>
+                    <p className="text-white/70 text-xs">{it.d}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section id="faq" className="py-20 bg-gray-50 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-3xl mx-auto">
+          <motion.div
+            className="text-center mb-12"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+              Preguntas frecuentes
+            </h2>
+            <p className="text-lg text-gray-500">Lo que las empresas nos preguntan antes de partir.</p>
+          </motion.div>
+
+          <div className="space-y-3">
+            {faqs.map((faq, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-30px' }}
+                transition={{ duration: 0.4, delay: i * 0.05 }}
+                className="bg-white rounded-xl border border-gray-200 overflow-hidden"
+              >
+                <button
+                  onClick={() => setOpenFaq(openFaq === i ? -1 : i)}
+                  className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left"
+                >
+                  <span className="font-semibold text-gray-900 text-sm sm:text-base">{faq.q}</span>
+                  <ChevronDown className={`w-5 h-5 text-gray-400 shrink-0 transition-transform duration-200 ${openFaq === i ? 'rotate-180' : ''}`} />
+                </button>
+                {openFaq === i && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    transition={{ duration: 0.25 }}
+                    className="px-5 pb-4"
+                  >
+                    <p className="text-sm text-gray-500 leading-relaxed">{faq.a}</p>
+                  </motion.div>
+                )}
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mx-auto text-center">
@@ -652,7 +932,9 @@ export default function LandingPage() {
               <h4 className="text-white font-semibold mb-3">Producto</h4>
               <ul className="space-y-2 text-sm">
                 <li><a href="#features" className="hover:text-white transition-colors">Funcionalidades</a></li>
+                <li><a href="#marcaje" className="hover:text-white transition-colors">Cómo marcar</a></li>
                 <li><a href="#pricing" className="hover:text-white transition-colors">Precios</a></li>
+                <li><a href="#faq" className="hover:text-white transition-colors">Preguntas frecuentes</a></li>
                 <li><a href="#legal" className="hover:text-white transition-colors">Seguridad</a></li>
               </ul>
             </div>

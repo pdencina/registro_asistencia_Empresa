@@ -1,6 +1,7 @@
 const { getDb } = require('../lib/db');
 const { corsHeaders, handleCors } = require('../lib/cors');
 const { hashPin } = require('../lib/hash');
+const { rateLimit } = require('../lib/rateLimit');
 
 /**
  * POST /api/auth/recover-pin
@@ -14,6 +15,9 @@ module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
+
+  // Evita spam de correos y bloqueos repetidos de la cuenta del administrador
+  if (rateLimit(req, res, { maxAttempts: 3, windowMs: 600000, keyPrefix: 'recover-pin' })) return;
 
   const RESEND_API_KEY = process.env.RESEND_API_KEY;
   if (!RESEND_API_KEY) {

@@ -1,6 +1,8 @@
 const { getDb } = require('../lib/db');
 const { corsHeaders, handleCors } = require('../lib/cors');
-const { verifyPin } = require('../lib/hash');
+const { verifyPin, hashPin, isHashed } = require('../lib/hash');
+const { rateLimit } = require('../lib/rateLimit');
+const { signAdminSession } = require('../lib/session');
 
 /**
  * POST /api/auth/login
@@ -15,10 +17,13 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  // Freno a fuerza bruta: 10 intentos por minuto por IP
+  if (rateLimit(req, res, { maxAttempts: 10, windowMs: 60000, keyPrefix: 'login' })) return;
+
   const sql = getDb();
 
   try {
-    const { email, password } = req.body;
+    const { email, password } = req.body || {};
 
     if (!email || !password) {
       return res.status(400).json({ error: 'Email y contraseña son obligatorios' });
@@ -50,8 +55,13 @@ module.exports = async function handler(req, res) {
     // Login exitoso — check if it's the main admin or a tenant_user
     // First try: main admin
     if (tenant.admin_email.toLowerCase() === email.toLowerCase() && verifyPin(password, tenant.admin_password)) {
+      // Migración transparente: si estaba en texto plano, se guarda hasheada
+      if (!isHashed(tenant.admin_password)) {
+        await sql('UPDATE tenants SET admin_password = $1 WHERE id = $2', [hashPin(password), tenant.id]);
+      }
       return res.status(200).json({
         success: true,
+        token: signAdminSession({ tenantId: tenant.id, slug: tenant.slug, role: 'admin', email: tenant.admin_email.toLowerCase() }),
         tenant_id: tenant.id,
         tenant_name: tenant.name,
         tenant_slug: tenant.slug,
@@ -69,8 +79,12 @@ module.exports = async function handler(req, res) {
         [tenant.id, email.toLowerCase()]
       );
       if (user && verifyPin(password, user.password)) {
+        if (!isHashed(user.password)) {
+          await sql('UPDATE tenant_users SET password = $1 WHERE id = $2', [hashPin(password), user.id]);
+        }
         return res.status(200).json({
           success: true,
+          token: signAdminSession({ tenantId: tenant.id, slug: tenant.slug, role: user.role, email: user.email.toLowerCase() }),
           tenant_id: tenant.id,
           tenant_name: tenant.name,
           tenant_slug: tenant.slug,

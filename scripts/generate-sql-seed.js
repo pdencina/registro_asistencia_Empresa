@@ -1,6 +1,6 @@
 /**
  * Genera el SQL de seed para pegar directamente en Neon SQL Editor.
- * Ejecutar: node scripts/generate-sql-seed.js > seed-data.sql
+ * Ejecutar: node scripts/generate-sql-seed.js > scripts/seeds/seed-data.sql
  */
 
 const TENANT_ID = '0bedbeb6-ea87-4953-864d-e1bee9525111';

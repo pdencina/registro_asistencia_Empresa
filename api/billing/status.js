@@ -1,4 +1,5 @@
 const { getDb } = require('../lib/db');
+const { requireAuth } = require('../lib/auth');
 const { corsHeaders, handleCors } = require('../lib/cors');
 
 /**
@@ -12,12 +13,13 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const sql = getDb();
-  const { tenant_id, tenant_slug } = req.query;
+  // El tenant sale de la sesión, no de parámetros del cliente
+  const authedTenant = await requireAuth(req, res);
+  if (!authedTenant) return;
 
-  if (!tenant_id && !tenant_slug) {
-    return res.status(400).json({ error: 'tenant_id o tenant_slug es obligatorio' });
-  }
+  const sql = getDb();
+  const tenant_id = authedTenant.id;
+  const tenant_slug = null;
 
   try {
     // Resolve tenant_id from slug if needed

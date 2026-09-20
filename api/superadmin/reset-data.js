@@ -1,5 +1,6 @@
 const { getDb } = require('../lib/db');
 const { corsHeaders, handleCors } = require('../lib/cors');
+const { requireSuperAdmin } = require('../lib/auth');
 
 module.exports = async function handler(req, res) {
   if (handleCors(req, res)) return;
@@ -8,21 +9,7 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // Verificar super admin
-  const GLOBAL_SECRET = process.env.GLOBAL_ADMIN_SECRET;
-  if (!GLOBAL_SECRET) return res.status(500).json({ error: 'Config error' });
-
-  const auth = req.headers.authorization || '';
-  const token = auth.replace('Bearer ', '');
-  let isAdmin = false;
-  try {
-    const decoded = Buffer.from(token, 'base64').toString('utf8');
-    isAdmin = decoded.startsWith(GLOBAL_SECRET + ':');
-  } catch {}
-
-  if (!isAdmin) {
-    return res.status(401).json({ error: 'No autorizado' });
-  }
+  if (!requireSuperAdmin(req, res)) return;
 
   const sql = getDb();
 

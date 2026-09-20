@@ -1,6 +1,6 @@
 const { getDb } = require('../lib/db');
 const { handleCors } = require('../lib/cors');
-const { requireTenant } = require('../lib/tenant');
+const { requireAuth } = require('../lib/auth');
 
 const TZ = 'America/Santiago';
 
@@ -13,7 +13,7 @@ const TZ = 'America/Santiago';
 module.exports = async function handler(req, res) {
   if (handleCors(req, res)) return;
 
-  const tenant = await requireTenant(req, res);
+  const tenant = await requireAuth(req, res, { roles: ['admin', 'rrhh', 'jefe_area'] });
   if (!tenant) return;
 
   const sql = getDb();

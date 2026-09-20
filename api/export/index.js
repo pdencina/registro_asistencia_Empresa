@@ -1,6 +1,6 @@
 const { getDb } = require('../lib/db');
 const { handleCors } = require('../lib/cors');
-const { requireTenant } = require('../lib/tenant');
+const { requireAuth } = require('../lib/auth');
 
 /**
  * GET /api/export
@@ -17,7 +17,7 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const tenant = await requireTenant(req, res);
+  const tenant = await requireAuth(req, res, { roles: ['admin'] });
   if (!tenant) return;
 
   const sql = getDb();

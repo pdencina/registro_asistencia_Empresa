@@ -1,6 +1,8 @@
 const { getDb } = require('../lib/db');
 const { corsHeaders, handleCors } = require('../lib/cors');
 const { requireTenant } = require('../lib/tenant');
+const { rateLimit } = require('../lib/rateLimit');
+
 const { verifyPin } = require('../lib/hash');
 
 /**
@@ -15,6 +17,8 @@ module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
+
+  if (rateLimit(req, res, { maxAttempts: 5, windowMs: 60000, keyPrefix: 'verify-pin' })) return;
 
   const tenant = await requireTenant(req, res);
   if (!tenant) return;

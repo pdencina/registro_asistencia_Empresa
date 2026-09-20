@@ -1,37 +1,7 @@
 const { getDb } = require('../lib/db');
 const { handleCors } = require('../lib/cors');
 
-/**
- * Verify superadmin token (same as tenants.js)
- */
-function verifySuperAdmin(req) {
-  const GLOBAL_SECRET = process.env.GLOBAL_ADMIN_SECRET;
-  if (!GLOBAL_SECRET) return false;
-
-  // Try Authorization header (Bearer token) — check both cases
-  const auth = req.headers.authorization || req.headers.Authorization || '';
-  const bearerToken = auth.replace('Bearer ', '').replace('bearer ', '');
-  if (bearerToken) {
-    // Direct secret match
-    if (bearerToken === GLOBAL_SECRET) return true;
-    try {
-      const decoded = Buffer.from(bearerToken, 'base64').toString('utf8');
-      if (decoded.startsWith(GLOBAL_SECRET + ':')) return true;
-    } catch {}
-  }
-
-  // Try x-admin-secret header (direct or base64)
-  const adminSecret = req.headers['x-admin-secret'];
-  if (adminSecret) {
-    if (adminSecret === GLOBAL_SECRET) return true;
-    try {
-      const decoded = Buffer.from(adminSecret, 'base64').toString('utf8');
-      if (decoded.startsWith(GLOBAL_SECRET + ':')) return true;
-    } catch {}
-  }
-
-  return false;
-}
+const { isSuperAdmin: verifySuperAdmin } = require('../lib/auth');
 
 /**
  * /api/proposals

@@ -1,6 +1,7 @@
 const { getDb } = require('../lib/db');
 const { handleCors } = require('../lib/cors');
-const { requireTenant } = require('../lib/tenant');
+const { requireAuth } = require('../lib/auth');
+const { hashPin } = require('../lib/hash');
 
 /**
  * /api/users
@@ -25,7 +26,7 @@ const ROLE_LABELS = {
 module.exports = async function handler(req, res) {
   if (handleCors(req, res)) return;
 
-  const tenant = await requireTenant(req, res);
+  const tenant = await requireAuth(req, res, { roles: ['admin'] });
   if (!tenant) return;
 
   const sql = getDb();
@@ -78,7 +79,7 @@ module.exports = async function handler(req, res) {
       INSERT INTO tenant_users (tenant_id, name, email, password, role, department)
       VALUES ($1, $2, $3, $4, $5, $6)
       RETURNING id, name, email, role, department, active, created_at
-    `, [tenant.id, name.trim(), email.toLowerCase().trim(), password, role, department || null]);
+    `, [tenant.id, name.trim(), email.toLowerCase().trim(), hashPin(password), role, department || null]);
 
     return res.status(201).json(user);
   }
@@ -94,7 +95,7 @@ module.exports = async function handler(req, res) {
 
     if (name) { setClauses.push(`name = $${idx++}`); values.push(name.trim()); }
     if (email) { setClauses.push(`email = $${idx++}`); values.push(email.toLowerCase().trim()); }
-    if (password) { setClauses.push(`password = $${idx++}`); values.push(password); }
+    if (password) { setClauses.push(`password = $${idx++}`); values.push(hashPin(password)); }
     if (role && VALID_ROLES.includes(role)) { setClauses.push(`role = $${idx++}`); values.push(role); }
     if (department !== undefined) { setClauses.push(`department = $${idx++}`); values.push(department || null); }
     if (active !== undefined) { setClauses.push(`active = $${idx++}`); values.push(active); }

@@ -1,6 +1,8 @@
 const { getDb } = require('../lib/db');
 const { corsHeaders, handleCors } = require('../lib/cors');
 const { requireTenant } = require('../lib/tenant');
+const { rateLimit } = require('../lib/rateLimit');
+
 const { insertAttendanceRecord } = require('../lib/integrity');
 const { validateGeofence, getTenantGeoConfig, getNearestDevice } = require('../lib/geofence');
 
@@ -18,6 +20,9 @@ module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
+
+  // El PIN de 4-6 dígitos identifica al trabajador: se limita para frenar la fuerza bruta
+  if (req.body && req.body.pin && rateLimit(req, res, { maxAttempts: 20, windowMs: 60000, keyPrefix: 'pin-checkin' })) return;
 
   const tenant = await requireTenant(req, res);
   if (!tenant) return;

@@ -1,6 +1,20 @@
 const { getDb } = require('../lib/db');
+const { handleCors } = require('../lib/cors');
+const { requireSuperAdmin } = require('../lib/auth');
+
+const SECRET_FIELDS = ['admin_password', 'admin_pin_hash', 'admin_pin'];
+const stripSecrets = (row) => {
+  const clean = { ...row };
+  for (const f of SECRET_FIELDS) delete clean[f];
+  return clean;
+};
 
 module.exports = async function handler(req, res) {
+  if (handleCors(req, res)) return;
+
+  // Crear y listar empresas es una operación de plataforma: solo superadmin
+  if (!requireSuperAdmin(req, res)) return;
+
   const sql = getDb();
 
   // POST - Crear nuevo tenant (signup)
@@ -60,7 +74,7 @@ module.exports = async function handler(req, res) {
       `, [rows[0].id, selectedPlan, trialEnds.toISOString()]);
 
       return res.status(201).json({
-        tenant: rows[0],
+        tenant: stripSecrets(rows[0]),
         message: `Cuenta creada. Accede en: flexio.cl/app/${slug}`,
         trial_days: 15,
       });
@@ -69,7 +83,7 @@ module.exports = async function handler(req, res) {
     }
   }
 
-  // GET - Listar tenants (solo admin global)
+  // GET - Listar tenants
   if (req.method === 'GET') {
     try {
       const rows = await sql(`
@@ -79,7 +93,7 @@ module.exports = async function handler(req, res) {
         LEFT JOIN subscriptions s ON s.tenant_id = t.id
         ORDER BY t.created_at DESC
       `);
-      return res.status(200).json(rows);
+      return res.status(200).json(rows.map(stripSecrets));
     } catch (error) {
       return res.status(500).json({ error: error.message });
     }

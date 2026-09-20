@@ -1,6 +1,6 @@
 const { getDb } = require('../lib/db');
 const { handleCors } = require('../lib/cors');
-const { requireTenant } = require('../lib/tenant');
+const { requireAuth } = require('../lib/auth');
 const { verifyChainIntegrity, createProtectionRules, ensureIntegrityColumns } = require('../lib/integrity');
 
 /**
@@ -19,7 +19,7 @@ const { verifyChainIntegrity, createProtectionRules, ensureIntegrityColumns } = 
 module.exports = async function handler(req, res) {
   if (handleCors(req, res)) return;
 
-  const tenant = await requireTenant(req, res);
+  const tenant = await requireAuth(req, res);
   if (!tenant) return;
 
   // GET: Verificar integridad

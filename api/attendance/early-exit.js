@@ -1,8 +1,12 @@
 const { getDb } = require('../lib/db');
 const { corsHeaders, handleCors } = require('../lib/cors');
+const { requireAuth } = require('../lib/auth');
 
 module.exports = async function handler(req, res) {
   if (handleCors(req, res)) return;
+
+  const tenant = await requireAuth(req, res);
+  if (!tenant) return;
 
   const sql = getDb();
 
@@ -26,6 +30,9 @@ module.exports = async function handler(req, res) {
         return res.status(400).json({ error: 'employee_id y reason son requeridos' });
       }
 
+      const [ownedEmp] = await sql('SELECT id FROM employees WHERE id = $1 AND tenant_id = $2', [employee_id, tenant.id]);
+      if (!ownedEmp) return res.status(404).json({ error: 'Empleado no encontrado' });
+
       const [record] = await sql(`
         INSERT INTO early_exits (id, attendance_record_id, employee_id, reason, authorized_by, notes)
         VALUES (gen_random_uuid(), $1, $2, $3, $4, $5)
@@ -38,6 +45,9 @@ module.exports = async function handler(req, res) {
     // GET: get early exits for an employee
     if (req.method === 'GET') {
       const { employee_id } = req.query;
+      const [ownedEmp] = await sql('SELECT id FROM employees WHERE id = $1 AND tenant_id = $2', [employee_id, tenant.id]);
+      if (!ownedEmp) return res.status(404).json({ error: 'Empleado no encontrado' });
+
       const exits = await sql(`
         SELECT ee.*, a.name as authorizer_name
         FROM early_exits ee

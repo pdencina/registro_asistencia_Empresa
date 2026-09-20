@@ -46,7 +46,10 @@ module.exports = async function handler(req, res) {
   }
 
   const sql = getDb();
-  const slug = req.headers['x-tenant-slug'];
+  const { requireAuth } = require('../lib/auth');
+  const authedTenant = await requireAuth(req, res, { roles: ['admin'] });
+  if (!authedTenant) return;
+  const slug = authedTenant.slug;
 
   try {
     const { payer_email } = req.body;

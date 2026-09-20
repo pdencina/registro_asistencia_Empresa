@@ -1,5 +1,6 @@
 const { getDb } = require('../lib/db');
 const { handleCors } = require('../lib/cors');
+const { requireSuperAdmin } = require('../lib/auth');
 
 /**
  * POST /api/proposals/send-email
@@ -11,15 +12,7 @@ module.exports = async function handler(req, res) {
   if (handleCors(req, res)) return;
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  // Verificar super admin
-  const GLOBAL_SECRET = process.env.GLOBAL_ADMIN_SECRET;
-  const auth = (req.headers.authorization || '').replace('Bearer ', '');
-  let isAdmin = false;
-  if (GLOBAL_SECRET) {
-    if (auth === GLOBAL_SECRET) isAdmin = true;
-    else { try { isAdmin = Buffer.from(auth, 'base64').toString('utf8').startsWith(GLOBAL_SECRET + ':'); } catch {} }
-  }
-  if (!isAdmin) return res.status(401).json({ error: 'No autorizado' });
+  if (!requireSuperAdmin(req, res)) return;
 
   const RESEND_API_KEY = process.env.RESEND_API_KEY;
   if (!RESEND_API_KEY) return res.status(500).json({ error: 'Email no configurado' });

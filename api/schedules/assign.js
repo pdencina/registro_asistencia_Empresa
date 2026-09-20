@@ -1,8 +1,12 @@
 const { getDb } = require('../lib/db');
 const { corsHeaders, handleCors } = require('../lib/cors');
+const { requireAuth } = require('../lib/auth');
 
 module.exports = async function handler(req, res) {
   if (handleCors(req, res)) return;
+
+  const tenant = await requireAuth(req, res);
+  if (!tenant) return;
 
   const sql = getDb();
 
@@ -50,6 +54,14 @@ module.exports = async function handler(req, res) {
         return res.status(400).json({ error: 'employee_id es requerido' });
       }
 
+      const [ownedEmp] = await sql('SELECT id FROM employees WHERE id = $1 AND tenant_id = $2', [employee_id, tenant.id]);
+      if (!ownedEmp) return res.status(404).json({ error: 'Empleado no encontrado' });
+
+      if (schedule_id) {
+        const [ownedSch] = await sql('SELECT id FROM work_schedules WHERE id = $1 AND (tenant_id = $2 OR tenant_id IS NULL)', [schedule_id, tenant.id]);
+        if (!ownedSch) return res.status(404).json({ error: 'Horario no encontrado' });
+      }
+
       await sql(`
         INSERT INTO employee_schedules (employee_id, schedule_id, custom_entry_time, custom_exit_time, updated_at)
         VALUES ($1, $2, $3, $4, NOW())
@@ -67,6 +79,9 @@ module.exports = async function handler(req, res) {
       if (!employee_id) {
         return res.status(400).json({ error: 'employee_id es requerido' });
       }
+
+      const [ownedEmp] = await sql('SELECT id FROM employees WHERE id = $1 AND tenant_id = $2', [employee_id, tenant.id]);
+      if (!ownedEmp) return res.status(404).json({ error: 'Empleado no encontrado' });
 
       // Get employee-specific schedule or fall back to default
       const [assignment] = await sql(`
@@ -92,7 +107,7 @@ module.exports = async function handler(req, res) {
       }
 
       // Fall back to default schedule
-      const [defaultSchedule] = await sql('SELECT * FROM work_schedules WHERE is_default = true LIMIT 1');
+      const [defaultSchedule] = await sql('SELECT * FROM work_schedules WHERE is_default = true AND (tenant_id = $1 OR tenant_id IS NULL) ORDER BY (tenant_id IS NOT NULL) DESC LIMIT 1', [tenant.id]);
       if (defaultSchedule) {
         return res.status(200).json({
           entry_time: defaultSchedule.entry_time,

@@ -22,6 +22,7 @@ import PayrollReportPage from '../pages/PayrollReportPage';
 import OnboardingWizard from '../components/OnboardingWizard';
 import PinCheckInPage from '../pages/PinCheckInPage';
 import ComoMarcarPage from '../pages/ComoMarcarPage';
+import { clearAdminSession } from '../utils/adminSession';
 
 // Lazy load heavy pages (face-api.js = 641KB, only needed for check-in)
 const CheckInPage = lazy(() => import('../pages/CheckInPage'));
@@ -85,9 +86,7 @@ export default function AdminLayout() {
   }, [tenant]);
 
   function handleLogout() {
-    sessionStorage.removeItem('admin_auth');
-    sessionStorage.removeItem('admin_tenant');
-    sessionStorage.removeItem('admin_email');
+    clearAdminSession();
     navigate('/');
   }
 

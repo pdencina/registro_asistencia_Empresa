@@ -1,12 +1,15 @@
 const { getDb } = require('../lib/db');
 const { corsHeaders, handleCors } = require('../lib/cors');
 const { requireTenant } = require('../lib/tenant');
+const { requireAuth } = require('../lib/auth');
 const { put } = require('@vercel/blob');
 
 module.exports = async function handler(req, res) {
   if (handleCors(req, res)) return;
 
-  const tenant = await requireTenant(req, res);
+  const tenant = req.method === 'GET'
+    ? await requireTenant(req, res)
+    : await requireAuth(req, res, { roles: ['admin'] });
   if (!tenant) return;
 
   const sql = getDb();

@@ -1,5 +1,7 @@
 const { getDb } = require('../lib/db');
 const { handleCors } = require('../lib/cors');
+const { requireSuperAdmin } = require('../lib/auth');
+const { hashPin } = require('../lib/hash');
 
 /**
  * POST /api/superadmin/seed-demo
@@ -10,19 +12,7 @@ module.exports = async function handler(req, res) {
   if (handleCors(req, res)) return;
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  // Verify superadmin
-  const auth = req.headers.authorization || '';
-  const token = auth.replace('Bearer ', '');
-  const GLOBAL_SECRET = process.env.GLOBAL_ADMIN_SECRET;
-  if (!GLOBAL_SECRET) return res.status(500).json({ error: 'Secret not configured' });
-
-  let authorized = false;
-  if (token === GLOBAL_SECRET) authorized = true;
-  try {
-    const decoded = Buffer.from(token, 'base64').toString('utf8');
-    if (decoded.startsWith(GLOBAL_SECRET + ':')) authorized = true;
-  } catch {}
-  if (!authorized) return res.status(401).json({ error: 'No autorizado' });
+  if (!requireSuperAdmin(req, res)) return;
 
   const sql = getDb();
 
@@ -32,9 +22,9 @@ module.exports = async function handler(req, res) {
     if (!tenant) {
       [tenant] = await sql(`
         INSERT INTO tenants (id, name, slug, admin_email, admin_password, plan, active)
-        VALUES (gen_random_uuid(), 'Colegio Demo', 'demo', 'admin@demo.cl', 'demo1234', 'profesional', true)
+        VALUES (gen_random_uuid(), 'Colegio Demo', 'demo', 'admin@demo.cl', $1, 'profesional', true)
         RETURNING id
-      `);
+      `, [hashPin('demo1234')]);
     }
     const tenantId = tenant.id;
 

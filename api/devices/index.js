@@ -1,12 +1,19 @@
 const { getDb } = require('../lib/db');
 const { corsHeaders, handleCors } = require('../lib/cors');
 const { requireTenant } = require('../lib/tenant');
+const { requireAuth } = require('../lib/auth');
+const { rateLimit } = require('../lib/rateLimit');
+
 const { verifyPin } = require('../lib/hash');
 
 module.exports = async function handler(req, res) {
   if (handleCors(req, res)) return;
 
-  const tenant = await requireTenant(req, res);
+  if (req.method === 'POST' && rateLimit(req, res, { maxAttempts: 5, windowMs: 60000, keyPrefix: 'device-auth' })) return;
+
+  const tenant = req.method === 'PUT'
+    ? await requireAuth(req, res, { roles: ['admin', 'rrhh'] })
+    : await requireTenant(req, res);
   if (!tenant) return;
 
   const sql = getDb();

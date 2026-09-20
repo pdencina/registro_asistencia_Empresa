@@ -1,6 +1,7 @@
 const { getDb } = require('../lib/db');
 const { corsHeaders, handleCors } = require('../lib/cors');
-const { requireTenant } = require('../lib/tenant');
+const { requireAuth } = require('../lib/auth');
+const { hashPin } = require('../lib/hash');
 
 /**
  * /api/auth/users - Manage tenant users with roles
@@ -9,7 +10,7 @@ const { requireTenant } = require('../lib/tenant');
 module.exports = async function handler(req, res) {
   if (handleCors(req, res)) return;
 
-  const tenant = await requireTenant(req, res);
+  const tenant = await requireAuth(req, res, { roles: ['admin'] });
   if (!tenant) return;
 
   const sql = getDb();
@@ -68,7 +69,7 @@ module.exports = async function handler(req, res) {
       const [user] = await sql(`
         INSERT INTO tenant_users (tenant_id, email, password, name, role, department)
         VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, email, name, role, department
-      `, [tenant.id, email.toLowerCase(), password, name || null, role, department || null]);
+      `, [tenant.id, email.toLowerCase(), hashPin(password), name || null, role, department || null]);
 
       return res.status(201).json(user);
     }

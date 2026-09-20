@@ -262,10 +262,10 @@ module.exports = async function handler(req, res) {
  */
 async function handleGenerateToken(req, res) {
   const sql = getDb();
-  const { requireTenant } = require('../lib/tenant');
+  const { requireAuth } = require('../lib/auth');
   const { verifyPin } = require('../lib/hash');
 
-  const tenant = await requireTenant(req, res);
+  const tenant = await requireAuth(req, res, { roles: ['admin'] });
   if (!tenant) return;
 
   const { pin } = req.body;
