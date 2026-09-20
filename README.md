@@ -1,6 +1,6 @@
 # Flexio — Control de asistencia
 
-SaaS multi-tenant de control de asistencia para empresas chilenas, alineado con la Resolución 38 Exenta de la Dirección del Trabajo. Marcaje por tótem (iPad/kiosco) o por móvil, con foto, PIN, RUT o QR, y geolocalización como evidencia.
+SaaS multi-tenant de control de asistencia para empresas chilenas, en preparación técnica para el proceso de certificación bajo la Resolución Exenta N.º 38 de la Dirección del Trabajo (no está certificado; ver `docs/marcaje-res38/`). Marcaje por tótem (iPad/kiosco) o por móvil, con foto, PIN, RUT o QR, y geolocalización como evidencia.
 
 ## Stack
 
@@ -13,7 +13,7 @@ SaaS multi-tenant de control de asistencia para empresas chilenas, alineado con 
 ## Funcionalidades
 
 - **Marcaje:** tótem (`/marcaje/:tenant`) y móvil (`/movil/:tenant`), con foto, PIN/RUT y sello de tiempo
-- **Cumplimiento Res. 38 DT:** hash encadenado SHA-256 por registro (`api/lib/integrity.js`), verificación de integridad, sello de tiempo HMAC, libro de asistencia, reporte de fiscalización, log de auditoría
+- **Preparación Res. 38 DT (sin certificar):** cadena de hashes SHA-256 por registro con secuencia por empresa (`api/lib/integrity.js`), verificación de integridad, sello de tiempo HMAC, libro de asistencia, reporte de fiscalización, log de auditoría. Plan y estado en `docs/marcaje-res38/`
 - **Geolocalización:** registra dónde se marcó y alerta fuera del perímetro; **nunca bloquea** la marca (criterio DT, ver `api/lib/geofence.js`)
 - **Gestión:** empleados, turnos, calendario, atrasos, horas extra, permisos, licencias médicas, justificaciones, amonestaciones, contratos con firma, consentimiento
 - **Reportes:** dashboard, horas semanales, liquidaciones, exportación a Excel
@@ -44,7 +44,7 @@ vercel dev               # API + frontend
 
 `npm run dev` levanta solo el frontend (Vite, puerto 5173) y hace proxy de `/api` a `localhost:3000`.
 
-Otros scripts de base de datos: `db:migrate-multitenant`, `db:migrate-billing`. Migraciones adicionales están en `scripts/`. Para aislar por empresa los horarios y autorizadores heredados: `node scripts/migrate-tenant-scoping.js` (simulación) y luego `--apply`.
+Migraciones versionadas (`/migrations`): `node scripts/migrate.js` (simulación) y `node scripts/migrate.js --apply`. Otros scripts de base de datos: `db:migrate-multitenant`, `db:migrate-billing`. Migraciones adicionales están en `scripts/`. Para aislar por empresa los horarios y autorizadores heredados: `node scripts/migrate-tenant-scoping.js` (simulación) y luego `--apply`.
 
 ## Variables de entorno
 

@@ -9,8 +9,8 @@ import { useGeolocation } from '../utils/useGeolocation';
  * 
  * URL: /marcaje/:tenant
  * 
- * Conforme a Resolución 38 Exenta DT:
- * - Identificación por PIN personal o RUT
+ * Preparación técnica para la certificación (Res. 38 DT; no certificado):
+ * - Identificación por PIN personal o RUT (el RUT solo será retirado: ver docs/marcaje-res38/plan-de-implementacion.md)
  * - Geolocalización al momento del registro
  * - Comprobante por email
  * - Modo offline con sync

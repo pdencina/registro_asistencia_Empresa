@@ -4,7 +4,8 @@ const { requireTenant } = require('../lib/tenant');
 const { rateLimit } = require('../lib/rateLimit');
 
 const { insertAttendanceRecord } = require('../lib/integrity');
-const { validateGeofence, getTenantGeoConfig, getNearestDevice } = require('../lib/geofence');
+const { evaluateGeo } = require('../lib/geofence');
+const { resolveEventTime, parseCoordinates, normalizeChannel, sanitizeDeviceId } = require('../lib/attendanceEvents');
 
 const TZ = 'America/Santiago';
 
@@ -111,34 +112,25 @@ module.exports = async function handler(req, res) {
       }
 
       const id = crypto.randomUUID();
-      // Si viene de sync offline, usar el timestamp original
-      const now = req.body._offline_timestamp || new Date().toISOString();
 
-      // Extraer coordenadas si vienen en el body
-      const latitude = req.body.latitude || null;
-      const longitude = req.body.longitude || null;
+      // Hora del evento: la del servidor, o la del dispositivo solo en sincronización offline acotada
+      const eventTime = resolveEventTime(req.body);
+      if (!eventTime.ok) {
+        return res.status(eventTime.status).json({ error: eventTime.error, code: eventTime.code });
+      }
+      const now = eventTime.timestamp;
+
+      // Coordenadas validadas (body o formato legado "GPS: lat, lng" en notes)
+      const { latitude, longitude, accuracy } = parseCoordinates(req.body);
 
       // Evaluar geofence SIN bloquear la marca (ORD. N°408 DT, 10-09-2026):
-      // el sistema debe permitir marcar y dejar evidencia de si estuvo
-      // dentro o fuera del perímetro, NO impedir el registro.
-      let geoObservacion = '';
-      const geoConfig = await getTenantGeoConfig(sql, tenant.id);
-      if (geoConfig.geolocationEnabled && latitude != null) {
-        const nearestDevice = await getNearestDevice(sql, tenant.id, latitude, longitude);
-        const geoResult = validateGeofence({
-          latitude,
-          longitude,
-          device: nearestDevice,
-          radiusMeters: geoConfig.radiusMeters,
-          geolocationRequired: false, // nunca bloquear
-        });
-        if (!geoResult.valid && geoResult.distance != null) {
-          // Solo se deja constancia; la marca se registra igual
-          geoObservacion = ` | FUERA DE PERÍMETRO: ${geoResult.distance}m (máx ${geoConfig.radiusMeters}m)`;
-        }
-      }
+      // se permite marcar y se deja evidencia estructurada de si estuvo dentro o fuera
+      // del perímetro, NO se impide el registro.
+      const geo = await evaluateGeo(sql, tenant.id, latitude, longitude);
 
-      // Insertar con hash de integridad encadenado (Res. 38 DT)
+      // Insertar con hash de integridad encadenado (Res. 38 DT).
+      // Se deja constancia honesta del método: la marca por RUT sin segundo factor queda como
+      // RUT_ONLY / IDENTIFIED_ONLY para poder detectarla y retirarla (plan de marcación, etapa 6).
       const method = pin ? 'pin' : 'rut';
       const baseNote = notes || `Marcaje por ${method === 'pin' ? 'PIN personal' : 'RUT'}`;
       await insertAttendanceRecord({
@@ -148,10 +140,20 @@ module.exports = async function handler(req, res) {
         type: action,
         timestamp: now,
         method,
-        notes: baseNote + geoObservacion,
+        notes: baseNote + geo.observacion,
         photo_snapshot_url: null,
         latitude,
         longitude,
+        server_received_at: eventTime.serverReceivedAt,
+        client_timestamp: eventTime.clientTimestamp,
+        is_offline_sync: eventTime.isOfflineSync,
+        auth_method: pin ? 'PIN' : 'RUT_ONLY',
+        auth_result: pin ? 'SUCCESS' : 'IDENTIFIED_ONLY',
+        channel: normalizeChannel(req.body.source),
+        device_id: sanitizeDeviceId(req.body.device_id),
+        geo_status: geo.geo_status,
+        geo_distance_m: geo.geo_distance_m,
+        geo_accuracy_m: accuracy,
       });
 
       // Enviar email si tiene (con ubicación si hay GPS)

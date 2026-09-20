@@ -157,9 +157,57 @@ async function getNearestDevice(sql, tenantId, latitude, longitude) {
   }
 }
 
+/**
+ * Evalúa la ubicación de una marcación como EVIDENCIA. Nunca bloquea (criterio DT).
+ *
+ * geo_status:
+ *   NOT_PROVIDED  la marcación no trae coordenadas
+ *   NOT_EVALUATED la empresa tiene la geolocalización desactivada
+ *   NO_REFERENCE  hay coordenadas pero no hay ubicación de referencia configurada
+ *   INSIDE / OUTSIDE  dentro o fuera del radio autorizado
+ *
+ * @returns {{ geo_status: string, geo_distance_m: number|null, radius_m: number|null, observacion: string }}
+ *          `observacion` conserva el texto histórico que se agrega a notes.
+ */
+async function evaluateGeo(sql, tenantId, latitude, longitude) {
+  if (latitude == null || longitude == null) {
+    return { geo_status: 'NOT_PROVIDED', geo_distance_m: null, radius_m: null, observacion: '' };
+  }
+
+  const config = await getTenantGeoConfig(sql, tenantId);
+  if (!config.geolocationEnabled) {
+    return { geo_status: 'NOT_EVALUATED', geo_distance_m: null, radius_m: null, observacion: '' };
+  }
+
+  const nearest = await getNearestDevice(sql, tenantId, latitude, longitude);
+  const result = validateGeofence({
+    latitude,
+    longitude,
+    device: nearest,
+    radiusMeters: config.radiusMeters,
+    geolocationRequired: false, // nunca bloquear
+  });
+
+  if (result.distance == null) {
+    return { geo_status: 'NO_REFERENCE', geo_distance_m: null, radius_m: config.radiusMeters, observacion: '' };
+  }
+
+  if (!result.valid) {
+    return {
+      geo_status: 'OUTSIDE',
+      geo_distance_m: result.distance,
+      radius_m: config.radiusMeters,
+      observacion: ` | FUERA DE PERÍMETRO: ${result.distance}m (máx ${config.radiusMeters}m)`,
+    };
+  }
+
+  return { geo_status: 'INSIDE', geo_distance_m: result.distance, radius_m: config.radiusMeters, observacion: '' };
+}
+
 module.exports = {
   haversineDistance,
   validateGeofence,
+  evaluateGeo,
   getTenantGeoConfig,
   getNearestDevice,
 };

@@ -4,11 +4,22 @@
 > Normativa: Resolución Exenta N°38, 26 de abril de 2024.
 > Fuente oficial: https://www.bcn.cl/leychile/navegar?idNorma=1203415
 
+> **Lectura correcta de este documento.** Es un análisis interno de brechas, **no una declaración de
+> cumplimiento ni de certificación**. "Implementado" significa que existe una funcionalidad técnica; que
+> satisfaga a la Dirección del Trabajo lo determina únicamente el proceso de certificación.
+>
+> **Desactualizado en varios puntos.** Fue escrito antes de la cadena de hash, el sello de tiempo y el
+> registro v2 (p. ej. 1.4, 2.1 y 2.2 ya tienen implementación parcial). El estado vigente y los puntos
+> regulatorios abiertos están en [marcaje-res38/plan-de-implementacion.md](marcaje-res38/plan-de-implementacion.md)
+> y [marcaje-res38/requisitos-configurables.md](marcaje-res38/requisitos-configurables.md).
+> El punto 1.2 (identificación que impida la suplantación) **no debe considerarse resuelto**: hoy el
+> tótem admite marca solo con RUT; se corrige en las etapas 4–6 del plan.
+
 ---
 
 ## Resumen Ejecutivo
 
-| Categoría | Cumple | Parcial | No Cumple |
+| Categoría | Implementado (sin certificar) | Parcial | Brecha / pendiente |
 |-----------|--------|---------|-----------|
 | Registro de marcaciones | 4 | 1 | 0 |
 | Integridad y seguridad | 1 | 1 | 3 |
@@ -24,17 +35,17 @@
 
 ## 1. REGISTRO DE MARCACIONES
 
-### 1.1 Registro de hora de entrada y salida ✅ CUMPLE
+### 1.1 Registro de hora de entrada y salida 🟦 IMPLEMENTADO (sin certificar)
 - **Requisito**: El sistema debe registrar la hora exacta de inicio y término de la jornada.
 - **Flexio**: `attendance_records` almacena `type` (entry/exit) con `timestamp` preciso.
 - **Archivos**: `api/attendance/register.js`, `api/attendance/pin-checkin.js`
 
-### 1.2 Método de identificación del trabajador ✅ CUMPLE
+### 1.2 Método de identificación del trabajador 🟦 IMPLEMENTADO (sin certificar)
 - **Requisito**: Debe existir un mecanismo que impida la suplantación de identidad.
 - **Flexio**: Doble método — reconocimiento facial con foto snapshot + PIN personal como alternativa. Snapshot almacenado como evidencia.
 - **Archivos**: `api/attendance/register.js` (method='visual', photo_snapshot), `api/attendance/pin-checkin.js` (method='pin')
 
-### 1.3 Registro del método de validación utilizado ✅ CUMPLE
+### 1.3 Registro del método de validación utilizado 🟦 IMPLEMENTADO (sin certificar)
 - **Requisito**: Debe quedar constancia del método usado para la marcación.
 - **Flexio**: Campo `method` en `attendance_records` (visual, pin, mobile).
 - **Archivo**: `api/attendance/libro-asistencia.js` muestra método en el libro.
@@ -47,7 +58,7 @@
   - ❌ La geolocalización no es obligatoria para completar una marcación
 - **Brecha**: Agregar columnas `latitude`, `longitude` a `attendance_records`. Implementar validación de geofence al momento del registro. Hacer configurable si la geolocalización es obligatoria o no.
 
-### 1.5 Identificación del dispositivo ✅ CUMPLE
+### 1.5 Identificación del dispositivo 🟦 IMPLEMENTADO (sin certificar)
 - **Requisito**: Debe identificarse el dispositivo desde donde se realiza la marcación.
 - **Flexio**: Sistema de dispositivos autorizados con `device_id`, geolocalización del dispositivo, y control de dispositivos activos por plan.
 - **Archivo**: `api/devices/index.js`
@@ -56,7 +67,7 @@
 
 ## 2. INTEGRIDAD Y SEGURIDAD DE LOS DATOS
 
-### 2.1 Inalterabilidad de registros ❌ NO CUMPLE
+### 2.1 Inalterabilidad de registros ⬜ BRECHA / PENDIENTE
 - **Requisito**: Los registros de asistencia NO deben poder ser modificados, eliminados o adulterados una vez generados.
 - **Flexio**: No existe mecanismo técnico que impida la modificación. Los registros son filas normales en PostgreSQL que pueden ser UPDATEados o DELETEados.
 - **Brecha CRÍTICA**: Implementar:
@@ -65,7 +76,7 @@
   - Si se necesita corrección, debe ser via registro nuevo de tipo "corrección" que referencia al original
   - Log de intentos de modificación
 
-### 2.2 Firma digital o sello de tiempo ❌ NO CUMPLE
+### 2.2 Firma digital o sello de tiempo ⬜ BRECHA / PENDIENTE
 - **Requisito**: Los registros deben contar con mecanismo que garantice autenticidad e integridad (firma electrónica o sello de tiempo certificado).
 - **Flexio**: No existe firma digital ni sello de tiempo certificado. Solo se almacena `timestamp` como dato.
 - **Brecha CRÍTICA**: Implementar:
@@ -80,12 +91,12 @@
   - ❌ No hay roles granulares documentados
 - **Brecha**: Hashear PIN con bcrypt. Crear rol de acceso para fiscalizadores DT. Documentar perfiles de acceso.
 
-### 2.4 Cifrado de datos en tránsito y reposo ✅ CUMPLE
+### 2.4 Cifrado de datos en tránsito y reposo 🟦 IMPLEMENTADO (sin certificar)
 - **Requisito**: Comunicaciones cifradas (HTTPS) y datos sensibles protegidos.
 - **Flexio**: Desplegado en Vercel (HTTPS por defecto). Base de datos Neon PostgreSQL (TLS en tránsito, cifrado en reposo).
 - **Nota**: Verificar que la conexión a BD siempre use SSL.
 
-### 2.5 Respaldo y recuperación de datos ❌ NO CUMPLE
+### 2.5 Respaldo y recuperación de datos ⬜ BRECHA / PENDIENTE
 - **Requisito**: Debe contar con mecanismos de respaldo periódico y plan de recuperación ante desastres.
 - **Flexio**: Depende del proveedor de BD (Neon) para backups. No existe:
   - ❌ Política documentada de respaldos
@@ -98,17 +109,17 @@
 
 ## 3. ACCESO DEL TRABAJADOR A SUS REGISTROS
 
-### 3.1 Consulta de registros propios ✅ CUMPLE
+### 3.1 Consulta de registros propios 🟦 IMPLEMENTADO (sin certificar)
 - **Requisito**: El trabajador debe poder consultar sus propias marcaciones en todo momento.
 - **Flexio**: Endpoint público `GET /api/attendance/my-hours?rut=XXXXXXX` permite al trabajador ver sus horas semanales sin autenticación.
 - **Archivo**: `api/attendance/my-hours.js`
 
-### 3.2 Información en tiempo real ✅ CUMPLE
+### 3.2 Información en tiempo real 🟦 IMPLEMENTADO (sin certificar)
 - **Requisito**: El trabajador debe conocer su estado de marcación al momento del registro.
 - **Flexio**: Al marcar (facial o PIN), el sistema confirma la acción y envía email de notificación inmediata al trabajador con hora y ubicación.
 - **Archivos**: `api/attendance/register.js`, `api/attendance/pin-checkin.js`
 
-### 3.3 Historial completo ✅ CUMPLE
+### 3.3 Historial completo 🟦 IMPLEMENTADO (sin certificar)
 - **Requisito**: Acceso al historial de marcaciones del período.
 - **Flexio**: `my-hours` muestra detalle diario semanal. El endpoint de historial (`api/attendance/history.js`) permite filtrar por fechas.
 
@@ -116,17 +127,17 @@
 
 ## 4. LIBRO DE ASISTENCIA ELECTRÓNICO
 
-### 4.1 Formato compatible con fiscalización ✅ CUMPLE
+### 4.1 Formato compatible con fiscalización 🟦 IMPLEMENTADO (sin certificar)
 - **Requisito**: Generar el Libro de Asistencia conforme al Art. 33 del Código del Trabajo.
 - **Flexio**: Endpoint dedicado que genera libro con: Fecha, RUT, Nombre, Hora Entrada, Hora Salida, Método de Validación, Horas Trabajadas, Observaciones. Incluye nota legal.
 - **Archivo**: `api/attendance/libro-asistencia.js`
 
-### 4.2 Exportación para fiscalización ✅ CUMPLE
+### 4.2 Exportación para fiscalización 🟦 IMPLEMENTADO (sin certificar)
 - **Requisito**: Debe poder exportarse o ponerse a disposición del fiscalizador DT.
 - **Flexio**: API retorna JSON estructurado. El frontend genera CSV descargable.
 - **Brecha menor**: Considerar generar PDF firmado digitalmente para presentar ante DT.
 
-### 4.3 Conservación por 5 años ✅ CUMPLE
+### 4.3 Conservación por 5 años 🟦 IMPLEMENTADO (sin certificar)
 - **Requisito**: Los registros deben conservarse por al menos 5 años.
 - **Flexio**: Base de datos sin política de eliminación automática. La nota legal menciona "Conservar por 5 años".
 - **Nota**: Documentar formalmente la política de retención.
@@ -140,17 +151,17 @@
 
 ## 5. INFRAESTRUCTURA Y DISPONIBILIDAD
 
-### 5.1 Disponibilidad del sistema (uptime) ✅ CUMPLE
+### 5.1 Disponibilidad del sistema (uptime) 🟦 IMPLEMENTADO (sin certificar)
 - **Requisito**: El sistema debe estar disponible para realizar marcaciones en todo momento de la jornada laboral.
 - **Flexio**: Desplegado en Vercel (99.99% uptime SLA) + Neon PostgreSQL (alta disponibilidad).
 - **Nota**: Documentar SLA y estadísticas de uptime.
 
-### 5.2 Operación ante fallas de conectividad ❌ NO CUMPLE
+### 5.2 Operación ante fallas de conectividad ⬜ BRECHA / PENDIENTE
 - **Requisito**: Debe existir mecanismo para registrar asistencia aunque haya falla de internet.
 - **Flexio**: Sistema 100% cloud — si no hay internet, no se puede marcar.
 - **Brecha**: Implementar modo offline en el frontend (Service Worker + IndexedDB) que registre marcaciones localmente y las sincronice cuando vuelva la conexión. Marcar registros sincronizados con flag especial.
 
-### 5.3 Escalabilidad ✅ CUMPLE
+### 5.3 Escalabilidad 🟦 IMPLEMENTADO (sin certificar)
 - **Requisito**: Soportar múltiples trabajadores marcando simultáneamente.
 - **Flexio**: Arquitectura serverless (Vercel) escala automáticamente.
 
@@ -163,12 +174,12 @@
 
 ## 6. PROTECCIÓN DE DATOS PERSONALES
 
-### 6.1 Consentimiento para datos biométricos ✅ CUMPLE
+### 6.1 Consentimiento para datos biométricos 🟦 IMPLEMENTADO (sin certificar)
 - **Requisito**: Si usa biometría, debe obtener consentimiento informado del trabajador (Ley 21.719).
 - **Flexio**: Sistema de consentimiento implementado (`consent_status` en employees). Alternativa no biométrica (PIN) para quienes no consienten.
 - **Archivos**: `api/auth/consent.js`, `api/attendance/pin-checkin.js`
 
-### 6.2 Portabilidad de datos ✅ CUMPLE
+### 6.2 Portabilidad de datos 🟦 IMPLEMENTADO (sin certificar)
 - **Requisito**: Cumplir con derecho de acceso y portabilidad (Ley 21.719).
 - **Flexio**: Endpoint de exportación completa de datos del tenant en JSON.
 - **Archivo**: `api/export/index.js`
@@ -178,7 +189,7 @@
 - **Flexio**: Existe consentimiento biométrico pero no se encontró política de privacidad formal documentada.
 - **Brecha**: Crear documento de Política de Privacidad y Tratamiento de Datos conforme a Ley 21.719.
 
-### 6.4 Eliminación de datos biométricos ❌ NO CUMPLE
+### 6.4 Eliminación de datos biométricos ⬜ BRECHA / PENDIENTE
 - **Requisito**: Datos biométricos deben eliminarse cuando ya no son necesarios o cuando el trabajador revoca consentimiento.
 - **Flexio**: Los snapshots faciales se almacenan en Vercel Blob sin política de retención/eliminación.
 - **Brecha**: Implementar proceso de eliminación de snapshots cuando: (a) el trabajador revoca consentimiento, (b) transcurre el período de retención, (c) el trabajador deja la empresa.
@@ -187,16 +198,16 @@
 
 ## 7. AUDITORÍA Y TRAZABILIDAD
 
-### 7.1 Log de auditoría ✅ CUMPLE
+### 7.1 Log de auditoría 🟦 IMPLEMENTADO (sin certificar)
 - **Requisito**: Registro de todas las acciones administrativas sobre el sistema.
 - **Flexio**: Tabla `audit_log` con: tenant_id, action, actor, target_type, target_id, details (JSON before/after), IP, timestamp.
 - **Archivo**: `api/lib/auditLog.js`
 
-### 7.2 Trazabilidad de cambios ✅ CUMPLE
+### 7.2 Trazabilidad de cambios 🟦 IMPLEMENTADO (sin certificar)
 - **Requisito**: Poder rastrear quién hizo qué y cuándo.
 - **Flexio**: El audit log registra actor, acción y detalles con before/after.
 
-### 7.3 Auditoría accesible ✅ CUMPLE
+### 7.3 Auditoría accesible 🟦 IMPLEMENTADO (sin certificar)
 - **Requisito**: Los registros de auditoría deben ser consultables.
 - **Flexio**: API de consulta con filtros por acción y tipo de objetivo, paginación.
 - **Archivo**: `api/audit/index.js`
@@ -210,14 +221,14 @@
 
 ## 8. CERTIFICACIÓN Y DOCUMENTACIÓN (TODO PENDIENTE)
 
-### 8.1 Certificación por entidad independiente ❌ NO CUMPLE
+### 8.1 Certificación por entidad independiente ⬜ BRECHA / PENDIENTE
 - **Requisito**: El sistema debe ser certificado por un organismo independiente autorizado.
 - **Acción**: Contratar a BizPartners SpA u otro certificador autorizado.
 - **Contacto**: https://bizpartners.cl/certificacion-de-aplicaciones-de-registro-y-control-de-asistencia/
 - **Plazo estimado**: 6-8 semanas (certificación formal).
 - **Costo**: Consultar directamente con BizPartners.
 
-### 8.2 Documentación técnica ❌ NO CUMPLE
+### 8.2 Documentación técnica ⬜ BRECHA / PENDIENTE
 - **Requisito**: Manual técnico del sistema, arquitectura, flujos de datos.
 - **Brecha**: Crear documento técnico formal con:
   - Arquitectura del sistema
@@ -226,7 +237,7 @@
   - Infraestructura y SLA
   - Modelo de datos
 
-### 8.3 Manual de usuario ❌ NO CUMPLE
+### 8.3 Manual de usuario ⬜ BRECHA / PENDIENTE
 - **Requisito**: Documentación de uso para administradores y trabajadores.
 - **Brecha**: Crear manual de usuario (admin + trabajador).
 

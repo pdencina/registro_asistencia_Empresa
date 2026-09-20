@@ -1,7 +1,11 @@
 const { getDb } = require('../../lib/db');
 const { corsHeaders, handleCors } = require('../../lib/cors');
 const { requireAuth } = require('../../lib/auth');
-const { logAudit } = require('../../lib/auditLog');
+const { logAudit, auditContext } = require('../../lib/auditLog');
+
+// Los triggers de protección (Res. 38 DT) rechazan UPDATE/DELETE de marcaciones con este mensaje
+const isProtectedRecordError = (e) => /No se permite (modificar|eliminar) registros de asistencia/.test(e && e.message || '');
+const PROTECTED_MESSAGE = 'Las marcaciones son inalterables. La corrección con conservación del registro original estará disponible próximamente.';
 
 module.exports = async function handler(req, res) {
   if (handleCors(req, res)) return;
@@ -25,19 +29,29 @@ module.exports = async function handler(req, res) {
         return res.status(404).json({ error: 'Registro no encontrado' });
       }
 
-      await sql('UPDATE attendance_records SET timestamp = $1 WHERE id = $2 AND tenant_id = $3', [timestamp, id, tenant.id]);
-
-      // Audit log
-      const ip = req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || 'unknown';
+      // 1) Constancia ANTES de modificar: si no se puede auditar, no se cambia nada.
+      //    Se guarda el registro original completo (con su hash) para que la edición nunca sea silenciosa.
+      const newTimestamp = new Date(timestamp);
+      if (Number.isNaN(newTimestamp.getTime())) {
+        return res.status(400).json({ error: 'timestamp inválido' });
+      }
       await logAudit({
+        ...auditContext(req),
         tenant_id: tenant.id,
         action: 'attendance.edit',
-        actor: sessionStorage?.getItem?.('admin_email') || 'admin',
         target_type: 'attendance_record',
         target_id: id,
-        details: { old_timestamp: record.timestamp, new_timestamp: timestamp, employee_id: record.employee_id, type: record.type },
-        ip: typeof ip === 'string' ? ip.split(',')[0].trim() : null,
-      });
+        details: { original_record: record, new_timestamp: newTimestamp.toISOString(), reason: req.body.reason || null, mode: 'direct_edit' },
+      }, { strict: true });
+
+      // 2) Modificación
+      try {
+        await sql('UPDATE attendance_records SET timestamp = $1 WHERE id = $2 AND tenant_id = $3', [newTimestamp.toISOString(), id, tenant.id]);
+      } catch (e) {
+        await logAudit({ ...auditContext(req), tenant_id: tenant.id, action: 'attendance.edit_failed', target_type: 'attendance_record', target_id: id, details: { error: e.message } });
+        if (isProtectedRecordError(e)) return res.status(409).json({ error: PROTECTED_MESSAGE, code: 'RECORD_PROTECTED' });
+        throw e;
+      }
 
       const [updated] = await sql(`
         SELECT ar.*, e.first_name, e.last_name, e.rut, e.department, e.email
@@ -96,7 +110,23 @@ module.exports = async function handler(req, res) {
         return res.status(404).json({ error: 'Registro no encontrado' });
       }
 
-      await sql('DELETE FROM attendance_records WHERE id = $1 AND tenant_id = $2', [id, tenant.id]);
+      // Constancia ANTES de borrar, con el registro original completo (recuperable desde la auditoría)
+      await logAudit({
+        ...auditContext(req),
+        tenant_id: tenant.id,
+        action: 'attendance.delete',
+        target_type: 'attendance_record',
+        target_id: id,
+        details: { original_record: record, reason: (req.body && req.body.reason) || null, mode: 'direct_delete' },
+      }, { strict: true });
+
+      try {
+        await sql('DELETE FROM attendance_records WHERE id = $1 AND tenant_id = $2', [id, tenant.id]);
+      } catch (e) {
+        await logAudit({ ...auditContext(req), tenant_id: tenant.id, action: 'attendance.delete_failed', target_type: 'attendance_record', target_id: id, details: { error: e.message } });
+        if (isProtectedRecordError(e)) return res.status(409).json({ error: PROTECTED_MESSAGE, code: 'RECORD_PROTECTED' });
+        throw e;
+      }
 
       return res.status(200).json({ message: 'Registro eliminado', deleted: record });
     }

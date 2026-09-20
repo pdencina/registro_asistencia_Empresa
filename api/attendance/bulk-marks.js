@@ -1,7 +1,24 @@
 const { getDb } = require('../lib/db');
 const { handleCors } = require('../lib/cors');
 const { requireAuth } = require('../lib/auth');
-const { logAudit } = require('../lib/auditLog');
+const { logAudit, auditContext } = require('../lib/auditLog');
+const { insertAttendanceRecord } = require('../lib/integrity');
+
+// Las marcas importadas también entran a la cadena de integridad (antes se insertaban sin hash ni sello)
+function insertImported(tenantId, employeeId, type, timestampText, notes) {
+  return insertAttendanceRecord({
+    id: require('crypto').randomUUID(),
+    tenant_id: tenantId,
+    employee_id: employeeId,
+    type,
+    timestamp: new Date(timestampText).toISOString(),
+    method: 'manual_import',
+    notes,
+    channel: 'IMPORT',
+    auth_method: 'OTHER',
+    auth_result: 'ADMIN_IMPORT',
+  });
+}
 
 /**
  * POST /api/attendance/bulk-marks
@@ -78,24 +95,14 @@ module.exports = async function handler(req, res) {
       // Create entry record if entry_time provided
       if (mark.entry_time) {
         const entryTimestamp = `${mark.date}T${normalizeTime(mark.entry_time)}:00`;
-        const id = require('crypto').randomUUID();
-        await sql(`
-          INSERT INTO attendance_records (id, tenant_id, employee_id, type, timestamp, method, notes)
-          VALUES ($1, $2, $3, 'entry', $4, 'manual_import', $5)
-          ON CONFLICT DO NOTHING
-        `, [id, tenant.id, employeeId, entryTimestamp, mark.notes || 'Carga masiva']);
+        await insertImported(tenant.id, employeeId, 'entry', entryTimestamp, mark.notes || 'Carga masiva');
         results.created++;
       }
 
       // Create exit record if exit_time provided
       if (mark.exit_time) {
         const exitTimestamp = `${mark.date}T${normalizeTime(mark.exit_time)}:00`;
-        const id = require('crypto').randomUUID();
-        await sql(`
-          INSERT INTO attendance_records (id, tenant_id, employee_id, type, timestamp, method, notes)
-          VALUES ($1, $2, $3, 'exit', $4, 'manual_import', $5)
-          ON CONFLICT DO NOTHING
-        `, [id, tenant.id, employeeId, exitTimestamp, mark.notes || 'Carga masiva']);
+        await insertImported(tenant.id, employeeId, 'exit', exitTimestamp, mark.notes || 'Carga masiva');
         results.created++;
       }
     } catch (err) {
@@ -103,15 +110,13 @@ module.exports = async function handler(req, res) {
     }
   }
 
-  // Audit log
-  const ip = req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || 'unknown';
+  // Audit log (actor real desde la sesión)
   await logAudit({
+    ...auditContext(req),
     tenant_id: tenant.id,
     action: 'attendance.bulk_import',
-    actor: 'admin',
     target_type: 'attendance_records',
     details: { total_marks: marks.length, created: results.created, skipped: results.skipped, errors_count: results.errors.length },
-    ip: typeof ip === 'string' ? ip.split(',')[0].trim() : null,
   });
 
   return res.status(200).json({

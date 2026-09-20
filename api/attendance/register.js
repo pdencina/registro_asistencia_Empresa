@@ -4,7 +4,9 @@ const { requireTenant } = require('../lib/tenant');
 const { validateRequest } = require('../lib/validate');
 const { put } = require('@vercel/blob');
 const { insertAttendanceRecord } = require('../lib/integrity');
-const { validateGeofence, getTenantGeoConfig, getNearestDevice } = require('../lib/geofence');
+const { evaluateGeo } = require('../lib/geofence');
+const { resolveEventTime, parseCoordinates, normalizeChannel, sanitizeDeviceId } = require('../lib/attendanceEvents');
+const { createHash } = require('crypto');
 
 module.exports = async function handler(req, res) {
   if (handleCors(req, res)) return;
@@ -40,9 +42,19 @@ module.exports = async function handler(req, res) {
       return res.status(404).json({ error: 'Empleado no encontrado o inactivo' });
     }
 
+    // Hora del evento: la del servidor, o la del dispositivo solo en sincronización offline acotada
+    const eventTime = resolveEventTime(req.body);
+    if (!eventTime.ok) {
+      return res.status(eventTime.status).json({ error: eventTime.error, code: eventTime.code });
+    }
+    const now = eventTime.timestamp;
+
     let snapshot_url = null;
+    let evidence_sha256 = null;
     if (photo_snapshot) {
       const buffer = Buffer.from(photo_snapshot.replace(/^data:image\/\w+;base64,/, ''), 'base64');
+      // El hash de la imagen queda dentro del registro sellado: si la foto se altera o se purga, se detecta
+      evidence_sha256 = createHash('sha256').update(buffer).digest('hex');
       const blob = await put(`snapshots/${tenant.slug}/${crypto.randomUUID()}.jpg`, buffer, {
         access: 'public',
         contentType: 'image/jpeg'
@@ -51,41 +63,18 @@ module.exports = async function handler(req, res) {
     }
 
     const id = crypto.randomUUID();
-    // Si viene de sync offline, usar el timestamp original de la marcación
-    const now = req.body._offline_timestamp || new Date().toISOString();
-    const isOfflineSync = !!req.body._offline_sync;
 
-    // Extraer coordenadas GPS si vienen en notes o body
-    let latitude = req.body.latitude || null;
-    let longitude = req.body.longitude || null;
-    if (!latitude && notes && notes.includes('GPS:')) {
-      const gpsMatch = notes.match(/GPS:\s*([-\d.]+),\s*([-\d.]+)/);
-      if (gpsMatch) {
-        latitude = parseFloat(gpsMatch[1]);
-        longitude = parseFloat(gpsMatch[2]);
-      }
-    }
+    // Coordenadas validadas (body o formato legado "GPS: lat, lng" en notes)
+    const { latitude, longitude, accuracy } = parseCoordinates(req.body);
 
     // Evaluar geofence SIN bloquear la marca (ORD. N°408 DT, 10-09-2026):
-    // se permite marcar y se deja evidencia de si estuvo dentro o fuera
+    // se permite marcar y se deja evidencia estructurada de si estuvo dentro o fuera
     // del perímetro. NO se impide el registro por estar fuera de la geocerca.
-    let geoObservacion = '';
-    const geoConfig = await getTenantGeoConfig(sql, tenant.id);
-    if (geoConfig.geolocationEnabled && latitude != null) {
-      const nearestDevice = await getNearestDevice(sql, tenant.id, latitude, longitude);
-      const geoResult = validateGeofence({
-        latitude,
-        longitude,
-        device: nearestDevice,
-        radiusMeters: geoConfig.radiusMeters,
-        geolocationRequired: false, // nunca bloquear
-      });
-      if (!geoResult.valid && geoResult.distance != null) {
-        geoObservacion = ` | FUERA DE PERÍMETRO: ${geoResult.distance}m (máx ${geoConfig.radiusMeters}m)`;
-      }
-    }
+    const geo = await evaluateGeo(sql, tenant.id, latitude, longitude);
 
-    // Insertar con hash de integridad encadenado (Res. 38 DT)
+    // Insertar con hash de integridad encadenado (Res. 38 DT).
+    // La verificación facial de este endpoint la hace el navegador y el servidor no la puede comprobar:
+    // se declara así en la evidencia (auth_result = CLIENT_REPORTED) en vez de aparentar una validación.
     await insertAttendanceRecord({
       id,
       tenant_id: tenant.id,
@@ -93,10 +82,21 @@ module.exports = async function handler(req, res) {
       type,
       timestamp: now,
       method: 'visual',
-      notes: (notes || '') + geoObservacion || null,
+      notes: (notes || '') + geo.observacion || null,
       photo_snapshot_url: snapshot_url,
       latitude,
       longitude,
+      server_received_at: eventTime.serverReceivedAt,
+      client_timestamp: eventTime.clientTimestamp,
+      is_offline_sync: eventTime.isOfflineSync,
+      auth_method: 'FACIAL',
+      auth_result: 'CLIENT_REPORTED',
+      channel: normalizeChannel(req.body.source),
+      device_id: sanitizeDeviceId(req.body.device_id),
+      geo_status: geo.geo_status,
+      geo_distance_m: geo.geo_distance_m,
+      geo_accuracy_m: accuracy,
+      evidence_sha256,
     });
 
     const [record] = await sql(`
@@ -114,11 +114,8 @@ module.exports = async function handler(req, res) {
         let locationText = null;
 
         try {
-          if (notes && notes.includes('GPS:')) {
-            const gpsMatch = notes.match(/GPS:\s*([-\d.]+),\s*([-\d.]+)/);
-            if (gpsMatch) {
-              locationText = await reverseGeocode(gpsMatch[1], gpsMatch[2]);
-            }
+          if (latitude != null && longitude != null) {
+            locationText = await reverseGeocode(latitude, longitude);
           }
 
           if (!locationText) {

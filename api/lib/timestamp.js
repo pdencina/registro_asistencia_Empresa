@@ -18,20 +18,40 @@ const { createHmac, createHash } = require('crypto');
  * complementado con un sello de una TSA externa (RFC 3161).
  */
 
+// Origen de la clave. NO se cambia el orden de fallback: hacerlo invalidaría los sellos ya emitidos.
+// Lo que sí se hace es dejar constancia de qué clave firmó cada sello (key_id) y permitir fallar
+// cerrado con REQUIRE_TIMESTAMP_SECRET=true cuando TIMESTAMP_SECRET no está definido.
+const KEY_SOURCE = process.env.TIMESTAMP_SECRET
+  ? 'TIMESTAMP_SECRET'
+  : (process.env.DATABASE_URL ? 'DATABASE_URL' : 'DEFAULT');
 const TIMESTAMP_SECRET = process.env.TIMESTAMP_SECRET || process.env.DATABASE_URL || 'flexio-default-tss-key';
+
+/** Identificador corto y no reversible de la clave activa (para saber con qué clave se firmó). */
+function sealKeyId() {
+  return createHash('sha256').update(`flexio-seal-key-id|${TIMESTAMP_SECRET}`, 'utf8').digest('hex').slice(0, 8);
+}
+
+/** Estado de la clave de sellado, para reportes de verificación. */
+function getSealKeyStatus() {
+  return { key_id: sealKeyId(), source: KEY_SOURCE, weak: KEY_SOURCE !== 'TIMESTAMP_SECRET' };
+}
 
 /**
  * Genera un sello de tiempo para un registro de asistencia.
- * 
+ *
  * @param {object} params
- * @param {string} params.record_hash - Hash SHA-256 del registro
+ * @param {string} params.record_hash - Hash SHA-256 del registro (o digest de contenido en registros v2)
  * @param {string} params.timestamp - Timestamp ISO del registro
  * @param {string} params.tenant_id - ID del tenant
  * @param {string} params.employee_id - ID del empleado
- * @returns {{ seal, server_timestamp, sequence_token }}
+ * @param {string} [params.serverTimestamp] - Hora del servidor ya fijada (ISO). Si no viene, se toma ahora.
+ * @returns {{ seal, server_timestamp, sequence_token, key_id }}
  */
-function generateTimestampSeal({ record_hash, timestamp, tenant_id, employee_id }) {
-  const serverTimestamp = new Date().toISOString();
+function generateTimestampSeal({ record_hash, timestamp, tenant_id, employee_id, serverTimestamp: fixedServerTimestamp }) {
+  if (KEY_SOURCE !== 'TIMESTAMP_SECRET' && process.env.REQUIRE_TIMESTAMP_SECRET === 'true') {
+    throw new Error('TIMESTAMP_SECRET no está configurado (REQUIRE_TIMESTAMP_SECRET=true)');
+  }
+  const serverTimestamp = fixedServerTimestamp || new Date().toISOString();
 
   // Payload a sellar: hash del registro + timestamp del servidor + IDs
   const payload = [
@@ -56,6 +76,7 @@ function generateTimestampSeal({ record_hash, timestamp, tenant_id, employee_id 
     sequence_token,
     algorithm: 'HMAC-SHA256',
     version: '1.0',
+    key_id: sealKeyId(),
   };
 }
 
@@ -117,6 +138,7 @@ function generateDailyAnchor(dayHashes, date) {
 }
 
 module.exports = {
+  getSealKeyStatus,
   generateTimestampSeal,
   verifyTimestampSeal,
   generateDailyAnchor,
